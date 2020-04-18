@@ -21,3 +21,5 @@ export const ClientCertificateType = uint8;
 export const DistinguishedName = string(uint16be);
 
 export const SignatureAlgorithm = uint16be;
+
+export const ProtocolVersion = { major: uint8, minor: uint8 };

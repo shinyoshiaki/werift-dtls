@@ -1278,7 +1278,8 @@ rsa_fixed_ecdh ECDH対応の公開鍵. ecdsa_fixed_ecdhはサーバーのキー�
 
 サーバー証明書と同様に、現在TLSでは使用できないアルゴリズム/アルゴリズムの組み合わせを使用する証明書があることに注意してください.  
 
-7.4.7. クライアントキー交換メッセージ
+
+7.4.7.  Client Key Exchange Message
 
 このメッセージが送信されるタイミング： 
 
@@ -1294,31 +1295,21 @@ rsa_fixed_ecdh ECDH対応の公開鍵. ecdsa_fixed_ecdhはサーバーのキー�
 
 メッセージの選択は、選択されている鍵交換方式によって異なります. KeyExchangeAlgorithmの定義については、7.4.3項を参照してください. 
 
+      struct {
+          select (KeyExchangeAlgorithm) {
+              case rsa:
+                  EncryptedPreMasterSecret;
+              case dhe_dss:
+              case dhe_rsa:
+              case dh_dss:
+              case dh_rsa:
+              case dh_anon:
+                  ClientDiffieHellmanPublic;
+          } exchange_keys;
+      } ClientKeyExchange;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-struct {select（KeyExchangeAlgorithm）{case rsa：EncryptedPreMasterSecret; ケースdhe_dss：ケースdhe_rsa：ケースdh_dss：ケースdh_rsa：ケースdh_anon：ClientDiffieHellmanPublic; } exchange_keys; } ClientKeyExchange;
-
-7.4.7.1. RSA暗号化プリマスターシークレットメッセージ
+7.4.7.1.  RSA-Encrypted Premaster Secret Message
 
 このメッセージの意味： 
 
@@ -1326,19 +1317,21 @@ RSAが鍵の合意と認証に使用されている場合、クライアント�
 
 このメッセージの構造： 
 
-struct {ProtocolVersion client_version; 不透明なランダム[46]; } PreMasterSecret;
+      struct {
+          ProtocolVersion client_version;
+          opaque random[46];
+      } PreMasterSecret;
 
 client_versionクライアントがサポートする最新の（最新の）バージョン. これは、バージョンロールバック攻撃を検出するために使用されます. 
 
 random 46の安全に生成されたランダムバイト.  
 
-struct {public-key-encrypted PreMasterSecret pre_master_secret; } EncryptedPreMasterSecret;
+      struct {
+          public-key-encrypted PreMasterSecret pre_master_secret;
+      } EncryptedPreMasterSecret;
 
-pre_master_secretこのランダムな値はクライアントによって生成され、セクション8.1で指定されているように、マスターシークレットを生成するために使用されます.  
-
-
-
-
+pre_master_secret
+このランダムな値はクライアントによって生成され、セクション8.1で指定されているように、マスターシークレットを生成するために使用されます.  
 
 注：PreMasterSecretのバージョン番号は、クライアントがClientHello.client_versionで提供するバージョンであり、接続についてネゴシエートされたバージョンではありません. この機能は、ロールバック攻撃を防ぐように設計されています. 残念ながら、一部の古い実装では代わりにネゴシエートされたバージョンを使用するため、バージョン番号を確認すると、このような不適切なクライアント実装との相互運用に失敗する可能性があります. 
 
@@ -1376,7 +1369,7 @@ Klima [KPR03]で説明されているように、これらの脆弱性は、正�
 
 実装メモ：少なくともクライアントとサーバーが同じLAN上にある場合、TLSに対するリモートタイミングベースの攻撃が可能であることが判明しました. したがって、静的なRSAキーを使用する実装では、[タイミング]で説明されているように、RSAブラインドまたはその他のアンチタイミング技術を使用する必要があります. 
 
-7.4.7.2. クライアントDiffie-Hellmanパブリックバリュー
+7.4.7.2.  Client Diffie-Hellman Public Value
 
 このメッセージの意味： 
 
@@ -1384,23 +1377,26 @@ Klima [KPR03]で説明されているように、これらの脆弱性は、正�
 
 このメッセージの構造： 
 
-列挙型{暗黙的、明示的} PublicValueEncoding; 
+enum { implicit, explicit } PublicValueEncoding;
 
+implicit
 暗黙的クライアントが適切なDiffie-Hellmanキー（fixed_dhクライアント認証用）を含む証明書を送信した場合、Ycは暗黙的であり、再度送信する必要はありません. この場合、クライアントの鍵交換メッセージが送信されますが、空である必要があります. 
 
+explicit
 明示的なYcを送信する必要があります.  
 
-struct {select（PublicValueEncoding）{暗黙のケース：struct {}; 明示的なケース：不透明なdh_Yc <1..2 ^ 16-1>; } dh_public; } ClientDiffieHellmanPublic;
+      struct {
+          select (PublicValueEncoding) {
+              case implicit: struct { };
+              case explicit: opaque dh_Yc<1..2^16-1>;
+          } dh_public;
+      } ClientDiffieHellmanPublic;
 
-dh_YcクライアントのDiffie-Hellman公開値（Yc）.  
+      dh_Yc
+         The client's Diffie-Hellman public value (Yc).
 
 
-
-
-
-
-
-7.4.8. 証明書の確認
+7.4.8.  Certificate Verify
 
 このメッセージが送信されるタイミング： 
 
