@@ -1,4 +1,4 @@
-import { ServerCertificate } from "../../../src/handshake/message/certificate";
+import { Certificate } from "../../../src/handshake/message/certificate";
 test("handshake_message_server_certificate", () => {
   const raw = Buffer.from([
     0x00,
@@ -401,6 +401,6 @@ test("handshake_message_server_certificate", () => {
     0x0f,
     0x58,
   ]);
-  const c = ServerCertificate.deSerialize(raw);
+  const c = Certificate.deSerialize(raw);
   expect(raw).toEqual(c.serialize());
 });

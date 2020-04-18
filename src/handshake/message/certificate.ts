@@ -3,8 +3,9 @@ import { HandshakeType } from "../const";
 import { ASN11Cert } from "../binary";
 
 // 7.4.2.  Server Certificate
+// 7.4.6.  Client Certificate
 
-export class ServerCertificate {
+export class Certificate {
   msgType = HandshakeType.certificate;
   messageSeq: number;
   static readonly spec = {
@@ -14,18 +15,18 @@ export class ServerCertificate {
   constructor(public certificateList: Buffer[]) {}
 
   static createEmpty() {
-    return new ServerCertificate(undefined);
+    return new Certificate(undefined);
   }
 
   static deSerialize(buf: Buffer) {
-    return new ServerCertificate(
+    return new Certificate(
       //@ts-ignore
-      ...Object.values(decode(buf, ServerCertificate.spec))
+      ...Object.values(decode(buf, Certificate.spec))
     );
   }
 
   serialize() {
-    const res = encode(this, ServerCertificate.spec).slice();
+    const res = encode(this, Certificate.spec).slice();
     return Buffer.from(res);
   }
 }
