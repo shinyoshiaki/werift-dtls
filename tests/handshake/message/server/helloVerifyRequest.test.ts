@@ -1,5 +1,5 @@
 import { ServerHelloVerifyRequest } from "../../../../src/handshake/message/server/helloVerifyRequest";
-test("handshake_message_server_certificate", () => {
+test("handshake_message_server_helloVerifyRequest", () => {
   const raw = Buffer.from([
     0xfe,
     0xff,

@@ -1,5 +1,5 @@
 import { Certificate } from "../../../src/handshake/message/certificate";
-test("handshake_message_server_certificate", () => {
+test("handshake_message_certificate", () => {
   const raw = Buffer.from([
     0x00,
     0x01,
