@@ -999,15 +999,25 @@ ClientHelloまたはServerHelloメッセージに異なるタイプの複数の�
 
 -TLSの設計の主要な側面を変更するために拡張を使用することは技術的に可能です. たとえば、暗号スイートのネゴシエーションの設計. これは推奨されません. 新しいバージョンのTLSを定義する方が適切です. 特に、TLSハンドシェイクアルゴリズムにはバージョン番号に基づくバージョンロールバック攻撃に対する特定の保護機能があり、主要な設計変更ではバージョンロールバックの可能性を考慮する必要があります. 
 
-7.4.1.4.1. 署名アルゴリズム
+7.4.1.4.1.  Signature Algorithms
 
-クライアントは、「signature_algorithms」拡張を使用して、デジタル署名で使用できる署名/ハッシュアルゴリズムのペアをサーバーに示します. この拡張の「extension_data」フィールドには、「supported_signature_algorithms」値が含まれています. 列挙型{none（0）、md5（1）、sha1（2）、sha224（3）、sha256（4）、sha384（5）、sha512（6）、（255）} HashAlgorithm;
+クライアントは、「signature_algorithms」拡張を使用して、デジタル署名で使用できる署名/ハッシュアルゴリズムのペアをサーバーに示します. この拡張の「extension_data」フィールドには、「supported_signature_algorithms」値が含まれています. 
 
-列挙型{anonymous（0）、rsa（1）、dsa（2）、ecdsa（3）、（255）} SignatureAlgorithm; 
+      enum {
+          none(0), md5(1), sha1(2), sha224(3), sha256(4), sha384(5),
+          sha512(6), (255)
+      } HashAlgorithm;
 
-struct {HashAlgorithmハッシュ; SignatureAlgorithm署名. } SignatureAndHashAlgorithm;
+      enum { anonymous(0), rsa(1), dsa(2), ecdsa(3), (255) }
+        SignatureAlgorithm;
 
-SignatureAndHashAlgorithm supported_signature_algorithms <2..2 ^ 16-2>; 
+      struct {
+            HashAlgorithm hash;
+            SignatureAlgorithm signature;
+      } SignatureAndHashAlgorithm;
+
+      SignatureAndHashAlgorithm
+        supported_signature_algorithms<2..2^16-2>;
 
 各SignatureAndHashAlgorithm値は、クライアントが確認する用意のある1つのハッシュ/署名ペアをリストします. 値は優先度の高い順に示されています. 
 
@@ -1037,7 +1047,7 @@ signatureこのフィールドは、使用できる署名アルゴリズムを�
 
 セッション再開を実行する場合、この拡張機能はServer Helloに含まれず、サーバーはClient Hello（存在する場合）の拡張機能を無視します.  
 
-7.4.2. サーバー証明書
+7.4.2.  Server Certificate
 
 このメッセージが送信されるタイミング： 
 
@@ -1049,9 +1059,11 @@ signatureこのフィールドは、使用できる署名アルゴリズムを�
 
 証明書は、交渉された暗号スイートの鍵交換アルゴリズムと交渉された拡張に適切でなければなりません（MUST）. このメッセージの構造：
 
-不透明なASN.1Cert <1..2 ^ 24-1>; 
+      opaque ASN.1Cert<1..2^24-1>;
 
-struct {ASN.1Cert certificate_list <0..2 ^ 24-1>; }証明書;
+      struct {
+          ASN.1Cert certificate_list<0..2^24-1>;
+      } Certificate;
 
 certificate_list証明書のシーケンス（チェーン）です. 送信者の証明書がリストの最初に来る必要があります. 次の各証明書は、その前の証明書を直接証明する必要があります. 証明書の検証では、ルートキーを個別に配布する必要があるため、ルート認証局を指定する自己署名証明書は、リモートエンドがそれを検証するためにすでに所有している必要があるという前提の下で、チェーンから省略される場合があります. 
 
@@ -1069,12 +1081,6 @@ certificate_list証明書のシーケンス（チェーン）です. 送信者�
 
 RSA RSA公開鍵. 証明書は、RSA_PSKキーが暗号化に使用されることを許可する必要があります（キー使用拡張が存在する場合、keyEnciphermentビットを設定する必要があります）. 注：RSA_PSKは[TLSPSK]で定義されています. 
 
-
-
-
-
-
-
 DHE_RSA RSA公開鍵. 証明書では、サーバーの鍵交換メッセージで使用される署名方式とハッシュアルゴリズムを使用して、ECDHE_RSA鍵を署名に使用できるようにする必要があります（鍵用途拡張が存在する場合はdigitalSignatureビットを設定する必要があります）. 注：ECDHE_RSAは[TLSECC]で定義されています. 
 
 DHE_DSS DSA公開鍵. 証明書では、サーバーの鍵交換メッセージで使用されるハッシュアルゴリズムでの署名に鍵を使用できるようにする必要があります. 
@@ -1088,12 +1094,6 @@ ECDHE_ECDSA ECDSA対応の公開鍵. 証明書では、サーバーの鍵交換�
 -「server_name」および「trusted_ca_keys」拡張[TLSEXT]は、証明書の選択をガイドするために使用されます.  
 
 クライアントが「signature_algorithms」拡張を提供した場合、サーバーによって提供されるすべての証明書は、その拡張に表示されるハッシュ/署名アルゴリズムのペアによって署名されなければなりません（MUST）. これは、ある署名アルゴリズムの鍵を含む証明書が、別の署名アルゴリズム（たとえば、DSA鍵で署名されたRSA鍵）を使用して署名される場合があることを意味することに注意してください. これは、アルゴリズムが同じであることが要求されたTLS 1.1からの逸脱です. これは、DH_DSS、DH_RSA、ECDH_ECDSA、およびECDH_RSA鍵交換アルゴリズムが、証明書の署名に使用されるアルゴリズムを制限しないことも意味することに注意してください. 固定DH証明書は、拡張機能に表示されるハッシュ/署名アルゴリズムのペアで署名される場合があります. DH_DSS、DH_RSA、ECDH_ECDSA、およびECDH_RSAという名前は歴史的なものです. 
-
-
-
-
-
-
 
 サーバーに複数の証明書がある場合、サーバーは上記の基準（トランスポート層のエンドポイント、ローカルの構成や設定などの他の基準に加えて）に基づいてそれらの1つを選択します. サーバーに単一の証明書がある場合、サーバーはこれらの基準を満たしていることを検証しようとする必要があります. 
 
