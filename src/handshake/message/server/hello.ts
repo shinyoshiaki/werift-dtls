@@ -6,7 +6,7 @@ const { uint16be, uint8, buffer, array } = types;
 // 7.4.1.3.  Server Hello
 
 export class ServerHello {
-  msgType = HandshakeType.certificate;
+  msgType = HandshakeType.server_hello;
   messageSeq: number;
   static readonly spec = {
     serverVersion: { major: uint8, minor: uint8 },

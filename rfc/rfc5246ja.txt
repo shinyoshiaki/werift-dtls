@@ -1101,7 +1101,8 @@ ECDHE_ECDSA ECDSA対応の公開鍵. 証明書では、サーバーの鍵交換�
 
 TLSプロトコルには新しい鍵交換方式を指定する暗号スイートが指定されているため、それらは証明書形式と必要なエンコードされた鍵情報を意味します.  
 
-7.4.3. サーバーキー交換メッセージ
+
+7.4.3.  Server Key Exchange Message
 
 このメッセージが送信されるタイミング： 
 
@@ -1117,69 +1118,51 @@ RSA DH_DSS DH_RSA
 
 [TLSECC]で定義されているような他の鍵交換アルゴリズムは、ServerKeyExchangeメッセージが送信されるかどうかを指定しなければなりません. メッセージが送信された場合、その内容. 
 
-
-
-
-
-
-
-
-
 このメッセージの意味： 
 
 このメッセージは、クライアントがプリマスターシークレット（クライアントがキー交換を完了することができるDiffie-Hellman公開鍵（結果はプリマスターシークレット））または他のアルゴリズムの公開鍵を通信できるようにする暗号化情報を伝えます.  
 
 このメッセージの構造： 
 
-enum {dhe_dss、dhe_rsa、dh_anon、rsa、dh_dss、dh_rsa / * ECDHの場合は拡張可能-たとえば、[TLSECC]を参照* /} KeyExchangeAlgorithm; 
+      enum { dhe_dss, dhe_rsa, dh_anon, rsa, dh_dss, dh_rsa
+            /* may be extended, e.g., for ECDH -- see [TLSECC] */
+           } KeyExchangeAlgorithm;
 
-struct {opaque dh_p <1..2 ^ 16-1>; 不透明dh_g <1..2 ^ 16-1>; 不透明dh_Ys <1..2 ^ 16-1>; } ServerDHParams; / *エフェメラルDHパラメータ* /
+      struct {
+          opaque dh_p<1..2^16-1>;
+          opaque dh_g<1..2^16-1>;
+          opaque dh_Ys<1..2^16-1>;
+      } ServerDHParams;     /* Ephemeral DH parameters */
 
-dh_p Diffie-Hellman演算に使用される素数係数.  
+      dh_p
+         The prime modulus used for the Diffie-Hellman operation.
 
-dh_g Diffie-Hellman操作に使用されるジェネレータ.  
+      dh_g
+         The generator used for the Diffie-Hellman operation.
 
-dh_YsサーバーのDiffie-Hellmanパブリック値（g ^ X mod p）.  
+      dh_Ys
+         The server's Diffie-Hellman public value (g^X mod p). 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-struct {select（KeyExchangeAlgorithm）{case dh_anon：ServerDHParams params; case dhe_dss：case dhe_rsa：ServerDHParams params; デジタル署名された構造体{不透明なclient_random [32]; 不透明なserver_random [32]; ServerDHParams params; } signed_pa​​rams; ケースrsa：ケースdh_dss：ケースdh_rsa：構造体{}; / * rsa、dh_dss、およびdh_rsaの場合はメッセージが省略されます* / / * ECDHなどの場合は拡張される可能性があります-[TLSECC]を参照してください* /}; } ServerKeyExchange;
+      struct {
+          select (KeyExchangeAlgorithm) {
+              case dh_anon:
+                  ServerDHParams params;
+              case dhe_dss:
+              case dhe_rsa:
+                  ServerDHParams params;
+                  digitally-signed struct {
+                      opaque client_random[32];
+                      opaque server_random[32];
+                      ServerDHParams params;
+                  } signed_params;
+              case rsa:
+              case dh_dss:
+              case dh_rsa:
+                  struct {} ;
+                 /* message is omitted for rsa, dh_dss, and dh_rsa */
+              /* may be extended, e.g., for ECDH -- see [TLSECC] */
+          };
+      } ServerKeyExchange;
 
 paramsサーバーの鍵交換パラメーター.  
 
@@ -1193,7 +1176,7 @@ DSA署名にはハッシュアルゴリズムの安全な表示が含まれて�
 
 新しいキー交換アルゴリズムを含む追加の暗号スイートがTLSに定義されているため、サーバー交換キーメッセージは、キー交換アルゴリズムに関連付けられた証明書タイプがクライアントがプリマスターシークレットを交換するのに十分な情報を提供しない場合にのみ送信されます.  
 
-7.4.4. 証明書リクエスト
+7.4.4.  Certificate Request
 
 このメッセージが送信されるタイミング： 
 
@@ -1201,23 +1184,35 @@ DSA署名にはハッシュアルゴリズムの安全な表示が含まれて�
 
 このメッセージの構造： 
 
-列挙型{rsa_sign（1）、dss_sign（2）、rsa_fixed_dh（3）、dss_fixed_dh（4）、rsa_ephemeral_dh_RESERVED（5）、dss_ephemeral_dh_RESERVED（6）、fortezza_dms_RESERVED（20）、（255）、（255） 
+      enum {
+          rsa_sign(1), dss_sign(2), rsa_fixed_dh(3), dss_fixed_dh(4),
+          rsa_ephemeral_dh_RESERVED(5), dss_ephemeral_dh_RESERVED(6),
+          fortezza_dms_RESERVED(20), (255)
+      } ClientCertificateType;
 
-不透明なDistinguishedName <1..2 ^ 16-1>; 
+      opaque DistinguishedName<1..2^16-1>;
 
-struct {ClientCertificateType certificate_types <1..2 ^ 8-1>; SignatureAndHashAlgorithm supported_signature_algorithms <2 ^ 16-1>; DistinguishedName certificate_authorities <0..2 ^ 16-1>; } CertificateRequest;
+      struct {
+          ClientCertificateType certificate_types<1..2^8-1>;
+          SignatureAndHashAlgorithm
+            supported_signature_algorithms<2^16-1>;
+          DistinguishedName certificate_authorities<0..2^16-1>;
+      } CertificateRequest;
 
-certificate_typesクライアントが提供できる証明書タイプのタイプのリスト.  
+   certificate_types
+      A list of the types of certificate types that the client may
+      offer.
 
-rsa_sign RSAキーを含む証明書dss_sign DSAキーを含む証明書rsa_fixed_dh静的DHキーを含む証明書 dss_fixed_dh静的DHキーを含む証明書
+         rsa_sign        a certificate containing an RSA key
+         dss_sign        a certificate containing a DSA key
+         rsa_fixed_dh    a certificate containing a static DH key.
+         dss_fixed_dh    a certificate containing a static DH key
 
+supported_signature_algorithms
+サーバーが検証できるハッシュ/署名アルゴリズムのペアのリストで、優先度の高い順にリストされています.  
 
-
-
-
-supported_signature_algorithmsサーバーが検証できるハッシュ/署名アルゴリズムのペアのリストで、優先度の高い順にリストされています.  
-
-certificate_authorities DERエンコード形式で表された、受け入れ可能なcertificate_authoritiesの識別名[X501]のリスト. これらの識別名は、ルートCAまたは下位CAに必要な識別名を指定できます. したがって、このメッセージを使用して、既知のルートと必要な承認スペースを説明できます. certificate_authoritiesリストが空の場合、反対の外部配置がない限り、クライアントは適切なClientCertificateTypeの証明書を送信できます（MAY）. 
+certificate_authorities 
+DERエンコード形式で表された、受け入れ可能なcertificate_authoritiesの識別名[X501]のリスト. これらの識別名は、ルートCAまたは下位CAに必要な識別名を指定できます. したがって、このメッセージを使用して、既知のルートと必要な承認スペースを説明できます. certificate_authoritiesリストが空の場合、反対の外部配置がない限り、クライアントは適切なClientCertificateTypeの証明書を送信できます（MAY）. 
 
 certificate_typesフィールドとsupported_signature_algorithmsフィールドの相互作用はやや複雑です. SSL_3以降、certificate_typesはTLSに存在していましたが、多少仕様が不十分でした. その機能の多くは、supported_signature_algorithmsに置き換えられています. 次の規則が適用されます. 
 
@@ -1231,11 +1226,9 @@ certificate_typesフィールドとsupported_signature_algorithmsフィールド
 
 注：RESERVEDとしてリストされている値は使用できません. SSLv3で使用されていました. 
 
-
-
 注：匿名サーバーがクライアント認証を要求することは、致命的なhandshake_failureアラートです.  
 
-7.4.5. サーバーこんにちは完了
+7.4.5.  Server Hello Done
 
 このメッセージが送信されるタイミング： 
 
