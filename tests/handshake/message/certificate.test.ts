@@ -1,4 +1,4 @@
-import { ServerCertificate } from "../../../../src/handshake/message/server/certificate";
+import { ServerCertificate } from "../../../src/handshake/message/certificate";
 test("handshake_message_server_certificate", () => {
   const raw = Buffer.from([
     0x00,

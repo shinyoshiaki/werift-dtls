@@ -1,6 +1,6 @@
 import { encode, types, decode } from "binary-data";
-import { HandshakeType } from "../../const";
-import { ASN11Cert } from "../../binary";
+import { HandshakeType } from "../const";
+import { ASN11Cert } from "../binary";
 
 // 7.4.2.  Server Certificate
 
