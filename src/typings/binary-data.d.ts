@@ -6,6 +6,7 @@ declare module "binary-data" {
     uint24be: any;
     array: any;
     uint32be: any;
+    uint48be: any;
     string: any;
   };
   declare const types: Types;

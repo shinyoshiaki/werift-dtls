@@ -499,7 +499,7 @@ TLSと同様に、ChangeCipherSpecメッセージは技術的にはハンドシ�
 
 ChangeCipherSpecに論理的に先行するハンドシェイクメッセージの予想されるセットは、ハンドシェイク状態の残りから予測できるため、これは現在のTLSモードでは問題になりません. ただし、将来のモードでは、あいまいさを避けるよう注意する必要があります. 
 
-4.2.6. CertificateVerifyおよび終了したメッセージ
+4.2.6.  CertificateVerify and Finished Messages
 
 CertificateVerifyおよびFinishedメッセージの形式は、TLSと同じです. ハッシュ計算には、DTLS固有のフィールド（message_seq、fragment_offset、fragment_length）を含む、ハンドシェイクメッセージ全体が含まれます. ただし、ハンドシェイクメッセージの断片化に対する感度を削除するために、各ハンドシェイクメッセージが単一のフラグメントとして送信されたかのように、Finished MACを計算する必要があります. Cookie交換が使用される場合、最初のClientHelloおよびHelloVerifyRequestをCertificateVerifyまたはFinished MAC計算に含めてはならないことに注意してください. 
 

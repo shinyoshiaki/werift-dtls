@@ -402,7 +402,7 @@ MACキー上記で生成された、この接続のMACキー.
 
 TLSレコードレイヤーは、任意のサイズの空でないブロックで上位レイヤーから未解釈のデータを受け取ります.  
 
-6.2.1. 断片化
+6.2.1.  Fragmentation
 
 レコード層は、情報ブロックをTLSPlaintextレコードにフラグメント化し、2 ^ 14バイト以下のチャンクでデータを伝送します. クライアントメッセージの境界はレコードレイヤーで保持されません（つまり、同じContentTypeの複数のクライアントメッセージが単一のTLSPlaintextレコードに合体されるか、単一のメッセージが複数のレコードにフラグメント化される場合があります）. 
 
@@ -1430,11 +1430,17 @@ Finishedメッセージは、交渉されたばかりのアルゴリズム、キ
 
 このメッセージの構造： 
 
-struct {不透明なverify_data [verify_data_length]; }終了しました. 
+      struct {
+          opaque verify_data[verify_data_length];
+      } Finished;
 
-verify_data PRF（master_secret、finished_label、Hash（handshake_messages））[0..verify_data_length-1]; 
 
-finished_labelクライアントによって送信された終了メッセージの場合、ストリング「client finished」. サーバーによって送信された終了メッセージの場合、文字列「サーバー終了」. 
+      verify_data
+         PRF(master_secret, finished_label, Hash(handshake_messages))
+            [0..verify_data_length-1];
+
+finished_label
+クライアントによって送信された終了メッセージの場合、ストリング「client finished」. サーバーによって送信された終了メッセージの場合、文字列「server finished」. 
 
 ハッシュは、ハンドシェイクメッセージのハッシュを示します. セクション5で定義されたPRFの場合、ハッシュはPRFの基礎として使用されるハッシュでなければなりません. 異なるPRFを定義する暗号スイートは、Finished計算で使用するハッシュも定義する必要があります. 
 
@@ -1448,31 +1454,34 @@ handshake_messagesこのハンドシェイク内のすべてのメッセージ�
 
 注：ChangeCipherSpecメッセージ、アラート、およびその他のレコードタイプはハンドシェイクメッセージではないため、ハッシュ計算には含まれません. また、HelloRequestメッセージはハンドシェイクハッシュから省略されます. 
 
-8.暗号計算 
+8.  Cryptographic Computations
 
 接続保護を開始するには、TLSレコードプロトコルで一連のアルゴリズム、マスターシークレット、およびクライアントとサーバーのランダム値を指定する必要があります. 認証、暗号化、およびMACアルゴリズムは、サーバーによって選択され、ServerHelloメッセージで明らかにされたcipher_suiteによって決定されます. 圧縮アルゴリズムはhelloメッセージでネゴシエートされ、ランダムな値がhelloメッセージで交換されます. あとは、マスターシークレットを計算するだけです. 
 
-8.1. マスターシークレットの計算
+8.1.  Computing the Master Secret
 
 すべての鍵交換方式で、同じアルゴリズムを使用してpre_master_secretをmaster_secretに変換します. master_secretが計算されたら、pre_master_secretをメモリから削除する必要があります. 
 
 master_secret = PRF（pre_master_secret、 "master secret"、ClientHello.random + ServerHello.random）[0..47]; 
 
-マスターシークレットの長さは常に正確に48バイトです. プリマスターシークレットの長さは、鍵の交換方法によって異なります. 8.1.1. RSA
+マスターシークレットの長さは常に正確に48バイトです. プリマスターシークレットの長さは、鍵の交換方法によって異なります. 
+
+
+8.1.1. RSA
 
 RSAがサーバー認証と鍵交換に使用される場合、48バイトのpre_master_secretがクライアントによって生成され、サーバーの公開鍵で暗号化されてサーバーに送信されます. サーバーは、その秘密鍵を使用してpre_master_secretを復号化します. 次に、両方の当事者が、上記のようにpre_master_secretをmaster_secretに変換します. 
 
-8.1.2. ディフィーヘルマン
+8.1.2.  Diffie-Hellman
 
 従来のDiffie-Hellman計算が実行されます. ネゴシエートされたキー（Z）はpre_master_secretとして使用され、上記のようにmaster_secretに変換されます. すべてゼロのビットを含むZの先頭バイトは、pre_master_secretとして使用される前に取り除かれます. 
 
 注：Diffie-Hellmanパラメーターはサーバーによって指定され、一時的であるか、サーバーの証明書内に含まれている可能性があります.  
 
-9.必須の暗号スイート 
+9.  Mandatory Cipher Suites
 
 特に指定しないアプリケーションプロファイル標準がない場合、TLS準拠のアプリケーションは、暗号スイートTLS_RSA_WITH_AES_128_CBC_SHAを実装する必要があります（定義については、付録A.5を参照してください）.  
 
-10.アプリケーションデータプロトコル 
+10.  Application Data Protocol
 
 アプリケーションデータメッセージはレコードレイヤーによって運ばれ、現在の接続状態に基づいて断片化、圧縮、および暗号化されます. メッセージは、レコードレイヤーに対して透過的なデータとして扱われます. 
 
