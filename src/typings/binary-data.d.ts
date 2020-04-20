@@ -1,12 +1,12 @@
 declare module "binary-data" {
   type Types = {
-    uint16be: any;
+    uint16be: number;
     buffer: any;
-    uint8: any;
-    uint24be: any;
+    uint8: number;
+    uint24be: number;
     array: any;
-    uint32be: any;
-    uint48be: any;
+    uint32be: number;
+    uint48be: number;
     string: any;
   };
   declare const types: Types;
