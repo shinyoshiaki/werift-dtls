@@ -47,6 +47,11 @@ export class ClientHello {
     );
   }
 
+  static from(spec: typeof ClientHello.spec) {
+    //@ts-ignore
+    return new ClientHello(...Object.values(spec));
+  }
+
   serialize() {
     const res = encode(this, ClientHello.spec).slice();
     return Buffer.from(res);

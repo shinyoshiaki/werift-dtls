@@ -8,6 +8,8 @@ declare module "binary-data" {
     uint32be: number;
     uint48be: number;
     string: any;
+    when: any;
+    select: any;
   };
   declare const types: Types;
   type Encode = (o: object, spec: object) => { slice: () => number[] };

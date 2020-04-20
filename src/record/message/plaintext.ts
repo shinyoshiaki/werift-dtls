@@ -4,12 +4,16 @@ import { DtlsPlaintextHeader } from "./header";
 export class DtlsPlaintext {
   static readonly spec = {
     recordLayerHeader: DtlsPlaintextHeader.spec,
-    content: { contentType: types.uint8 },
+    fragment: types.buffer(
+      (context: {
+        current: { recordLayerHeader: typeof DtlsPlaintextHeader.spec };
+      }) => context.current.recordLayerHeader.contentLen
+    ),
   };
 
   constructor(
     public recordLayerHeader: typeof DtlsPlaintext.spec.recordLayerHeader,
-    public content: typeof DtlsPlaintext.spec.content
+    public fragment: typeof DtlsPlaintext.spec.fragment
   ) {}
 
   static createEmpty() {
