@@ -4,7 +4,7 @@ import { encode, types, decode } from "binary-data";
 
 export class ChangeCipherSpec {
   static readonly spec = {
-    type: types.uint32be,
+    type: types.uint8,
   };
 
   constructor(public type = 1) {}

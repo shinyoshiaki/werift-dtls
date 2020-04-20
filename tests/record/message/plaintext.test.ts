@@ -18,7 +18,6 @@ describe("record_message_plaintext", () => {
       0x01,
     ]);
     const c = DtlsPlaintext.deSerialize(raw);
-    expect(raw).toEqual(c.serialize());
     expect(c.recordLayerHeader.contentType).toBe(20);
     expect(c.recordLayerHeader.protocolVersion).toEqual({
       major: 0xfe,
@@ -26,5 +25,7 @@ describe("record_message_plaintext", () => {
     });
     expect(c.recordLayerHeader.epoch).toBe(0);
     expect(c.recordLayerHeader.sequenceNumber).toBe(18);
+    const expected = c.serialize();
+    expect(raw).toEqual(expected);
   });
 });

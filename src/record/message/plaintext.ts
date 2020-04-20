@@ -1,19 +1,25 @@
 import { encode, types, decode } from "binary-data";
 import { DtlsPlaintextHeader } from "./header";
+import { Handshake } from "./content/handshake";
+import { contentType } from "../const";
+import { ChangeCipherSpec } from "../../handshake/message/changeCipherSpec";
 
 export class DtlsPlaintext {
   static readonly spec = {
     recordLayerHeader: DtlsPlaintextHeader.spec,
-    fragment: types.buffer(
-      (context: {
-        current: { recordLayerHeader: typeof DtlsPlaintextHeader.spec };
-      }) => context.current.recordLayerHeader.contentLen
+    fragment: types.select(
+      types.when(
+        ({ node }: any) =>
+          node.recordLayerHeader.contentType === contentType.changeCipherSpec,
+        ChangeCipherSpec.spec
+      ),
+      {}
     ),
   };
 
   constructor(
     public recordLayerHeader: typeof DtlsPlaintext.spec.recordLayerHeader,
-    public fragment: typeof DtlsPlaintext.spec.fragment
+    public fragment: Handshake | ChangeCipherSpec
   ) {}
 
   static createEmpty() {
@@ -21,14 +27,24 @@ export class DtlsPlaintext {
   }
 
   static deSerialize(buf: Buffer) {
-    return new DtlsPlaintext(
+    const r = new DtlsPlaintext(
       //@ts-ignore
       ...Object.values(decode(buf, DtlsPlaintext.spec))
     );
+    return r;
   }
 
   serialize() {
-    const res = encode(this, DtlsPlaintext.spec).slice();
+    const fragment = (() => {
+      switch (this.recordLayerHeader.contentType) {
+        case contentType.changeCipherSpec:
+          return ChangeCipherSpec.spec;
+      }
+    })();
+    const res = encode(this, {
+      ...DtlsPlaintext.spec,
+      fragment,
+    }).slice();
     return Buffer.from(res);
   }
 }
