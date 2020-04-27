@@ -5,15 +5,15 @@ import { ClientHello } from "../../../handshake/message/client/hello";
 export class Handshake {
   static readonly spec = {
     header: {
-      handshakeType: types.uint8,
+      msg_type: types.uint8,
       length: types.uint24be,
-      messageSequence: types.uint16be,
-      fragmentOffset: types.uint24be,
-      fragmentLength: types.uint24be,
+      message_seq: types.uint16be,
+      fragment_offset: types.uint24be,
+      fragment_length: types.uint24be,
     },
     message: types.select(
-      types.when(({ node: { header: { handshakeType } } }: any) => {
-        return handshakeType === HandshakeType.client_hello;
+      types.when(({ node: { header: { msg_type } } }: any) => {
+        return msg_type === HandshakeType.client_hello;
       }, ClientHello.spec),
       {}
     ),
@@ -39,7 +39,13 @@ export class Handshake {
     const header = Buffer.from(
       encode(this.header, Handshake.spec.header).slice()
     );
-    const body = ClientHello.from(this.message);
+    const body = (() => {
+      switch (this.header.msg_type) {
+        case HandshakeType.client_hello:
+          return ClientHello.from(this.message);
+      }
+    })();
+
     return Buffer.concat([header, body.serialize()]);
   }
 }
