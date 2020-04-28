@@ -1,6 +1,7 @@
 import { FragmentedHandshake } from "../../../src/record/message/fragment";
 import { HandshakeType } from "../../../src/handshake/const";
 import { ClientHello } from "../../../src/handshake/message/client/hello";
+
 test("record/message/fragment", () => {
   const raw = Buffer.from([
     0x01,
