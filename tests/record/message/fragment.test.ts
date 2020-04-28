@@ -1,6 +1,7 @@
-import { Handshake } from "../../../../src/record/message/content/handshake";
-import { HandshakeType } from "../../../../src/handshake/const";
-test("record/message/content/handshake", () => {
+import { FragmentedHandshake } from "../../../src/record/message/fragment";
+import { HandshakeType } from "../../../src/handshake/const";
+import { ClientHello } from "../../../src/handshake/message/client/hello";
+test("record/message/fragment", () => {
   const raw = Buffer.from([
     0x01,
     0x00,
@@ -56,13 +57,14 @@ test("record/message/content/handshake", () => {
     0x00,
     0x00,
   ]);
-  const c = Handshake.deSerialize(raw);
+  const c = FragmentedHandshake.deSerialize(raw);
   expect(raw).toEqual(c.serialize());
-  expect(c.header.length).toBe(0x29);
-  expect(c.header.fragmentLength).toBe(0x29);
-  expect(c.header.handshakeType).toBe(HandshakeType.client_hello);
-  expect(c.message.clientVersion).toEqual({ major: 0xfe, minor: 0xfd });
-  expect(c.message.random).toEqual({
+  expect(c.length).toBe(0x29);
+  expect(c.fragment_length).toBe(0x29);
+  expect(c.msg_type).toBe(HandshakeType.client_hello);
+  const message = ClientHello.deSerialize(c.fragment);
+  expect(message.clientVersion).toEqual({ major: 0xfe, minor: 0xfd });
+  expect(message.random).toEqual({
     gmt_unix_time: 3056586332,
     random_bytes: Buffer.from([
       0x42,

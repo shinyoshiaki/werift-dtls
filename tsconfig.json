@@ -1,6 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "lib": ["esnext"],
     "declaration": true,
     "module": "commonjs",
     "moduleResolution": "node",

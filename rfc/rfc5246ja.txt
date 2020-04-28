@@ -531,11 +531,14 @@ MACは暗号化の前に計算されることに注意してください. スト
 
 MACは、セクション6.2.3.1で説明されているように生成されます.  
 
-IV初期化ベクトル（IV）はランダムに選択する必要があり（SHOULD）、予測不可能である必要があります. 1.1より前のバージョンのTLSでは、IVフィールドはなく、前のレコードの最後の暗号文ブロック（「CBC残差」）がIVとして使用されていました. これは、[CBCATT]で説明されている攻撃を防ぐために変更されました. ブロック暗号の場合、IVの長さはSecurityParameters.record_iv_lengthであり、SecurityParameters.block_sizeと同じです. 
+IV
+初期化ベクトル（IV）はランダムに選択する必要があり（SHOULD）、予測不可能である必要があります. 1.1より前のバージョンのTLSでは、IVフィールドはなく、前のレコードの最後の暗号文ブロック（「CBC残差」）がIVとして使用されていました. これは、[CBCATT]で説明されている攻撃を防ぐために変更されました. ブロック暗号の場合、IVの長さはSecurityParameters.record_iv_lengthであり、SecurityParameters.block_sizeと同じです. 
 
+padding
 平文の長さをブロック暗号のブロック長の整数倍にするために追加されるパディング. TLSCiphertext.lengthがブロック長の整数倍になる結果となる限り、パディングは255バイトまでの任意の長さでもかまいません. 交換されたメッセージの長さの分析に基づくプロトコルへの攻撃を妨げるには、必要以上に長い長さが望ましい場合があります. パディングデータベクトルの各uint8には、パディング長の値を入力する必要があります. 受信者はこのパディングをチェックする必要があり、バッドエラーを示すためにbad_record_macアラートを使用する必要があります. 
 
-padding_lengthパディングの長さは、GenericBlockCipher構造の合計サイズが暗号のブロック長の倍数になるようにする必要があります. 有効な値の範囲は0〜255です. この長さは、padding_lengthフィールド自体を除いたpaddingフィールドの長さを指定します. 
+padding_length
+パディングの長さは、GenericBlockCipher構造の合計サイズが暗号のブロック長の倍数になるようにする必要があります. 有効な値の範囲は0〜255です. この長さは、padding_lengthフィールド自体を除いたpaddingフィールドの長さを指定します. 
 
 暗号化されたデータの長さ（TLSCiphertext.length）は、SecurityParameters.block_length、TLSCompressed.length、SecurityParameters.mac_length、およびpadding_lengthの合計よりも1つ長くなります.  
 
@@ -549,7 +552,12 @@ padding_lengthパディングの長さは、GenericBlockCipher構造の合計サ
 
 AEAD [AEAD]暗号（[CCM]や[GCM]など）の場合、AEAD関数はTLSCompressed.fragment構造とAEAD TLSCiphertext.fragment構造との間で変換を行います.  
 
-struct {opaque nonce_explicit [SecurityParameters.record_iv_length]; aead-ciphered struct {opaque content [TLSCompressed.length]; }; } GenericAEADCipher;
+      struct {
+         opaque nonce_explicit[SecurityParameters.record_iv_length];
+         aead-ciphered struct {
+             opaque content[TLSCompressed.length];
+         };
+      } GenericAEADCipher;
 
 AEAD暗号は、[AEAD]のセクション2.1で説明されているように、認証チェックに含まれる単一のキー、ノンス、平文、および「追加データ」を入力として受け取ります. キーはclient_write_keyまたはserver_write_keyのいずれかです. MACキーは使用されません. 
 
@@ -795,7 +803,7 @@ helloメッセージに続いて、サーバーは、認証される場合、証
 
 各メッセージの内容と重要性については、次のセクションで詳しく説明します.  
 
-7.4. ハンドシェイクプロトコル
+7.4.  Handshake Protocol
 
 TLSハンドシェイクプロトコルは、TLSレコードプロトコルの定義済みの高レベルクライアントの1つです. このプロトコルは、セッションの安全な属性をネゴシエートするために使用されます. ハンドシェイクメッセージはTLSレコードレイヤーに提供され、1つ以上のTLSPlaintext構造内にカプセル化されます. これらの構造は、現在アクティブなセッション状態で指定されたとおりに処理および送信されます. 
 
@@ -1698,7 +1706,7 @@ struct {不透明なverify_data [verify_data_length]; }終了しました.
 
 
 
-A.5. 暗号スイート
+A.5.  The Cipher Suite
 
 次の値は、ClientHelloおよびServerHelloメッセージで使用される暗号スイートコードを定義します.  
 
@@ -1710,21 +1718,48 @@ CipherSuite TLS_NULL_WITH_NULL_NULL = {0x00,0x00};
 
 以下のCipherSuite定義では、サーバーが鍵交換に使用できるRSA証明書を提供する必要があります. サーバーは、証明書要求メッセージで署名可能な証明書を要求できます. 
 
-CipherSuite TLS_RSA_WITH_NULL_MD5 = {0x00,0x01}; CipherSuite TLS_RSA_WITH_NULL_SHA = {0x00,0x02}; CipherSuite TLS_RSA_WITH_NULL_SHA256 = {0x00,0x3B}; CipherSuite TLS_RSA_WITH_RC4_128_MD5 = {0x00,0x04}; CipherSuite TLS_RSA_WITH_RC4_128_SHA = {0x00,0x05}; CipherSuite TLS_RSA_WITH_3DES_EDE_CBC_SHA = {0x00,0x0A}; CipherSuite TLS_RSA_WITH_AES_128_CBC_SHA = {0x00,0x2F}; CipherSuite TLS_RSA_WITH_AES_256_CBC_SHA = {0x00,0x35}; CipherSuite TLS_RSA_WITH_AES_128_CBC_SHA256 = {0x00,0x3C}; CipherSuite TLS_RSA_WITH_AES_256_CBC_SHA256 = {0x00,0x3D};
+      CipherSuite TLS_RSA_WITH_NULL_MD5                 = { 0x00,0x01 };
+      CipherSuite TLS_RSA_WITH_NULL_SHA                 = { 0x00,0x02 };
+      CipherSuite TLS_RSA_WITH_NULL_SHA256              = { 0x00,0x3B };
+      CipherSuite TLS_RSA_WITH_RC4_128_MD5              = { 0x00,0x04 };
+      CipherSuite TLS_RSA_WITH_RC4_128_SHA              = { 0x00,0x05 };
+      CipherSuite TLS_RSA_WITH_3DES_EDE_CBC_SHA         = { 0x00,0x0A };
+      CipherSuite TLS_RSA_WITH_AES_128_CBC_SHA          = { 0x00,0x2F };
+      CipherSuite TLS_RSA_WITH_AES_256_CBC_SHA          = { 0x00,0x35 };
+      CipherSuite TLS_RSA_WITH_AES_128_CBC_SHA256       = { 0x00,0x3C };
+      CipherSuite TLS_RSA_WITH_AES_256_CBC_SHA256       = { 0x00,0x3D };
 
 次の暗号スイート定義は、サーバー認証（およびオプションでクライアント認証）Diffie-Hellmanに使用されます. DHは、サーバーの証明書に認証局（CA）によって署名されたDiffie-Hellmanパラメーターが含まれている暗号スイートを示します. DHEは、一時的なDiffie-Hellmanを示します. Diffie-Hellmanパラメータは、CAによって署名された署名対応証明書によって署名されます. サーバーが使用する署名アルゴリズムは、CipherSuite名のDHEコンポーネントの後に指定されます. サーバーは、クライアント認証のためにクライアントから署名可能な証明書を要求できます. または、Diffie-Hellman証明書を要求することもできます. クライアントが提供するDiffie-Hellman証明書は、サーバーが記述するパラメーター（グループとジェネレーター）を使用する必要があります. 
 
-
-
-
-
-
-
-CipherSuite TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA = {0x00,0x0D}; CipherSuite TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA = {0x00,0x10}; CipherSuite TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA = {0x00,0x13}; CipherSuite TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA = {0x00,0x16}; CipherSuite TLS_DH_DSS_WITH_AES_128_CBC_SHA = {0x00,0x30}; CipherSuite TLS_DH_RSA_WITH_AES_128_CBC_SHA = {0x00,0x31}; CipherSuite TLS_DHE_DSS_WITH_AES_128_CBC_SHA = {0x00,0x32}; CipherSuite TLS_DHE_RSA_WITH_AES_128_CBC_SHA = {0x00,0x33}; CipherSuite TLS_DH_DSS_WITH_AES_256_CBC_SHA = {0x00,0x36}; CipherSuite TLS_DH_RSA_WITH_AES_256_CBC_SHA = {0x00,0x37}; CipherSuite TLS_DHE_DSS_WITH_AES_256_CBC_SHA = {0x00,0x38}; CipherSuite TLS_DHE_RSA_WITH_AES_256_CBC_SHA = {0x00,0x39}; CipherSuite TLS_DH_DSS_WITH_AES_128_CBC_SHA256 = {0x00,0x3E}; CipherSuite TLS_DH_RSA_WITH_AES_128_CBC_SHA256 = {0x00,0x3F}; CipherSuite TLS_DHE_DSS_WITH_AES_128_CBC_SHA256 = {0x00,0x40}; CipherSuite TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 = {0x00,0x67}; CipherSuite TLS_DH_DSS_WITH_AES_256_CBC_SHA256 = {0x00,0x68}; CipherSuite TLS_DH_RSA_WITH_AES_256_CBC_SHA256 = {0x00,0x69}; CipherSuite TLS_DHE_DSS_WITH_AES_256_CBC_SHA256 = {0x00,0x6A}; CipherSuite TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 = {0x00,0x6B}; CipherSuite TLS_DH_RSA_WITH_AES_256_CBC_SHA256 = {0x00,0x69}; CipherSuite TLS_DHE_DSS_WITH_AES_256_CBC_SHA256 = {0x00,0x6A}; CipherSuite TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 = {0x00,0x6B}; CipherSuite TLS_DH_RSA_WITH_AES_256_CBC_SHA256 = {0x00,0x69}; CipherSuite TLS_DHE_DSS_WITH_AES_256_CBC_SHA256 = {0x00,0x6A}; CipherSuite TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 = {0x00,0x6B};
+      CipherSuite TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA      = { 0x00,0x0D };
+      CipherSuite TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA      = { 0x00,0x10 };
+      CipherSuite TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA     = { 0x00,0x13 };
+      CipherSuite TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA     = { 0x00,0x16 };
+      CipherSuite TLS_DH_DSS_WITH_AES_128_CBC_SHA       = { 0x00,0x30 };
+      CipherSuite TLS_DH_RSA_WITH_AES_128_CBC_SHA       = { 0x00,0x31 };
+      CipherSuite TLS_DHE_DSS_WITH_AES_128_CBC_SHA      = { 0x00,0x32 };
+      CipherSuite TLS_DHE_RSA_WITH_AES_128_CBC_SHA      = { 0x00,0x33 };
+      CipherSuite TLS_DH_DSS_WITH_AES_256_CBC_SHA       = { 0x00,0x36 };
+      CipherSuite TLS_DH_RSA_WITH_AES_256_CBC_SHA       = { 0x00,0x37 };
+      CipherSuite TLS_DHE_DSS_WITH_AES_256_CBC_SHA      = { 0x00,0x38 };
+      CipherSuite TLS_DHE_RSA_WITH_AES_256_CBC_SHA      = { 0x00,0x39 };
+      CipherSuite TLS_DH_DSS_WITH_AES_128_CBC_SHA256    = { 0x00,0x3E };
+      CipherSuite TLS_DH_RSA_WITH_AES_128_CBC_SHA256    = { 0x00,0x3F };
+      CipherSuite TLS_DHE_DSS_WITH_AES_128_CBC_SHA256   = { 0x00,0x40 };
+      CipherSuite TLS_DHE_RSA_WITH_AES_128_CBC_SHA256   = { 0x00,0x67 };
+      CipherSuite TLS_DH_DSS_WITH_AES_256_CBC_SHA256    = { 0x00,0x68 };
+      CipherSuite TLS_DH_RSA_WITH_AES_256_CBC_SHA256    = { 0x00,0x69 };
+      CipherSuite TLS_DHE_DSS_WITH_AES_256_CBC_SHA256   = { 0x00,0x6A };
+      CipherSuite TLS_DHE_RSA_WITH_AES_256_CBC_SHA256   = { 0x00,0x6B };
 
 次の暗号スイートは、どちらの当事者も認証されない完全に匿名のDiffie-Hellman通信に使用されます. このモードは中間者攻撃に対して脆弱であることに注意してください. したがって、このモードの使用は制限されています. これらの暗号スイートは、アプリケーション層が匿名キー交換を許可するように特別に要求していない限り、TLS 1.2実装で使用してはなりません（MUST NOT）. （たとえば、認証の設定が行われていない場合や、認証を保証する他の手段を持つより複雑なセキュリティプロトコルの一部としてTLSが使用されている場合など、日和見暗号化をサポートするために、匿名の鍵交換が受け入れられる場合があります. ）
 
-CipherSuite TLS_DH_anon_WITH_RC4_128_MD5 = {0x00,0x18}; CipherSuite TLS_DH_anon_WITH_3DES_EDE_CBC_SHA = {0x00,0x1B}; CipherSuite TLS_DH_anon_WITH_AES_128_CBC_SHA = {0x00,0x34}; CipherSuite TLS_DH_anon_WITH_AES_256_CBC_SHA = {0x00,0x3A}; CipherSuite TLS_DH_anon_WITH_AES_128_CBC_SHA256 = {0x00,0x6C}; CipherSuite TLS_DH_anon_WITH_AES_256_CBC_SHA256 = {0x00,0x6D};
+      CipherSuite TLS_DH_anon_WITH_RC4_128_MD5          = { 0x00,0x18 };
+      CipherSuite TLS_DH_anon_WITH_3DES_EDE_CBC_SHA     = { 0x00,0x1B };
+      CipherSuite TLS_DH_anon_WITH_AES_128_CBC_SHA      = { 0x00,0x34 };
+      CipherSuite TLS_DH_anon_WITH_AES_256_CBC_SHA      = { 0x00,0x3A };
+      CipherSuite TLS_DH_anon_WITH_AES_128_CBC_SHA256   = { 0x00,0x6C };
+      CipherSuite TLS_DH_anon_WITH_AES_256_CBC_SHA256   = { 0x00,0x6D };
 
 キー交換を実際に確認せずに非匿名キー交換を使用することは、本質的に匿名キー交換と同等であり、同じ予防策が適用されることに注意してください. 非匿名キー交換は、一般に匿名キー交換よりも高い計算コストと通信コストを伴いますが、アプリケーション層で匿名キー交換が許可されている場合に非匿名キー交換を無効にしないことは相互運用性の利益になる場合があります. 
 
@@ -1732,25 +1767,42 @@ CipherSuite TLS_DH_anon_WITH_RC4_128_MD5 = {0x00,0x18}; CipherSuite TLS_DH_anon_
 
 注：暗号スイートの値{0x00、0x1C}および{0x00、0x1D}は、SSL 3のFortezzaベースの暗号スイートとの衝突を避けるために予約されています.  
 
-A.6. セキュリティパラメータ
+A.6.  The Security Parameters
 
 これらのセキュリティパラメータはTLSハンドシェイクプロトコルによって決定され、接続状態を初期化するためにパラメータとしてTLSレコードレイヤに提供されます. SecurityParametersには以下が含まれます. 
 
-列挙型{null（0）、（255）} CompressionMethod; 
+   enum { null(0), (255) } CompressionMethod;
 
-列挙型{サーバー、クライアント} ConnectionEnd; 
+   enum { server, client } ConnectionEnd;
 
-列挙型{tls_prf_sha256} PRFAlgorithm; 
+   enum { tls_prf_sha256 } PRFAlgorithm;
 
-enum {null、rc4、3des、aes} BulkCipherAlgorithm; 
+   enum { null, rc4, 3des, aes } BulkCipherAlgorithm;
 
-enum {stream、block、aead} CipherType; 
+   enum { stream, block, aead } CipherType;
 
-列挙型{null、hmac_md5、hmac_sha1、hmac_sha256、hmac_sha384、hmac_sha512} MACAlgorithm; 
+   enum { null, hmac_md5, hmac_sha1, hmac_sha256, hmac_sha384,
+     hmac_sha512} MACAlgorithm;
 
 / * CompressionMethod、PRFAlgorithm、BulkCipherAlgorithm、およびMACAlgorithmで指定されたアルゴリズムに他の値が追加される場合があります. * /
 
-構造体{ConnectionEndエンティティ; PRFAlgorithm prf_algorithm; BulkCipherAlgorithm bulk_cipher_algorithm; CipherType cipher_type; uint8 enc_key_length; uint8 block_length; uint8 fixed_iv_length; uint8 record_iv_length; MACAlgorithm mac_algorithm; uint8 mac_length; uint8 mac_key_length; CompressionMethod compression_algorithm; 不透明なmaster_secret [48]; 不透明なclient_random [32]; 不透明なserver_random [32]; } SecurityParameters;
+   struct {
+       ConnectionEnd          entity;
+       PRFAlgorithm           prf_algorithm;
+       BulkCipherAlgorithm    bulk_cipher_algorithm;
+       CipherType             cipher_type;
+       uint8                  enc_key_length;
+       uint8                  block_length;
+       uint8                  fixed_iv_length;
+       uint8                  record_iv_length;
+       MACAlgorithm           mac_algorithm;
+       uint8                  mac_length;
+       uint8                  mac_key_length;
+       CompressionMethod      compression_algorithm;
+       opaque                 master_secret[48];
+       opaque                 client_random[32];
+       opaque                 server_random[32];
+   } SecurityParameters;
 
 A.7. RFC 4492の変更
 
@@ -1803,12 +1855,6 @@ Data Encryption Standard DES [DES]は、現在はかなり弱いと考えられ�
 マスターシークレット暗号化キー、MACシークレット、およびIVの生成に使用される安全なシークレットデータ.  
 
 MD5 MD5 [MD5]は、任意の長いデータストリームを固定サイズ（16バイト）のハッシュに変換するハッシュ関数です. 暗号解読が大幅に進歩したため、このドキュメントの公開時点では、MD5は「安全な」ハッシュ関数と見なすことはできません. 
-
-
-
-
-
-
 
 公開キー暗号化2キー暗号を使用する暗号化技術のクラス. 公開鍵で暗号化されたメッセージは、関連付けられた秘密鍵でのみ復号化できます. 逆に、秘密鍵で署名されたメッセージは、公開鍵で検証できます. 
 

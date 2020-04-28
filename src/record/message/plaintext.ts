@@ -1,8 +1,9 @@
 import { encode, types, decode } from "binary-data";
 import { DtlsPlaintextHeader } from "./header";
-import { Handshake } from "./content/handshake";
 import { contentType } from "../const";
 import { ChangeCipherSpec } from "../../handshake/message/changeCipherSpec";
+import { FragmentedHandshake } from "./fragment";
+import { Alert } from "../../handshake/message/alert";
 
 export class DtlsPlaintext {
   static readonly spec = {
@@ -13,13 +14,18 @@ export class DtlsPlaintext {
           node.recordLayerHeader.contentType === contentType.changeCipherSpec,
         ChangeCipherSpec.spec
       ),
+      types.when(
+        ({ node }: any) =>
+          node.recordLayerHeader.contentType === contentType.alert,
+        Alert.spec
+      ),
       {}
     ),
   };
 
   constructor(
     public recordLayerHeader: typeof DtlsPlaintext.spec.recordLayerHeader,
-    public fragment: Handshake | ChangeCipherSpec
+    public fragment: FragmentedHandshake | ChangeCipherSpec
   ) {}
 
   static createEmpty() {
@@ -39,6 +45,8 @@ export class DtlsPlaintext {
       switch (this.recordLayerHeader.contentType) {
         case contentType.changeCipherSpec:
           return ChangeCipherSpec.spec;
+        case contentType.handshake:
+          return FragmentedHandshake.spec;
       }
     })();
     const res = encode(this, {

@@ -1,6 +1,6 @@
 import { encode, types, decode } from "binary-data";
-import { HandshakeType } from "../../../handshake/const";
-import { ClientHello } from "../../../handshake/message/client/hello";
+import { HandshakeType } from "../../handshake/const";
+import { ClientHello } from "../../handshake/message/client/hello";
 
 export class Handshake {
   static readonly spec = {
@@ -35,17 +35,18 @@ export class Handshake {
     );
   }
 
+  get body() {
+    switch (this.header.msg_type) {
+      case HandshakeType.client_hello:
+        return ClientHello.from(this.message);
+    }
+  }
+
   serialize() {
     const header = Buffer.from(
       encode(this.header, Handshake.spec.header).slice()
     );
-    const body = (() => {
-      switch (this.header.msg_type) {
-        case HandshakeType.client_hello:
-          return ClientHello.from(this.message);
-      }
-    })();
 
-    return Buffer.concat([header, body.serialize()]);
+    return Buffer.concat([header, this.body.serialize()]);
   }
 }

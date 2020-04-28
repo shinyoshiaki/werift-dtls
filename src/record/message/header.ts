@@ -12,10 +12,10 @@ export class DtlsPlaintextHeader {
 
   constructor(
     public contentType: number,
-    public contentLen: number,
     public protocolVersion: { major: number; minor: number },
     public epoch: number,
-    public sequenceNumber: number
+    public sequenceNumber: number,
+    public contentLen: number
   ) {}
 
   static createEmpty() {
