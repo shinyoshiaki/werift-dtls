@@ -15,8 +15,7 @@ export const createPackets = (client: ClientContext, record: RecordContext) => (
       const fragment = handshake.toFragment();
       const fragments = fragment.chunk().map((f) => ({
         type: contentType.handshake,
-        fragmentData: f.serialize(),
-        fragment: f,
+        fragment: f.serialize(),
       }));
       return fragments;
     })
@@ -29,7 +28,7 @@ export const createPackets = (client: ClientContext, record: RecordContext) => (
         protocolVersion: client.version,
         epoch: 0,
         sequenceNumber: record.recordSequenceNumber++,
-        contentLen: msg.fragmentData.length,
+        contentLen: msg.fragment.length,
       },
       msg.fragment
     );

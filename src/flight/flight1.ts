@@ -18,7 +18,7 @@ export const flight1 = async (
     dtlsRandom(),
     Buffer.from([]),
     Buffer.from([]),
-    [139],
+    [139, 140, 141, 174, 175, 168, 169, 49316, 49317, 49320, 49321],
     [0],
     []
   );
@@ -30,7 +30,9 @@ export const flight1 = async (
   // response
   const msg = await new Promise<Buffer>((r) => udp.socket.once("message", r));
   const plaintext = DtlsPlaintext.deSerialize(msg);
-  const handshake: FragmentedHandshake = plaintext.fragment;
+  const handshake: FragmentedHandshake = FragmentedHandshake.deSerialize(
+    plaintext.fragment
+  );
   const verifyReq = ServerHelloVerifyRequest.deSerialize(handshake.fragment);
   return verifyReq;
 };

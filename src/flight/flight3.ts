@@ -16,11 +16,12 @@ export const flight3 = (
   hello.cookie = verifyReq.cookie;
   hello.messageSeq = 0;
   const packets = createPackets(flight, record)([hello]);
-  udp.socket.send(Buffer.concat(packets), udp.rinfo.port, udp.rinfo.address);
+  const mergedPackets = Buffer.concat(packets);
+  udp.socket.send(mergedPackets, udp.rinfo.port, udp.rinfo.address);
 
   // response
   const msg = await new Promise<Buffer>((r) => udp.socket.once("message", r));
   const plaintext = DtlsPlaintext.deSerialize(msg);
-  const handshake: FragmentedHandshake = plaintext.fragment;
+  const handshake = FragmentedHandshake.deSerialize(plaintext.fragment);
   console.log();
 };
