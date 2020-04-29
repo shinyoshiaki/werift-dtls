@@ -3,9 +3,8 @@ import { ClientContext } from "../context/client";
 import { ClientHello } from "../handshake/message/client/hello";
 import { ServerHelloVerifyRequest } from "../handshake/message/server/helloVerifyRequest";
 import { createPackets } from "../record/builder";
-import { DtlsPlaintext } from "../record/message/plaintext";
-import { FragmentedHandshake } from "../record/message/fragment";
 import { RecordContext } from "../context/record";
+import { receive } from "../record/receive";
 
 export const flight3 = (
   udp: UdpContext,
@@ -21,7 +20,6 @@ export const flight3 = (
 
   // response
   const msg = await new Promise<Buffer>((r) => udp.socket.once("message", r));
-  const plaintext = DtlsPlaintext.deSerialize(msg);
-  const handshake = FragmentedHandshake.deSerialize(plaintext.fragment);
+  const handshakes = receive(msg);
   console.log();
 };
