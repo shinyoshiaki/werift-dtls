@@ -19,6 +19,11 @@ export class DtlsPlaintext {
           node.recordLayerHeader.contentType === contentType.alert,
         Alert.spec
       ),
+      types.when(
+        ({ node }: any) =>
+          node.recordLayerHeader.contentType === contentType.handshake,
+        FragmentedHandshake.spec
+      ),
       {}
     ),
   };

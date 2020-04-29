@@ -1,7 +1,10 @@
 import { spawn } from "child_process";
 import { flight1 } from "../src/flight/flight1";
+import { flight3 } from "../src/flight/flight3";
 import { createSocket } from "dgram";
-import { DtlsPlaintext } from "../src/record/message/plaintext";
+import { UdpContext } from "../src/context/udp";
+import { ClientContext } from "../src/context/client";
+import { RecordContext } from "../src/context/record";
 
 const server = spawn("openssl", [
   "s_server",
@@ -25,11 +28,16 @@ server.stdout.on("data", (data: string) => {
   }
 });
 
-setTimeout(() => {
+setTimeout(async () => {
   const socket = createSocket("udp4");
-  socket.on("message", (msg) => {
-    const c = DtlsPlaintext.deSerialize(msg);
-    console.log(c);
+  const udp = new UdpContext(socket, { address: "127.0.0.1", port: 5685 });
+  const flight = new ClientContext();
+  const record = new RecordContext();
+
+  udp.socket.on("message", (msg) => {
+    console.log(msg);
   });
-  flight1(socket, { address: "127.0.0.1", port: 5685 });
+
+  const verifyReq = await flight1(udp, flight, record);
+  flight3(udp, flight, record)(verifyReq);
 }, 100);

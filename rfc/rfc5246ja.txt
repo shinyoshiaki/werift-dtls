@@ -647,15 +647,45 @@ ChangeCipherSpecメッセージはクライアントとサーバーの両方か�
 
 注：データが接続上を流れている間に再ハンドシェイクが発生した場合、通信側は古いCipherSpecを使用してデータを送信し続ける場合があります. ただし、ChangeCipherSpecが送信されたら、新しいCipherSpecを使用する必要があります. ChangeCipherSpecを送信する最初の側は、反対側が新しいキー生成情報の計算を完了したことを知りません（たとえば、時間のかかる公開キー操作を実行する必要がある場合）. したがって、受信者がデータをバッファリングしなければならない小さな時間枠が存在する場合があります. 実際には、最新のマシンでは、この間隔はかなり短い可能性があります. 
 
-7.2. アラートプロトコル
+7.2.  Alert Protocol
 
 TLSレコードレイヤーでサポートされているコンテンツタイプの1つはアラートタイプです. アラートメッセージは、メッセージの重大度（警告または致命的）とアラートの説明を伝えます. 致命的なレベルのアラートメッセージは、接続を即座に終了させます. この場合、セッションに対応する他の接続は続行できますが、失敗したセッションが新しい接続の確立に使用されないように、セッション識別子を無効にする必要があります. 他のメッセージと同様に、現在の接続状態で指定されているように、アラートメッセージは暗号化および圧縮されます. 
 
-列挙型{warning（1）、fatal（2）、（255）} AlertLevel; 
+      enum { warning(1), fatal(2), (255) } AlertLevel;
 
-列挙型{close_notify（0）、unexpected_message（10）、bad_record_mac（20）、decryption_failed_RESERVED（21）、record_overflow（22）、decompression_failure（30）、handshake_failure（40）、no_certificate_RESERVED（41）、bad_certificate（42）、unsupported_certific ）、certificate_revoked（44）、certificate_expired（45）、certificate_unknown（46）、illegal_parameter（47）、unknown_ca（48）、access_denied（49）、decode_error（50）、decrypt_error（51）、export_restriction_RESERVED（60）、protocol_version（70 ）、不十分なセキュリティ（71）、内部エラー（80）、ユーザーキャンセル（90）、no_renegotiation（100）、サポートされていない拡張（110）、（255）} AlertDescription; 
+      enum {
+          close_notify(0),
+          unexpected_message(10),
+          bad_record_mac(20),
+          decryption_failed_RESERVED(21),
+          record_overflow(22),
+          decompression_failure(30),
+          handshake_failure(40),
+          no_certificate_RESERVED(41),
+          bad_certificate(42),
+          unsupported_certificate(43),
+          certificate_revoked(44),
+          certificate_expired(45),
+          certificate_unknown(46),
+          illegal_parameter(47),
+          unknown_ca(48),
+          access_denied(49),
+          decode_error(50),
+          decrypt_error(51),
+          export_restriction_RESERVED(60),
+          protocol_version(70),
+          insufficient_security(71),
+          internal_error(80),
+          user_canceled(90),
+          no_renegotiation(100),
+          unsupported_extension(110),
+          (255)
+      } AlertDescription;
 
-struct {AlertLevel level; AlertDescriptionの説明. }アラート. 
+      struct {
+          AlertLevel level;
+          AlertDescription description;
+      } Alert;
 
 7.2.1. 閉鎖アラート
 

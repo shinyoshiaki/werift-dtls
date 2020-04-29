@@ -45,7 +45,7 @@
         "--files",
         "--project",
         "${workspaceRoot}/tsconfig.json",
-        "${workspaceRoot}/e2e/flight1.ts"
+        "${workspaceRoot}/e2e/flight.ts"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
