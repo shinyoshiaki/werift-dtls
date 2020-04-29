@@ -80,10 +80,10 @@ test("handshake_message_server_hello", () => {
   };
   parsed.compressionMethod = 0;
 
-  const c = ServerHello.deSerialize(rawServerHello);
+  const c = ServerHello.deSerializeWithExtensions(rawServerHello);
   expect(parsed.serverVersion).toEqual(c.serverVersion);
   expect(parsed.random).toEqual(c.random);
   expect(parsed.compressionMethod).toEqual(c.compressionMethod);
-  const buf = c.serialize();
+  const buf = c.serializeWithExtensions();
   expect(buf).toEqual(rawServerHello);
 });

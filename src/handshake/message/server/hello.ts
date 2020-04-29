@@ -1,7 +1,6 @@
 import { encode, types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
-import { Random, ExtensionList } from "../../binary";
-const { uint16be, uint8, buffer, array } = types;
+import { Random, ProtocolVersion } from "../../binary";
 
 // 7.4.1.3.  Server Hello
 
@@ -9,12 +8,11 @@ export class ServerHello {
   msgType = HandshakeType.server_hello;
   messageSeq: number;
   static readonly spec = {
-    serverVersion: { major: uint8, minor: uint8 },
+    serverVersion: ProtocolVersion,
     random: Random,
-    sessionId: buffer(uint8),
-    cipherSuite: uint16be,
-    compressionMethod: uint8,
-    extensions: ExtensionList,
+    sessionId: types.buffer(types.uint8),
+    cipherSuite: types.uint16be,
+    compressionMethod: types.uint8,
   };
 
   constructor(
@@ -38,14 +36,34 @@ export class ServerHello {
   }
 
   static deSerialize(buf: Buffer) {
+    const res = decode(buf, ServerHello.spec);
     return new ServerHello(
       //@ts-ignore
-      ...Object.values(decode(buf, ServerHello.spec))
+      ...Object.values(res)
+    );
+  }
+
+  static deSerializeWithExtensions(buf: Buffer) {
+    const res = decode(buf, {
+      ...ServerHello.spec,
+      extensions: types.buffer(types.uint16be),
+    });
+    return new ServerHello(
+      //@ts-ignore
+      ...Object.values(res)
     );
   }
 
   serialize() {
     const res = encode(this, ServerHello.spec).slice();
+    return Buffer.from(res);
+  }
+
+  serializeWithExtensions() {
+    const res = encode(this, {
+      ...ServerHello.spec,
+      extensions: types.buffer(types.uint16be),
+    }).slice();
     return Buffer.from(res);
   }
 }

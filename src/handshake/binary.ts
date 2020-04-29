@@ -1,4 +1,4 @@
-import { encode, types, decode } from "binary-data";
+import { types } from "binary-data";
 const { uint16be, uint24be, buffer, array, uint32be, uint8, string } = types;
 
 export const Random = {
@@ -6,10 +6,8 @@ export const Random = {
   random_bytes: buffer(28),
 };
 
-const ExtensionType = uint16be;
-
 const Extension = {
-  type: ExtensionType,
+  type: uint16be,
   data: buffer(uint16be),
 };
 

@@ -39,5 +39,11 @@ setTimeout(async () => {
   });
 
   const verifyReq = await flight1(udp, flight, record);
-  flight3(udp, flight, record)(verifyReq);
+  const [serverHello, serverHelloDone] = await flight3(
+    udp,
+    flight,
+    record
+  )(verifyReq);
+
+  console.log();
 }, 100);
