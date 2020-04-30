@@ -10,16 +10,16 @@ import { ServerHelloDone } from "../handshake/message/server/helloDone";
 
 export const flight3 = (
   udp: UdpContext,
-  flight: ClientContext,
+  client: ClientContext,
   record: RecordContext
 ) => async (
   verifyReq: ServerHelloVerifyRequest
 ): Promise<[ServerHello, ServerHelloDone]> => {
-  const hello = flight.lastFlight[0] as ClientHello;
+  const hello = client.lastFlight[0] as ClientHello;
   hello.cookie = verifyReq.cookie;
-  const packets = createPackets(flight, record)([hello]);
-  const mergedPackets = Buffer.concat(packets);
-  udp.socket.send(mergedPackets, udp.rinfo.port, udp.rinfo.address);
+  const packets = createPackets(client, record)([hello]);
+  const buf = Buffer.concat(packets);
+  udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
 
   // response
   const msg = await new Promise<Buffer>((r) => udp.socket.once("message", r));

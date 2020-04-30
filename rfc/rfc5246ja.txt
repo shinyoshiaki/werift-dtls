@@ -1010,9 +1010,14 @@ extensions
 
 拡張形式は次のとおりです.  
 
-struct {ExtensionType extension_type; 不透明なextension_data <0..2 ^ 16-1>; }拡張. 
+      struct {
+          ExtensionType extension_type;
+          opaque extension_data<0..2^16-1>;
+      } Extension;
 
-列挙型{signature_algorithms（13）、（65535）} ExtensionType; 
+      enum {
+          signature_algorithms(13), (65535)
+      } ExtensionType;
 
 ここに： 
 

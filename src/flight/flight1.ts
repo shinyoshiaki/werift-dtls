@@ -13,19 +13,19 @@ export const flight1 = async (
   flight: ClientContext,
   record: RecordContext
 ) => {
-  const clientHello = new ClientHello(
+  const hello = new ClientHello(
     { major: 255 - 1, minor: 255 - 2 },
     dtlsRandom(),
     Buffer.from([]),
     Buffer.from([]),
-    [139, 140, 141, 174, 175, 168, 169, 49316, 49317, 49320, 49321],
+    [0xc02b, 0xc0ae, 0xc02b, 0xc02f, 0xc00a, 0xc014, 0xc0a4, 0xc0a8, 0x00a8],
     [0],
-    []
+    [{ type: 23, data: Buffer.from([]) }]
   );
-  flight.version = clientHello.clientVersion;
-  const packets = createPackets(flight, record)([clientHello]);
+  const packets = createPackets(flight, record)([hello]);
   const buf = Buffer.concat(packets);
   udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
+  flight.version = hello.clientVersion;
 
   // response
   const msg = await new Promise<Buffer>((r) => udp.socket.once("message", r));

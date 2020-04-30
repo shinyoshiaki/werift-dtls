@@ -6,7 +6,20 @@ import { UdpContext } from "../src/context/udp";
 import { ClientContext } from "../src/context/client";
 import { RecordContext } from "../src/context/record";
 
-const server = spawn("openssl", [
+const args = [
+  "s_server",
+  "-cert",
+  "./assets/cert.pem",
+  "-key",
+  "./assets/key.pem",
+  "-dtls1_2",
+  "-accept",
+  "127.0.0.1:5685",
+  "-debug",
+  "-msg",
+];
+
+const args2 = [
   "s_server",
   "-psk",
   "58394c53744f5065595433555a753577",
@@ -20,17 +33,19 @@ const server = spawn("openssl", [
   "PSK-AES128-CCM8",
   "-nocert",
   "-no_ticket",
-]);
-server.stdout.setEncoding("ascii");
-server.stdout.on("data", (data: string) => {
-  if (data.includes("### node->openssl")) {
-    server.stdin.write("### openssl->node\n");
-  }
-});
+];
+
+// const server = spawn("openssl", args);
+// server.stdout.setEncoding("ascii");
+// server.stdout.on("data", (data: string) => {
+//   if (data.includes("### node->openssl")) {
+//     server.stdin.write("### openssl->node\n");
+//   }
+// });
 
 setTimeout(async () => {
   const socket = createSocket("udp4");
-  const udp = new UdpContext(socket, { address: "127.0.0.1", port: 5685 });
+  const udp = new UdpContext(socket, { address: "127.0.0.1", port: 4444 });
   const flight = new ClientContext();
   const record = new RecordContext();
 
