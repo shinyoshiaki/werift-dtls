@@ -1,10 +1,5 @@
 import { spawn } from "child_process";
-import { flight1 } from "../src/flight/flight1";
-import { flight3 } from "../src/flight/flight3";
-import { createSocket } from "dgram";
-import { UdpContext } from "../src/context/udp";
-import { ClientContext } from "../src/context/client";
-import { RecordContext } from "../src/context/record";
+import { DtlsClient } from "../src/client";
 
 const args = [
   "s_server",
@@ -43,22 +38,7 @@ const args2 = [
 //   }
 // });
 
-setTimeout(async () => {
-  const socket = createSocket("udp4");
-  const udp = new UdpContext(socket, { address: "127.0.0.1", port: 4444 });
-  const flight = new ClientContext();
-  const record = new RecordContext();
-
-  udp.socket.on("message", (msg) => {
-    console.log(msg);
-  });
-
-  const verifyReq = await flight1(udp, flight, record);
-  const [serverHello, serverHelloDone] = await flight3(
-    udp,
-    flight,
-    record
-  )(verifyReq);
-
-  console.log();
+setTimeout(() => {
+  const client = new DtlsClient({ address: "127.0.0.1", port: 4444 });
+  console.log(client);
 }, 100);
