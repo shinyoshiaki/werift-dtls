@@ -1,19 +1,22 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
     "lib": ["esnext"],
     "declaration": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmitOnError": true,
-    "noImplicitAny": true,
-    "outDir": "build/",
-    "removeComments": false,
-    "stripInternal": true,
-    "target": "es2015",
-    "watch": false, // true breaks circleci,
-    "skipLibCheck": true
+    "outDir": "lib",
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "pretty": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "noUnusedLocals": false,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true
   },
-  "include": ["src"],
-  "exclude": ["build/**", "node_modules/**"]
+  "exclude": ["examples"],
+  "include": ["src"]
 }

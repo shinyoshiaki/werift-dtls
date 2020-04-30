@@ -5,13 +5,13 @@ import { HandshakeType } from "../../const";
 
 export class ClientKeyExchange {
   msgType = HandshakeType.client_key_exchange;
-  messageSeq: number;
+  messageSeq?: number;
   static readonly spec = { rawData: types.buffer(types.uint8) };
 
   constructor(public rawData: Buffer) {}
 
   static createEmpty() {
-    return new ClientKeyExchange(undefined);
+    return new ClientKeyExchange(undefined as any);
   }
 
   static deSerialize(buf: Buffer) {

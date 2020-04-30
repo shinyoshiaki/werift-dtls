@@ -20,11 +20,11 @@ export class DtlsPlaintextHeader {
 
   static createEmpty() {
     return new DtlsPlaintextHeader(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any
     );
   }
 

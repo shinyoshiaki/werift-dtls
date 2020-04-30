@@ -10,7 +10,7 @@ export class Finished {
   constructor(public verifyData: Buffer) {}
 
   static createEmpty() {
-    return new Finished(undefined);
+    return new Finished(undefined as any);
   }
 
   static deSerialize(buf: Buffer) {

@@ -5,7 +5,7 @@ import { HandshakeType } from "../../const";
 
 export class ServerHelloDone {
   msgType = HandshakeType.server_hello_done;
-  messageSeq: number;
+  messageSeq?: number;
   static readonly spec = {};
 
   static createEmpty() {

@@ -21,12 +21,12 @@ export class FragmentedHandshake {
 
   static createEmpty() {
     return new FragmentedHandshake(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any
     );
   }
 
@@ -42,7 +42,7 @@ export class FragmentedHandshake {
     return Buffer.from(res);
   }
 
-  chunk(maxFragmentLength?: number) {
+  chunk(maxFragmentLength?: number): FragmentedHandshake[] {
     let start = 0;
     const totalLength = this.fragment.length;
 

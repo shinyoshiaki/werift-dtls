@@ -17,7 +17,7 @@ export const clientHelloSpec = {
 
 export class ClientHello {
   msgType = HandshakeType.client_hello;
-  messageSeq: number;
+  messageSeq: number = 0;
   static readonly spec = clientHelloSpec;
 
   constructor(
@@ -32,13 +32,13 @@ export class ClientHello {
 
   static createEmpty() {
     return new ClientHello(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any
     );
   }
 

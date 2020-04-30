@@ -12,7 +12,7 @@ export class Alert {
   constructor(public verifyData: Buffer) {}
 
   static createEmpty() {
-    return new Alert(undefined);
+    return new Alert(undefined as any);
   }
 
   static deSerialize(buf: Buffer) {

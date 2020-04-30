@@ -15,7 +15,7 @@ export class DtlsPlaintext {
   ) {}
 
   static createEmpty() {
-    return new DtlsPlaintext(undefined, undefined);
+    return new DtlsPlaintext(undefined as any, undefined as any);
   }
 
   static deSerialize(buf: Buffer) {

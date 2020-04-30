@@ -10,7 +10,7 @@ import {
 
 export class ServerCertificateRequest {
   msgType = HandshakeType.certificate_request;
-  messageSeq: number;
+  messageSeq?: number;
   static readonly spec = {
     certificateTypes: types.array(ClientCertificateType, types.uint8, "bytes"),
     signatures: types.array(SignatureAlgorithm, types.uint16be, "bytes"),
@@ -24,7 +24,11 @@ export class ServerCertificateRequest {
   ) {}
 
   static createEmpty() {
-    return new ServerCertificateRequest(undefined, undefined, undefined);
+    return new ServerCertificateRequest(
+      undefined as any,
+      undefined as any,
+      undefined as any
+    );
   }
 
   static deSerialize(buf: Buffer) {

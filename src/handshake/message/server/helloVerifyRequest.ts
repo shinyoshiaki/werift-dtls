@@ -6,7 +6,7 @@ import { ProtocolVersion } from "../../binary";
 
 export class ServerHelloVerifyRequest {
   msgType = HandshakeType.hello_verify_request;
-  messageSeq: number;
+  messageSeq?: number;
   static readonly spec = {
     serverVersion: ProtocolVersion,
     cookie: types.buffer(types.uint8),
@@ -18,7 +18,7 @@ export class ServerHelloVerifyRequest {
   ) {}
 
   static createEmpty() {
-    return new ServerHelloVerifyRequest(undefined, undefined);
+    return new ServerHelloVerifyRequest(undefined as any, undefined as any);
   }
 
   static deSerialize(buf: Buffer) {

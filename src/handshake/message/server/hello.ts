@@ -6,7 +6,7 @@ import { Random, ProtocolVersion } from "../../binary";
 
 export class ServerHello {
   msgType = HandshakeType.server_hello;
-  messageSeq: number;
+  messageSeq?: number;
   static readonly spec = {
     serverVersion: ProtocolVersion,
     random: Random,
@@ -26,12 +26,12 @@ export class ServerHello {
 
   static createEmpty() {
     return new ServerHello(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any
     );
   }
 

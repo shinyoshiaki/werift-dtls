@@ -7,7 +7,7 @@ import { ASN11Cert } from "../binary";
 
 export class Certificate {
   msgType = HandshakeType.certificate;
-  messageSeq: number;
+  messageSeq?: number;
   static readonly spec = {
     certificateList: types.array(ASN11Cert, types.uint24be, "bytes"),
   };
@@ -15,7 +15,7 @@ export class Certificate {
   constructor(public certificateList: Buffer[]) {}
 
   static createEmpty() {
-    return new Certificate(undefined);
+    return new Certificate(undefined as any);
   }
 
   static deSerialize(buf: Buffer) {

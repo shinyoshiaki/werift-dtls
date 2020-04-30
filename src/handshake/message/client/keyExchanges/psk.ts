@@ -8,7 +8,7 @@ export class ClientKeyExchangePsk {
   constructor(public pskIdentity: Buffer) {}
 
   static createEmpty() {
-    return new ClientKeyExchangePsk(undefined);
+    return new ClientKeyExchangePsk(undefined as any);
   }
 
   static deSerialize(buf: Buffer) {
