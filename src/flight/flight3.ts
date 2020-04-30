@@ -17,7 +17,6 @@ export const flight3 = (
 ): Promise<[ServerHello, ServerHelloDone]> => {
   const hello = flight.lastFlight[0] as ClientHello;
   hello.cookie = verifyReq.cookie;
-  hello.messageSeq = 0;
   const packets = createPackets(flight, record)([hello]);
   const mergedPackets = Buffer.concat(packets);
   udp.socket.send(mergedPackets, udp.rinfo.port, udp.rinfo.address);
