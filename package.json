@@ -1,18 +1,17 @@
 {
-  "name": "node-dtls-client",
-  "version": "0.6.0",
+  "name": "my-dtls",
+  "version": "0.0.1",
   "description": "DTLS protocol implementation for Node.js written in TypeScript.",
-  "homepage": "https://github.com/AlCalzone/node-dtls-client",
+  "homepage": "https://github.com/shinyoshiaki/my-dtls",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlCalzone/node-dtls-client.git"
+    "url": "git+https://github.com/shinyoshiaki/my-dtls.git"
   },
   "license": "MIT",
   "author": {
-    "name": "AlCalzone",
-    "email": "d.griesel@gmx.net"
+    "name": "shinyoshiaki"
   },
-  "main": "./build/index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "build": "tsc",
     "ci": "yarn type && yarn lint && yarn test",
@@ -76,7 +75,7 @@
     "yargs": "^15.0.1"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=10"
   },
   "readme": "README.md"
 }
