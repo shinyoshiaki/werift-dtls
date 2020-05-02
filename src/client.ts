@@ -10,9 +10,9 @@ import { ServerHello } from "./handshake/message/server/hello";
 import { ServerHelloDone } from "./handshake/message/server/helloDone";
 import { HandshakeType } from "./handshake/const";
 import { Certificate } from "./handshake/message/certificate";
-import { KeyExchange } from "./handshake/message/keyExchange";
 import { flight5 } from "./flight/flight5";
 import { FragmentedHandshake } from "./record/message/fragment";
+import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
 
 export type Options = RemoteInfo;
 
@@ -77,7 +77,7 @@ export class DtlsClient {
               case HandshakeType.certificate:
                 return Certificate.deSerialize(handshake.fragment);
               case HandshakeType.server_key_exchange:
-                return KeyExchange.deSerialize(handshake.fragment);
+                return ServerKeyExchange.deSerialize(handshake.fragment);
               case HandshakeType.server_hello_done:
                 return ServerHelloDone.deSerialize(handshake.fragment);
             }

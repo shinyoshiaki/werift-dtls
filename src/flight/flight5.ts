@@ -1,12 +1,12 @@
 import { ServerHello } from "../handshake/message/server/hello";
 import { Certificate } from "../handshake/message/certificate";
-import { KeyExchange } from "../handshake/message/keyExchange";
 import { ServerHelloDone } from "../handshake/message/server/helloDone";
 import { HandshakeType } from "../handshake/const";
 import { ClientContext } from "../context/client";
+import { ServerKeyExchange } from "../handshake/message/server/keyExchange";
 
 export const flight5 = (client: ClientContext) => (
-  messages: (ServerHello | Certificate | KeyExchange | ServerHelloDone)[]
+  messages: (ServerHello | Certificate | ServerKeyExchange | ServerHelloDone)[]
 ) => {
   messages.forEach((message) => {
     handlers[message.msgType](client)(message);
@@ -31,5 +31,5 @@ handlers[HandshakeType.certificate] = (client: ClientContext) => (
 };
 
 handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
-  message: KeyExchange
+  message: ServerKeyExchange
 ) => {};
