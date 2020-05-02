@@ -4,6 +4,8 @@ import { createPackets } from "../record/builder";
 import { UdpContext } from "../context/udp";
 import { ClientContext } from "../context/client";
 import { RecordContext } from "../context/record";
+import { EllipticCurves } from "../handshake/extensions/ellipticCurves";
+import { Signature } from "../handshake/extensions/signature";
 
 export const flight1 = async (
   udp: UdpContext,
@@ -19,6 +21,19 @@ export const flight1 = async (
     [0],
     [{ type: 23, data: Buffer.from([]) }]
   );
+
+  hello.extensions = [];
+  const curve = EllipticCurves.createEmpty();
+  curve.data = [4, 29, 23];
+  hello.extensions.push(curve.extension);
+  const signature = Signature.createEmpty();
+  signature.data = [
+    { hash: 4, signature: 3 },
+    { hash: 5, signature: 3 },
+    { hash: 6, signature: 3 },
+  ];
+  hello.extensions.push(signature.extension);
+
   const packets = createPackets(flight, record)([hello]);
   const buf = Buffer.concat(packets);
   udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);

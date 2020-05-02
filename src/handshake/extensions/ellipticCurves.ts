@@ -3,14 +3,15 @@ import { encode, types, decode } from "binary-data";
 export class EllipticCurves {
   static readonly spec = {
     type: types.uint16be,
-    ellipticCurves: types.array(types.uint16be, types.uint16be, "bytes"),
+    data: types.array(types.uint16be, types.uint16be, "bytes"),
   };
 
-  constructor(public type: number, public ellipticCurves: any[]) {}
+  constructor(public type: number, public data: number[]) {
+    this.type = 10;
+  }
 
   static createEmpty() {
     const v = new EllipticCurves(undefined as any, undefined as any);
-    v.type = 10;
     return v;
   }
 
@@ -24,5 +25,11 @@ export class EllipticCurves {
   serialize() {
     const res = encode(this, EllipticCurves.spec).slice();
     return Buffer.from(res);
+  }
+  get extension() {
+    return {
+      type: this.type,
+      data: encode(this.data, EllipticCurves.spec.data).slice(),
+    };
   }
 }
