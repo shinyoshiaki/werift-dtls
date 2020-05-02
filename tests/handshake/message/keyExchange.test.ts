@@ -1,5 +1,5 @@
-import { KeyExchange } from "../../../../src/handshake/message/keyExchange";
-test("handshake_message_client_keyExchange", () => {
+import { KeyExchange } from "../../../src/handshake/message/keyExchange";
+test("handshake_message_keyExchange", () => {
   const raw = Buffer.from([
     0x20,
     0x26,

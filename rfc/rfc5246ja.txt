@@ -1607,139 +1607,200 @@ A.3. 警告メッセージ
 
 struct {AlertLevel level; AlertDescriptionの説明. }アラート. 
 
-A.4. ハンドシェイクプロトコル
-
-列挙型{hello_request（0）、client_hello（1）、server_hello（2）、certificate（11）、server_key_exchange（12）、certificate_request（13）、server_hello_done（14）、certificate_verify（15）、client_key_exchange（16）、finished（20 ）（255）} HandshakeType; 
-
-struct {HandshakeType msg_type; uint24の長さ. select（HandshakeType）{case hello_request：HelloRequest; ケースclient_hello：ClientHello; case server_hello：ServerHello; ケース証明書：証明書; ケースserver_key_exchange：ServerKeyExchange; case certificate_request：CertificateRequest; case server_hello_done：ServerHelloDone; case certificate_verify：CertificateVerify; ケースclient_key_exchange：ClientKeyExchange; ケース終了：終了. } 体; }ハンドシェイク. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-A.4.1. こんにちはメッセージ
-
-struct {} HelloRequest; 
-
-struct {uint32 gmt_unix_time; 不透明なrandom_bytes [28]; }ランダム. 
-
-不透明なSessionID <0..32>; 
-
-uint8 CipherSuite [2]; 
-
-列挙型{null（0）、（255）} CompressionMethod; 
-
-struct {ProtocolVersion client_version; ランダムランダム; SessionID session_id; CipherSuite cipher_suites <2..2 ^ 16-2>; CompressionMethod compression_methods <1..2 ^ 8-1>; select（extensions_present）{case false：struct {}; trueの場合：Extension extensions <0..2 ^ 16-1>; }; } ClientHello;
-
-struct {ProtocolVersion server_version; ランダムランダム; SessionID session_id; CipherSuite cipher_suite; CompressionMethod compression_method; select（extensions_present）{case false：struct {}; trueの場合：Extension extensions <0..2 ^ 16-1>; }; } ServerHello;
-
-struct {ExtensionType extension_type; 不透明なextension_data <0..2 ^ 16-1>; }拡張. 
-
-列挙型{signature_algorithms（13）、（65535）} ExtensionType; 
-
-enum {none（0）、md5（1）、sha1（2）、sha224（3）、sha256（4）、sha384（5）、sha512（6）、（255）} HashAlgorithm; 列挙型{anonymous（0）、rsa（1）、dsa（2）、ecdsa（3）、（255）} SignatureAlgorithm;
-
-struct {HashAlgorithmハッシュ; SignatureAlgorithm署名. } SignatureAndHashAlgorithm;
-
-SignatureAndHashAlgorithm supported_signature_algorithms <2..2 ^ 16-1>; 
-
-A.4.2. サーバー認証と主要交換メッセージ
-
-不透明なASN.1Cert <2 ^ 24-1>; 
-
-struct {ASN.1Cert certificate_list <0..2 ^ 24-1>; }証明書;
-
-enum {dhe_dss、dhe_rsa、dh_anon、rsa、dh_dss、dh_rsa / * ECDHの場合など、拡張できます-[TLSECC]を参照してください* /} KeyExchangeAlgorithm; 
-
-struct {opaque dh_p <1..2 ^ 16-1>; 不透明dh_g <1..2 ^ 16-1>; 不透明dh_Ys <1..2 ^ 16-1>; } ServerDHParams; / *エフェメラルDHパラメータ* /
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-struct {select（KeyExchangeAlgorithm）{case dh_anon：ServerDHParams params; case dhe_dss：case dhe_rsa：ServerDHParams params; デジタル署名された構造体{不透明なclient_random [32]; 不透明なserver_random [32]; ServerDHParams params; } signed_pa​​rams; ケースrsa：ケースdh_dss：ケースdh_rsa：構造体{}; / * rsa、dh_dss、およびdh_rsaの場合はメッセージが省略されます* / / * ECDHなどの場合は拡張される可能性があります-[TLSECC]を参照してください* /} ServerKeyExchange;
-
-列挙型{rsa_sign（1）、dss_sign（2）、rsa_fixed_dh（3）、dss_fixed_dh（4）、rsa_ephemeral_dh_RESERVED（5）、dss_ephemeral_dh_RESERVED（6）、fortezza_dms_RESERVED（20）、（255）、（255） 
-
-不透明なDistinguishedName <1..2 ^ 16-1>; 
-
-struct {ClientCertificateType certificate_types <1..2 ^ 8-1>; DistinguishedName certificate_authorities <0..2 ^ 16-1>; } CertificateRequest;
-
-struct {} ServerHelloDone; 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-A.4.3. クライアント認証と主要交換メッセージ
-
-struct {select（KeyExchangeAlgorithm）{case rsa：EncryptedPreMasterSecret; ケースdhe_dss：ケースdhe_rsa：ケースdh_dss：ケースdh_rsa：ケースdh_anon：ClientDiffieHellmanPublic; } exchange_keys; } ClientKeyExchange;
-
-struct {ProtocolVersion client_version; 不透明なランダム[46]; } PreMasterSecret;
-
-struct {public-key-encrypted PreMasterSecret pre_master_secret; } EncryptedPreMasterSecret;
-
-列挙型{暗黙的、明示的} PublicValueEncoding; 
-
-struct {select（PublicValueEncoding）{暗黙の場合：struct {}; 明示的なケース：不透明なDH_Yc <1..2 ^ 16-1>; } dh_public; } ClientDiffieHellmanPublic;
-
-構造体{デジタル署名された構造体{不透明なhandshake_messages [handshake_messages_length]; }} CertificateVerify;
+A.4.  Handshake Protocol
+
+   enum {
+       hello_request(0), client_hello(1), server_hello(2),
+       certificate(11), server_key_exchange (12),
+       certificate_request(13), server_hello_done(14),
+       certificate_verify(15), client_key_exchange(16),
+       finished(20)
+       (255)
+   } HandshakeType;
+
+   struct {
+       HandshakeType msg_type;
+       uint24 length;
+       select (HandshakeType) {
+           case hello_request:       HelloRequest;
+           case client_hello:        ClientHello;
+           case server_hello:        ServerHello;
+           case certificate:         Certificate;
+           case server_key_exchange: ServerKeyExchange;
+           case certificate_request: CertificateRequest;
+           case server_hello_done:   ServerHelloDone;
+           case certificate_verify:  CertificateVerify;
+           case client_key_exchange: ClientKeyExchange;
+           case finished:            Finished;
+       } body;
+   } Handshake;
+
+A.4.1.  Hello Messages
+
+   struct { } HelloRequest;
+
+   struct {
+       uint32 gmt_unix_time;
+       opaque random_bytes[28];
+   } Random;
+
+   opaque SessionID<0..32>;
+
+   uint8 CipherSuite[2];
+
+   enum { null(0), (255) } CompressionMethod;
+
+   struct {
+       ProtocolVersion client_version;
+       Random random;
+       SessionID session_id;
+       CipherSuite cipher_suites<2..2^16-2>;
+       CompressionMethod compression_methods<1..2^8-1>;
+       select (extensions_present) {
+           case false:
+               struct {};
+           case true:
+               Extension extensions<0..2^16-1>;
+       };
+   } ClientHello;
+
+   struct {
+       ProtocolVersion server_version;
+       Random random;
+       SessionID session_id;
+       CipherSuite cipher_suite;
+       CompressionMethod compression_method;
+       select (extensions_present) {
+           case false:
+               struct {};
+           case true:
+               Extension extensions<0..2^16-1>;
+       };
+   } ServerHello;
+
+   struct {
+       ExtensionType extension_type;
+       opaque extension_data<0..2^16-1>;
+   } Extension;
+
+   enum {
+       signature_algorithms(13), (65535)
+   } ExtensionType;
+
+   enum{
+       none(0), md5(1), sha1(2), sha224(3), sha256(4), sha384(5),
+       sha512(6), (255)
+   } HashAlgorithm;
+   enum {
+      anonymous(0), rsa(1), dsa(2), ecdsa(3), (255)
+   } SignatureAlgorithm;
+
+   struct {
+         HashAlgorithm hash;
+         SignatureAlgorithm signature;
+   } SignatureAndHashAlgorithm;
+
+   SignatureAndHashAlgorithm
+    supported_signature_algorithms<2..2^16-1>;
+
+A.4.2.  Server Authentication and Key Exchange Messages
+
+   opaque ASN.1Cert<2^24-1>;
+
+   struct {
+       ASN.1Cert certificate_list<0..2^24-1>;
+   } Certificate;
+
+   enum { dhe_dss, dhe_rsa, dh_anon, rsa,dh_dss, dh_rsa
+          /* may be extended, e.g., for ECDH -- see [TLSECC] */
+        } KeyExchangeAlgorithm;
+
+   struct {
+       opaque dh_p<1..2^16-1>;
+       opaque dh_g<1..2^16-1>;
+       opaque dh_Ys<1..2^16-1>;
+   } ServerDHParams;     /* Ephemeral DH parameters */
+
+   struct {
+       select (KeyExchangeAlgorithm) {
+           case dh_anon:
+               ServerDHParams params;
+           case dhe_dss:
+           case dhe_rsa:
+               ServerDHParams params;
+               digitally-signed struct {
+                   opaque client_random[32];
+                   opaque server_random[32];
+                   ServerDHParams params;
+               } signed_params;
+           case rsa:
+           case dh_dss:
+           case dh_rsa:
+               struct {} ;
+              /* message is omitted for rsa, dh_dss, and dh_rsa */
+           /* may be extended, e.g., for ECDH -- see [TLSECC] */
+   } ServerKeyExchange;
+
+   enum {
+       rsa_sign(1), dss_sign(2), rsa_fixed_dh(3), dss_fixed_dh(4),
+       rsa_ephemeral_dh_RESERVED(5), dss_ephemeral_dh_RESERVED(6),
+       fortezza_dms_RESERVED(20),
+       (255)
+   } ClientCertificateType;
+
+   opaque DistinguishedName<1..2^16-1>;
+
+   struct {
+       ClientCertificateType certificate_types<1..2^8-1>;
+       DistinguishedName certificate_authorities<0..2^16-1>;
+   } CertificateRequest;
+
+   struct { } ServerHelloDone;
+
+A.4.3.  Client Authentication and Key Exchange Messages
+
+   struct {
+       select (KeyExchangeAlgorithm) {
+           case rsa:
+               EncryptedPreMasterSecret;
+           case dhe_dss:
+           case dhe_rsa:
+           case dh_dss:
+           case dh_rsa:
+           case dh_anon:
+               ClientDiffieHellmanPublic;
+       } exchange_keys;
+   } ClientKeyExchange;
+
+   struct {
+       ProtocolVersion client_version;
+       opaque random[46];
+   } PreMasterSecret;
+
+   struct {
+       public-key-encrypted PreMasterSecret pre_master_secret;
+   } EncryptedPreMasterSecret;
+
+   enum { implicit, explicit } PublicValueEncoding;
+
+   struct {
+       select (PublicValueEncoding) {
+           case implicit: struct {};
+           case explicit: opaque DH_Yc<1..2^16-1>;
+       } dh_public;
+   } ClientDiffieHellmanPublic;
+
+   struct {
+        digitally-signed struct {
+            opaque handshake_messages[handshake_messages_length];
+        }
+   } CertificateVerify;
 
 A.4.4. ハンドシェイク終了メッセージ
 
-struct {不透明なverify_data [verify_data_length]; }終了しました. 
-
-
-
-
-
-
+   struct {
+       opaque verify_data[verify_data_length];
+   } Finished;
 
 A.5.  The Cipher Suite
 
