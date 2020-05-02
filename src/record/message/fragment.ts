@@ -7,7 +7,7 @@ export class FragmentedHandshake {
     message_seq: types.uint16be,
     fragment_offset: types.uint24be,
     fragment_length: types.uint24be,
-    fragment: types.buffer((context: any) => context.current.length),
+    fragment: types.buffer((context: any) => context.current.fragment_length),
   };
 
   constructor(

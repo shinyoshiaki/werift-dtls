@@ -1,6 +1,5 @@
 import { DtlsPlaintext } from "./message/plaintext";
 import { FragmentedHandshake } from "./message/fragment";
-import { Certificate } from "../handshake/message/certificate";
 
 export const receive = (data: Buffer) => {
   let start = 0;
@@ -16,12 +15,7 @@ export const receive = (data: Buffer) => {
   }
 
   const handshakes = packets.map((p) => {
-    switch (p.fragment[0]) {
-      case 11:
-        return FragmentedHandshake.deSerialize(p.fragment);
-      default:
-        return FragmentedHandshake.deSerialize(p.fragment);
-    }
+    return FragmentedHandshake.deSerialize(p.fragment);
   });
   return handshakes;
 };
