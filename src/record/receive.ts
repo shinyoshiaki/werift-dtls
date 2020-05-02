@@ -1,7 +1,7 @@
 import { DtlsPlaintext } from "./message/plaintext";
 import { FragmentedHandshake } from "./message/fragment";
 
-export const receive = (data: Buffer) => {
+export const parsePacket = (data: Buffer) => {
   let start = 0;
   const packets = [];
   while (data.length > start) {

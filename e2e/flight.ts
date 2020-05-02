@@ -9,34 +9,17 @@ const args = [
   "./assets/key.pem",
   "-dtls1_2",
   "-accept",
-  "127.0.0.1:5685",
-  "-debug",
-  "-msg",
-];
-
-const args2 = [
-  "s_server",
-  "-psk",
-  "58394c53744f5065595433555a753577",
-  "-dtls1_2",
-  "-accept",
-  "127.0.0.1:5685",
-  "-debug",
-  "-msg",
+  "127.0.0.1:4444",
   "-state",
-  "-cipher",
-  "PSK-AES128-CCM8",
-  "-nocert",
-  "-no_ticket",
 ];
 
-// const server = spawn("openssl", args);
-// server.stdout.setEncoding("ascii");
-// server.stdout.on("data", (data: string) => {
-//   if (data.includes("### node->openssl")) {
-//     server.stdin.write("### openssl->node\n");
-//   }
-// });
+const server = spawn("openssl", args);
+server.stdout.setEncoding("ascii");
+server.stdout.on("data", (data: string) => {
+  if (data.includes("### node->openssl")) {
+    server.stdin.write("### openssl->node\n");
+  }
+});
 
 setTimeout(() => {
   const client = new DtlsClient({ address: "127.0.0.1", port: 4444 });
