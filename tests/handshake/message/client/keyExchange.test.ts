@@ -1,4 +1,4 @@
-import { ClientKeyExchange } from "../../../../src/handshake/message/client/keyExchange";
+import { KeyExchange } from "../../../../src/handshake/message/keyExchange";
 test("handshake_message_client_keyExchange", () => {
   const raw = Buffer.from([
     0x20,
@@ -35,6 +35,6 @@ test("handshake_message_client_keyExchange", () => {
     0xff,
     0x54,
   ]);
-  const c = ClientKeyExchange.deSerialize(raw);
+  const c = KeyExchange.deSerialize(raw);
   expect(raw).toEqual(c.serialize());
 });

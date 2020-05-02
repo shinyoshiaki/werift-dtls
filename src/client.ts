@@ -12,6 +12,7 @@ import { HandshakeType } from "./handshake/const";
 import { Certificate } from "./handshake/message/certificate";
 import { KeyExchange } from "./handshake/message/keyExchange";
 import { flight5 } from "./flight/flight5";
+import { ServerContext } from "./context/server";
 
 export type Options = RemoteInfo;
 
@@ -19,6 +20,7 @@ export class DtlsClient {
   udp = new UdpContext(createSocket("udp4"), this.options);
   client = new ClientContext();
   record = new RecordContext();
+  server = new ServerContext();
   constructor(private options: Partial<Options> = {}) {
     this.udp.socket.on("message", this.udpOnMessage);
     this.udpOnListening();
@@ -53,7 +55,7 @@ export class DtlsClient {
                 return ServerHelloDone.deSerialize(handshake.fragment);
             }
           });
-          flight5(messages);
+          flight5(this.server)(messages);
         }
         break;
     }

@@ -16,8 +16,8 @@ export class ServerHello {
   };
 
   constructor(
-    public serverVersion: { major: number; minor: number },
-    public random: { gmt_unix_time: number; random_bytes: Buffer },
+    public serverVersion: Version,
+    public random: Random,
     public sessionId: Buffer,
     public cipherSuite: number,
     public compressionMethod: number,
