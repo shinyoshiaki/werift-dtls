@@ -82,7 +82,10 @@ export class DtlsClient {
                 return ServerHelloDone.deSerialize(handshake.fragment);
             }
           });
-          flight5(this.client)(messages);
+
+          this.client.bufferHandshake(messages);
+
+          flight5(this.udp, this.client, this.record)(messages);
         }
         break;
     }

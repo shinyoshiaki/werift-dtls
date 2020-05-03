@@ -6,7 +6,9 @@ import { ClientContext } from "../context/client";
 import { RecordContext } from "../context/record";
 import { EllipticCurves } from "../handshake/extensions/ellipticCurves";
 import { Signature } from "../handshake/extensions/signature";
-import { NamedCurve } from "../cipher/namedCurve";
+import { NamedCurveAlgorithm } from "../cipher/namedCurve";
+import { Algorithm } from "../cipher/hash";
+import { SignatureAlgorithm } from "../cipher/signature";
 
 export const flight1 = async (
   udp: UdpContext,
@@ -25,13 +27,11 @@ export const flight1 = async (
 
   hello.extensions = [];
   const curve = EllipticCurves.createEmpty();
-  curve.data = [NamedCurve.namedCurveP256];
+  curve.data = [NamedCurveAlgorithm.namedCurveP256];
   hello.extensions.push(curve.extension);
   const signature = Signature.createEmpty();
   signature.data = [
-    { hash: 4, signature: 3 },
-    { hash: 5, signature: 3 },
-    { hash: 6, signature: 3 },
+    { hash: Algorithm.sha256, signature: SignatureAlgorithm.ecdsa },
   ];
   hello.extensions.push(signature.extension);
 

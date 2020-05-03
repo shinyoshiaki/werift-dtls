@@ -2,10 +2,11 @@ import { encode, types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
 import { ProtocolVersion } from "../../binary";
 import { DtlsRandom } from "../../random";
+import { Version, Random, Handshake } from "../../../typings/domain";
 
 // 7.4.1.3.  Server Hello
 
-export class ServerHello {
+export class ServerHello implements Handshake {
   msgType = HandshakeType.server_hello;
   messageSeq?: number;
   static readonly spec = {

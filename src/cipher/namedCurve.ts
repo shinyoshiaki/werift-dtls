@@ -2,7 +2,7 @@ import { generateKeyPairSync } from "crypto";
 import { ec } from "elliptic";
 const elliptic = new ec("secp256k1");
 
-export enum NamedCurve {
+export enum NamedCurveAlgorithm {
   namedCurveP256 = 23,
   namedCurveX25519 = 29,
 }
@@ -17,7 +17,7 @@ export function generateKeyPair(
   namedCurve: number
 ): NamedCurveKeyPair | undefined {
   switch (namedCurve) {
-    case NamedCurve.namedCurveP256:
+    case NamedCurveAlgorithm.namedCurveP256:
       const key = elliptic.genKeyPair();
       const pub = key.getPublic();
       const byteLen = (256 + 7) >> 3;

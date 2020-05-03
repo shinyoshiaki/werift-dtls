@@ -1,7 +1,8 @@
 import { encode, types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
+import { Handshake } from "../../../typings/domain";
 
-export class ClientKeyExchange {
+export class ClientKeyExchange implements Handshake {
   msgType = HandshakeType.client_key_exchange;
 
   static readonly spec = {
