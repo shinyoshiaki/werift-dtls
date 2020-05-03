@@ -7,4 +7,9 @@ export class ClientContext {
   random?: Random;
   cipherSuite?: number;
   remoteCertificate?: Buffer;
+  remoteKeyPair?: Partial<{
+    publicKey: Buffer;
+    privateKey: Buffer;
+    curve: number;
+  }>;
 }

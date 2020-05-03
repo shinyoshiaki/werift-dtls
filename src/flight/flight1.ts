@@ -1,5 +1,5 @@
 import { ClientHello } from "../handshake/message/client/hello";
-import { dtlsRandom } from "../handshake/random";
+import { DtlsRandom } from "../handshake/random";
 import { createPackets } from "../record/builder";
 import { UdpContext } from "../context/udp";
 import { ClientContext } from "../context/client";
@@ -14,7 +14,7 @@ export const flight1 = async (
 ) => {
   const hello = new ClientHello(
     { major: 255 - 1, minor: 255 - 2 },
-    dtlsRandom(),
+    new DtlsRandom(),
     Buffer.from([]),
     Buffer.from([]),
     [0xc02b, 0xc0ae, 0xc02b, 0xc02f, 0xc00a, 0xc014, 0xc0a4, 0xc0a8, 0x00a8],

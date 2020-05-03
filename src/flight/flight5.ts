@@ -32,4 +32,9 @@ handlers[HandshakeType.certificate] = (client: ClientContext) => (
 
 handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
   message: ServerKeyExchange
-) => {};
+) => {
+  client.remoteKeyPair = {
+    curve: message.namedCurve,
+    publicKey: message.publicKey,
+  };
+};

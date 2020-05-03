@@ -1,6 +1,7 @@
 import { encode, types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
-import { Random, ProtocolVersion } from "../../binary";
+import { ProtocolVersion } from "../../binary";
+import { DtlsRandom } from "../../random";
 
 // 7.4.1.3.  Server Hello
 
@@ -9,7 +10,7 @@ export class ServerHello {
   messageSeq?: number;
   static readonly spec = {
     serverVersion: ProtocolVersion,
-    random: Random,
+    random: DtlsRandom.spec,
     sessionId: types.buffer(types.uint8),
     cipherSuite: types.uint16be,
     compressionMethod: types.uint8,

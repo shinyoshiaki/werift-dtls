@@ -1,13 +1,14 @@
 import { encode, types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
-import { Random, ExtensionList } from "../../binary";
+import { ExtensionList } from "../../binary";
 import { FragmentedHandshake } from "../../../record/message/fragment";
+import { DtlsRandom } from "../../random";
 
 // 7.4.1.2.  Client Hello
 
 export const clientHelloSpec = {
   clientVersion: { major: types.uint8, minor: types.uint8 },
-  random: Random,
+  random: DtlsRandom.spec,
   sessionId: types.buffer(types.uint8),
   cookie: types.buffer(types.uint8),
   cipherSuites: types.array(types.uint16be, types.uint16be, "bytes"),
