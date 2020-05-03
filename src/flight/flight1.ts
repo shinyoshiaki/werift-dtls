@@ -27,11 +27,16 @@ export const flight1 = async (
 
   hello.extensions = [];
   const curve = EllipticCurves.createEmpty();
-  curve.data = [NamedCurveAlgorithm.namedCurveP256];
+  curve.data = [
+    NamedCurveAlgorithm.namedCurveX25519,
+    NamedCurveAlgorithm.namedCurveP256,
+  ];
   hello.extensions.push(curve.extension);
   const signature = Signature.createEmpty();
   signature.data = [
     { hash: Algorithm.sha256, signature: SignatureAlgorithm.ecdsa },
+    // { hash: 5, signature: SignatureAlgorithm.ecdsa },
+    // { hash: 6, signature: SignatureAlgorithm.ecdsa },
   ];
   hello.extensions.push(signature.extension);
 

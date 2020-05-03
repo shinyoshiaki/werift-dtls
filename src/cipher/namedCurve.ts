@@ -1,5 +1,6 @@
 import { generateKeyPairSync } from "crypto";
 import { ec } from "elliptic";
+import * as nacl from "tweetnacl";
 const elliptic = new ec("secp256k1");
 
 export enum NamedCurveAlgorithm {
@@ -17,7 +18,7 @@ export function generateKeyPair(
   namedCurve: number
 ): NamedCurveKeyPair | undefined {
   switch (namedCurve) {
-    case NamedCurveAlgorithm.namedCurveP256:
+    case NamedCurveAlgorithm.namedCurveP256: {
       const key = elliptic.genKeyPair();
       const pub = key.getPublic();
       const byteLen = (256 + 7) >> 3;
@@ -41,5 +42,15 @@ export function generateKeyPair(
         privateKey,
         publicKey,
       };
+    }
+    case NamedCurveAlgorithm.namedCurveX25519: {
+      const keys = nacl.box.keyPair();
+
+      return {
+        curve: namedCurve,
+        privateKey: Buffer.from(keys.secretKey.buffer),
+        publicKey: Buffer.from(keys.publicKey.buffer),
+      };
+    }
   }
 }

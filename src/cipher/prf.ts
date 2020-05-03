@@ -1,5 +1,6 @@
 import { NamedCurveAlgorithm } from "./namedCurve";
 import { ec } from "elliptic";
+import * as nacl from "tweetnacl";
 const elliptic = new ec("secp256k1");
 
 export function prfPreMasterSecret(
@@ -14,5 +15,8 @@ export function prfPreMasterSecret(
       const y = pub.getY();
 
       return;
+
+    case NamedCurveAlgorithm.namedCurveX25519:
+      return Buffer.from(nacl.scalarMult(privateKey, publicKey));
   }
 }
