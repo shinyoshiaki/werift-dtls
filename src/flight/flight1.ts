@@ -6,6 +6,7 @@ import { ClientContext } from "../context/client";
 import { RecordContext } from "../context/record";
 import { EllipticCurves } from "../handshake/extensions/ellipticCurves";
 import { Signature } from "../handshake/extensions/signature";
+import { NamedCurve } from "../cipher/namedCurve";
 
 export const flight1 = async (
   udp: UdpContext,
@@ -24,7 +25,7 @@ export const flight1 = async (
 
   hello.extensions = [];
   const curve = EllipticCurves.createEmpty();
-  curve.data = [4, 29, 23];
+  curve.data = [NamedCurve.namedCurveP256];
   hello.extensions.push(curve.extension);
   const signature = Signature.createEmpty();
   signature.data = [

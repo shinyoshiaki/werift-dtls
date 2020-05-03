@@ -1,4 +1,5 @@
 import { ClientHello } from "../handshake/message/client/hello";
+import { NamedCurveKeyPair } from "../cipher/namedCurve";
 
 export class ClientContext {
   version = { major: 255 - 1, minor: 255 - 2 };
@@ -7,9 +8,6 @@ export class ClientContext {
   random?: Random;
   cipherSuite?: number;
   remoteCertificate?: Buffer;
-  remoteKeyPair?: Partial<{
-    publicKey: Buffer;
-    privateKey: Buffer;
-    curve: number;
-  }>;
+  remoteKeyPair?: Partial<NamedCurveKeyPair>;
+  localKeyPair?: NamedCurveKeyPair;
 }

@@ -3,7 +3,7 @@ import { HandshakeType } from "../../const";
 
 export class ServerKeyExchange {
   msgType = HandshakeType.server_key_exchange;
-  messageSeq?: number;
+
   static readonly spec = {
     ellipticCurveType: types.buffer(2),
     namedCurve: types.uint8,

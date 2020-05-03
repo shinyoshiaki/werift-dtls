@@ -16,5 +16,4 @@ test("handshake_extensions_signature", () => {
   ]);
   const c = Signature.deSerialize(raw);
   expect(raw).toEqual(c.serialize());
-  console.log();
 });
