@@ -1,3 +1,3 @@
-export enum Algorithm {
+export enum HashAlgorithm {
   sha256 = 4,
 }

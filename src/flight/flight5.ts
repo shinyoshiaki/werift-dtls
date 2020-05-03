@@ -69,7 +69,7 @@ handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
     publicKey: message.publicKey,
   };
   client.localKeyPair = generateKeyPair(message.namedCurve);
-  prfPreMasterSecret(
+  const preMasterSecret = prfPreMasterSecret(
     client.remoteKeyPair.publicKey!,
     client.localKeyPair?.privateKey!,
     client.localKeyPair?.curve!

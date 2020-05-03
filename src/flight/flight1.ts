@@ -7,7 +7,7 @@ import { RecordContext } from "../context/record";
 import { EllipticCurves } from "../handshake/extensions/ellipticCurves";
 import { Signature } from "../handshake/extensions/signature";
 import { NamedCurveAlgorithm } from "../cipher/namedCurve";
-import { Algorithm } from "../cipher/hash";
+import { HashAlgorithm } from "../cipher/hash";
 import { SignatureAlgorithm } from "../cipher/signature";
 
 export const flight1 = async (
@@ -34,7 +34,7 @@ export const flight1 = async (
   hello.extensions.push(curve.extension);
   const signature = Signature.createEmpty();
   signature.data = [
-    { hash: Algorithm.sha256, signature: SignatureAlgorithm.ecdsa },
+    { hash: HashAlgorithm.sha256, signature: SignatureAlgorithm.ecdsa },
     // { hash: 5, signature: SignatureAlgorithm.ecdsa },
     // { hash: 6, signature: SignatureAlgorithm.ecdsa },
   ];
