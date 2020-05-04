@@ -1,7 +1,7 @@
 import { NamedCurveAlgorithm } from "./namedCurve";
 import { ec } from "elliptic";
 import * as nacl from "tweetnacl";
-import { createHmac } from "crypto";
+import { createHmac, createHash } from "crypto";
 const elliptic = new ec("secp256k1");
 
 export function prfPreMasterSecret(
@@ -55,4 +55,25 @@ export function prfMasterSecret(
     serverRandom,
   ]);
   return prfPHash(preMasterSecret, seed, 48);
+}
+
+function hash(algorithm: string, data: Buffer) {
+  return createHash(algorithm).update(data).digest();
+}
+
+function prfVerifyData(
+  masterSecret: Buffer,
+  handshakes: Buffer,
+  label: string
+) {
+  const bytes = hash("sha256", handshakes);
+  return prfPHash(masterSecret, Buffer.concat([Buffer.from(label), bytes]), 12);
+}
+
+export function prfVerifyDataClient(masterSecret: Buffer, handshakes: Buffer) {
+  return prfVerifyData(masterSecret, handshakes, "client finished");
+}
+
+export function prfVerifyDataServer(masterSecret: Buffer, handshakes: Buffer) {
+  return prfVerifyData(masterSecret, handshakes, "server finished");
 }

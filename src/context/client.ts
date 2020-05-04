@@ -1,18 +1,21 @@
 import { ClientHello } from "../handshake/message/client/hello";
 import { NamedCurveKeyPair } from "../cipher/namedCurve";
-import { Random, Handshake } from "../typings/domain";
+import { Handshake } from "../typings/domain";
 import { HandshakeType } from "../handshake/const";
+import { DtlsRandom } from "../handshake/random";
 
 export class ClientContext {
   version = { major: 255 - 1, minor: 255 - 2 };
   lastFlight: Handshake[] = [];
   lastSentSeqNum = -1;
   handshakeCache: Buffer[] = [];
-  random?: Random;
+  localRandom?: DtlsRandom;
+  remoteRandom?: DtlsRandom;
   cipherSuite?: number;
   remoteCertificate?: Buffer;
   remoteKeyPair?: Partial<NamedCurveKeyPair>;
   localKeyPair?: NamedCurveKeyPair;
+  masterSecret?: Buffer;
 
   bufferHandshake(handshakes: Handshake[]) {
     const buffers = handshakes

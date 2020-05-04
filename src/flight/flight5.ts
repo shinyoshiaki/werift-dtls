@@ -5,13 +5,14 @@ import { HandshakeType } from "../handshake/const";
 import { ClientContext } from "../context/client";
 import { ServerKeyExchange } from "../handshake/message/server/keyExchange";
 import { generateKeyPair } from "../cipher/namedCurve";
-import { prfPreMasterSecret } from "../cipher/prf";
+import { prfPreMasterSecret, prfMasterSecret } from "../cipher/prf";
 import { ClientKeyExchange } from "../handshake/message/client/keyExchange";
 import { ChangeCipherSpec } from "../handshake/message/changeCipherSpec";
 import { Finished } from "../handshake/message/finished";
 import { createPackets } from "../record/builder";
 import { RecordContext } from "../context/record";
 import { UdpContext } from "../context/udp";
+import { DtlsRandom } from "../handshake/random";
 
 export const flight5 = (
   udp: UdpContext,
@@ -51,7 +52,7 @@ const handlers: {
 handlers[HandshakeType.server_hello] = (client: ClientContext) => (
   message: ServerHello
 ) => {
-  client.random = message.random;
+  client.remoteRandom = DtlsRandom.from(message.random);
   client.cipherSuite = message.cipherSuite;
 };
 
@@ -73,6 +74,11 @@ handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
     client.remoteKeyPair.publicKey!,
     client.localKeyPair?.privateKey!,
     client.localKeyPair?.curve!
+  )!;
+  client.masterSecret = prfMasterSecret(
+    preMasterSecret,
+    client.localRandom?.serialize()!,
+    client.remoteRandom?.serialize()!
   );
   console.log();
 };

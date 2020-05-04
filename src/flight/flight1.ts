@@ -12,7 +12,7 @@ import { SignatureAlgorithm } from "../cipher/signature";
 
 export const flight1 = async (
   udp: UdpContext,
-  flight: ClientContext,
+  client: ClientContext,
   record: RecordContext
 ) => {
   const hello = new ClientHello(
@@ -40,8 +40,10 @@ export const flight1 = async (
   ];
   hello.extensions.push(signature.extension);
 
-  const packets = createPackets(flight, record)([hello]);
+  const packets = createPackets(client, record)([hello]);
   const buf = Buffer.concat(packets);
   udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
-  flight.version = hello.clientVersion;
+
+  client.version = hello.clientVersion;
+  client.localRandom = DtlsRandom.from(hello.random);
 };
