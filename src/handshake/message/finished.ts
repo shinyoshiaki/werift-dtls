@@ -1,4 +1,3 @@
-import { encode, types, decode } from "binary-data";
 import { Handshake } from "../../typings/domain";
 import { HandshakeType } from "../const";
 import { FragmentedHandshake } from "../../record/message/fragment";
@@ -8,9 +7,6 @@ import { FragmentedHandshake } from "../../record/message/fragment";
 export class Finished implements Handshake {
   msgType = HandshakeType.finished;
   messageSeq?: number;
-  static readonly spec = {
-    verifyData: types.buffer(types.uint16be),
-  };
 
   constructor(public verifyData: Buffer) {}
 
@@ -19,15 +15,11 @@ export class Finished implements Handshake {
   }
 
   static deSerialize(buf: Buffer) {
-    return new Finished(
-      //@ts-ignore
-      ...Object.values(decode(buf, Finished.spec))
-    );
+    return new Finished(buf);
   }
 
   serialize() {
-    const res = encode(this, Finished.spec).slice();
-    return Buffer.from(res);
+    return this.verifyData;
   }
 
   toFragment() {

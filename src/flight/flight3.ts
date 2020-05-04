@@ -13,10 +13,9 @@ export const flight3 = (
   const hello = client.lastFlight[0] as ClientHello;
   hello.cookie = verifyReq.cookie;
 
-  client.bufferHandshake([hello]);
-
   const fragments = createFragments(client)([hello]);
   const packets = createPackets(client, record)(fragments);
   const buf = Buffer.concat(packets);
-  udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
+  client.bufferHandshake([hello]);
+  udp.send(buf);
 };

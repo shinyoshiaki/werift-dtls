@@ -17,7 +17,6 @@ import { createFragments, createPackets } from "../record/builder";
 import { RecordContext } from "../context/record";
 import { UdpContext } from "../context/udp";
 import { DtlsRandom } from "../handshake/random";
-import { DtlsPlaintext } from "../record/message/plaintext";
 import { ContentType } from "../record/const";
 
 export const flight5 = (
@@ -31,13 +30,26 @@ export const flight5 = (
     handlers[message.msgType](client)(message);
   });
 
-  const handshakes = [];
   const clientKeyExchange = new ClientKeyExchange(
     client.localKeyPair?.publicKey!
   );
-  handshakes.push(clientKeyExchange);
+  {
+    const fragments = createFragments(client)([clientKeyExchange]);
+    const packets = createPackets(client, record)(fragments);
+    const buf = Buffer.concat(packets);
+    client.bufferHandshake([clientKeyExchange]);
+    udp.send(buf);
+  }
 
-  client.bufferHandshake([clientKeyExchange]);
+  const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
+  {
+    const packets = createPackets(
+      client,
+      record
+    )([{ type: ContentType.changeCipherSpec, fragment: changeCipherSpec }]);
+    const buf = Buffer.concat(packets);
+    udp.send(buf);
+  }
 
   const localVerifyData = prfVerifyDataClient(
     client.masterSecret!,
@@ -45,21 +57,12 @@ export const flight5 = (
   );
 
   const finish = new Finished(localVerifyData);
-  handshakes.push(finish);
-
-  const fragments = createFragments(client)(handshakes);
-
-  const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
-
-  fragments.splice(fragments.length - 1, 0, {
-    type: ContentType.changeCipherSpec,
-    fragment: changeCipherSpec,
-  });
-
+  const fragments = createFragments(client)([finish]);
   const packets = createPackets(client, record)(fragments);
-
   const buf = Buffer.concat(packets);
-  udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
+  // todo encrypt
+  client.bufferHandshake([clientKeyExchange]);
+  udp.send(buf);
 };
 
 const handlers: {
@@ -99,6 +102,4 @@ handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
   );
 };
 
-handlers[HandshakeType.server_hello_done] = (client: ClientContext) => () => {
-  client.sequenceNumber++;
-};
+handlers[HandshakeType.server_hello_done] = (client: ClientContext) => () => {};

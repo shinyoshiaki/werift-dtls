@@ -7,7 +7,7 @@ import { DtlsRandom } from "../handshake/random";
 export class ClientContext {
   version = { major: 255 - 1, minor: 255 - 2 };
   lastFlight: Handshake[] = [];
-  sequenceNumber = -1;
+  sequenceNumber = 0;
   handshakeCache: Buffer[] = [];
   localRandom?: DtlsRandom;
   remoteRandom?: DtlsRandom;

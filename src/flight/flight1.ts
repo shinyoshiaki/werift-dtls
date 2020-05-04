@@ -9,6 +9,7 @@ import { Signature } from "../handshake/extensions/signature";
 import { NamedCurveAlgorithm } from "../cipher/namedCurve";
 import { HashAlgorithm } from "../cipher/hash";
 import { SignatureAlgorithm } from "../cipher/signature";
+import { CipherSuite } from "../cipher/cipherSuite";
 
 export const flight1 = async (
   udp: UdpContext,
@@ -20,7 +21,7 @@ export const flight1 = async (
     new DtlsRandom(),
     Buffer.from([]),
     Buffer.from([]),
-    [0xc02b, 0xc0ae, 0xc02b, 0xc02f, 0xc00a, 0xc014, 0xc0a4, 0xc0a8, 0x00a8],
+    [CipherSuite.EcdheEcdsaWithAes128GcmSha256],
     [0],
     [{ type: 23, data: Buffer.from([]) }]
   );

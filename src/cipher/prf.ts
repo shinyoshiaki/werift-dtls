@@ -77,3 +77,50 @@ export function prfVerifyDataClient(masterSecret: Buffer, handshakes: Buffer) {
 export function prfVerifyDataServer(masterSecret: Buffer, handshakes: Buffer) {
   return prfVerifyData(masterSecret, handshakes, "server finished");
 }
+
+export function prfEncryptionKeys(
+  masterSecret: Buffer,
+  clientRandom: Buffer,
+  serverRandom: Buffer,
+  prfMacLen: number,
+  prfKeyLen: number,
+  prfIvLen: number
+) {
+  const seed = Buffer.concat([
+    Buffer.from("key expansion"),
+    serverRandom,
+    clientRandom,
+  ]);
+  let keyMaterial = prfPHash(
+    masterSecret,
+    seed,
+    2 * prfMacLen + 2 * prfKeyLen + 2 * prfIvLen
+  );
+
+  const clientMACKey = keyMaterial.slice(0, prfMacLen);
+  keyMaterial = keyMaterial.slice(prfMacLen);
+
+  const serverMACKey = keyMaterial.slice(0, prfMacLen);
+  keyMaterial = keyMaterial.slice(prfMacLen);
+
+  const clientWriteKey = keyMaterial.slice(0, prfKeyLen);
+  keyMaterial = keyMaterial.slice(prfKeyLen);
+
+  const serverWriteKey = keyMaterial.slice(0, prfKeyLen);
+  keyMaterial = keyMaterial.slice(prfKeyLen);
+
+  const clientWriteIV = keyMaterial.slice(0, prfIvLen);
+  keyMaterial = keyMaterial.slice(prfIvLen);
+
+  const serverWriteIV = keyMaterial.slice(0, prfIvLen);
+
+  return {
+    masterSecret,
+    clientMACKey,
+    serverMACKey,
+    clientWriteKey,
+    serverWriteKey,
+    clientWriteIV,
+    serverWriteIV,
+  };
+}

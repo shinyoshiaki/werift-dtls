@@ -13,7 +13,7 @@ export const createFragments = (client: ClientContext) => (
 
   return handshakes
     .map((handshake) => {
-      handshake.messageSeq = ++client.sequenceNumber;
+      handshake.messageSeq = client.sequenceNumber++;
       const fragment = handshake.toFragment();
       const fragments = fragment.chunk().map((f) => ({
         type: ContentType.handshake,
