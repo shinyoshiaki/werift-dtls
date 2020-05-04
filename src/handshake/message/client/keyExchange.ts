@@ -1,9 +1,11 @@
 import { encode, types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
 import { Handshake } from "../../../typings/domain";
+import { FragmentedHandshake } from "../../../record/message/fragment";
 
 export class ClientKeyExchange implements Handshake {
   msgType = HandshakeType.client_key_exchange;
+  messageSeq?: number;
 
   static readonly spec = {
     publicKey: types.buffer(types.uint8),
@@ -26,5 +28,17 @@ export class ClientKeyExchange implements Handshake {
   serialize() {
     const res = encode(this, ClientKeyExchange.spec).slice();
     return Buffer.from(res);
+  }
+
+  toFragment() {
+    const body = this.serialize();
+    return new FragmentedHandshake(
+      this.msgType,
+      body.length,
+      this.messageSeq!,
+      0,
+      body.length,
+      body
+    );
   }
 }

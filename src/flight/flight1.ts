@@ -1,6 +1,6 @@
 import { ClientHello } from "../handshake/message/client/hello";
 import { DtlsRandom } from "../handshake/random";
-import { createPackets } from "../record/builder";
+import { createFragments, createPackets } from "../record/builder";
 import { UdpContext } from "../context/udp";
 import { ClientContext } from "../context/client";
 import { RecordContext } from "../context/record";
@@ -40,7 +40,8 @@ export const flight1 = async (
   ];
   hello.extensions.push(signature.extension);
 
-  const packets = createPackets(client, record)([hello]);
+  const fragments = createFragments(client)([hello]);
+  const packets = createPackets(client, record)(fragments);
   const buf = Buffer.concat(packets);
   udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
 

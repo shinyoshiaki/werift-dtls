@@ -13,15 +13,14 @@ const args = [
   "-state",
 ];
 
-const server = spawn("openssl", args);
-server.stdout.setEncoding("ascii");
-server.stdout.on("data", (data: string) => {
-  if (data.includes("### node->openssl")) {
-    server.stdin.write("### openssl->node\n");
-  }
-});
+// const server = spawn("openssl", args);
+// server.stdout.setEncoding("ascii");
+// server.stdout.on("data", (data: string) => {
+//   if (data.includes("### node->openssl")) {
+//     server.stdin.write("### openssl->node\n");
+//   }
+// });
 
 setTimeout(() => {
-  const client = new DtlsClient({ address: "127.0.0.1", port: 4444 });
-  console.log(client);
+  new DtlsClient({ address: "127.0.0.1", port: 4444 });
 }, 100);

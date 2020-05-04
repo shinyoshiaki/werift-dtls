@@ -5,14 +5,20 @@ import { HandshakeType } from "../handshake/const";
 import { ClientContext } from "../context/client";
 import { ServerKeyExchange } from "../handshake/message/server/keyExchange";
 import { generateKeyPair } from "../cipher/namedCurve";
-import { prfPreMasterSecret, prfMasterSecret } from "../cipher/prf";
+import {
+  prfPreMasterSecret,
+  prfMasterSecret,
+  prfVerifyDataClient,
+} from "../cipher/prf";
 import { ClientKeyExchange } from "../handshake/message/client/keyExchange";
 import { ChangeCipherSpec } from "../handshake/message/changeCipherSpec";
 import { Finished } from "../handshake/message/finished";
-import { createPackets } from "../record/builder";
+import { createFragments, createPackets } from "../record/builder";
 import { RecordContext } from "../context/record";
 import { UdpContext } from "../context/udp";
 import { DtlsRandom } from "../handshake/random";
+import { DtlsPlaintext } from "../record/message/plaintext";
+import { ContentType } from "../record/const";
 
 export const flight5 = (
   udp: UdpContext,
@@ -33,14 +39,25 @@ export const flight5 = (
 
   client.bufferHandshake([clientKeyExchange]);
 
-  const changeCipherSpec = ChangeCipherSpec.createEmpty();
-  handshakes.push(changeCipherSpec);
+  const localVerifyData = prfVerifyDataClient(
+    client.masterSecret!,
+    Buffer.concat(client.handshakeCache)
+  );
 
-  client.handshakeCache;
+  const finish = new Finished(localVerifyData);
+  handshakes.push(finish);
 
-  // const finish = new Finished();
+  const fragments = createFragments(client)(handshakes);
 
-  const packets = createPackets(client, record)(handshakes as any);
+  const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
+
+  fragments.splice(fragments.length - 1, 0, {
+    type: ContentType.changeCipherSpec,
+    fragment: changeCipherSpec,
+  });
+
+  const packets = createPackets(client, record)(fragments);
+
   const buf = Buffer.concat(packets);
   udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
 };
@@ -80,9 +97,8 @@ handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
     client.localRandom?.serialize()!,
     client.remoteRandom?.serialize()!
   );
-  console.log();
 };
 
 handlers[HandshakeType.server_hello_done] = (client: ClientContext) => () => {
-  client.lastSentSeqNum++;
+  client.sequenceNumber++;
 };

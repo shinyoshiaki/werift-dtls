@@ -3,6 +3,7 @@ import { HandshakeType } from "../../const";
 import { ProtocolVersion } from "../../binary";
 import { DtlsRandom } from "../../random";
 import { Version, Random, Handshake } from "../../../typings/domain";
+import { FragmentedHandshake } from "../../../record/message/fragment";
 
 // 7.4.1.3.  Server Hello
 
@@ -67,5 +68,17 @@ export class ServerHello implements Handshake {
       extensions: types.buffer(types.uint16be),
     }).slice();
     return Buffer.from(res);
+  }
+
+  toFragment() {
+    const body = this.serialize();
+    return new FragmentedHandshake(
+      this.msgType,
+      body.length,
+      this.messageSeq!,
+      0,
+      body.length,
+      body
+    );
   }
 }

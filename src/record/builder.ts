@@ -1,26 +1,32 @@
-import { ClientHello } from "../handshake/message/client/hello";
-import { contentType } from "./const";
+import { ContentType } from "./const";
 import { DtlsPlaintext } from "./message/plaintext";
 import { ClientContext } from "../context/client";
 import { RecordContext } from "../context/record";
+import { Handshake } from "../typings/domain";
 
-export const createPackets = (client: ClientContext, record: RecordContext) => (
-  handshakes: ClientHello[]
+type Fragment = { type: number; fragment: Buffer };
+
+export const createFragments = (client: ClientContext) => (
+  handshakes: Handshake[]
 ) => {
   client.lastFlight = handshakes;
 
-  const fragments = handshakes
+  return handshakes
     .map((handshake) => {
-      handshake.messageSeq = ++client.lastSentSeqNum;
+      handshake.messageSeq = ++client.sequenceNumber;
       const fragment = handshake.toFragment();
       const fragments = fragment.chunk().map((f) => ({
-        type: contentType.handshake,
+        type: ContentType.handshake,
         fragment: f.serialize(),
       }));
       return fragments;
     })
     .flatMap((v) => v);
+};
 
+export const createPackets = (client: ClientContext, record: RecordContext) => (
+  fragments: Fragment[]
+) => {
   return fragments.map((msg) => {
     const packet = new DtlsPlaintext(
       {

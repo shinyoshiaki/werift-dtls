@@ -2,7 +2,7 @@ import { UdpContext } from "../context/udp";
 import { ClientContext } from "../context/client";
 import { ClientHello } from "../handshake/message/client/hello";
 import { ServerHelloVerifyRequest } from "../handshake/message/server/helloVerifyRequest";
-import { createPackets } from "../record/builder";
+import { createFragments, createPackets } from "../record/builder";
 import { RecordContext } from "../context/record";
 
 export const flight3 = (
@@ -15,7 +15,8 @@ export const flight3 = (
 
   client.bufferHandshake([hello]);
 
-  const packets = createPackets(client, record)([hello]);
+  const fragments = createFragments(client)([hello]);
+  const packets = createPackets(client, record)(fragments);
   const buf = Buffer.concat(packets);
   udp.socket.send(buf, udp.rinfo.port, udp.rinfo.address);
 };
