@@ -1,7 +1,6 @@
 import { createSocket, RemoteInfo } from "dgram";
 import { flight1 } from "./flight/flight1";
 import { ClientContext } from "./context/client";
-import { RecordContext } from "./context/record";
 import { UdpContext } from "./context/udp";
 import { parsePacket } from "./record/receive";
 import { ServerHelloVerifyRequest } from "./handshake/message/server/helloVerifyRequest";
@@ -13,6 +12,7 @@ import { Certificate } from "./handshake/message/certificate";
 import { flight5 } from "./flight/flight5";
 import { FragmentedHandshake } from "./record/message/fragment";
 import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
+import { RecordContext } from "./context/record";
 
 export type Options = RemoteInfo;
 
@@ -83,7 +83,7 @@ export class DtlsClient {
             }
           });
 
-          this.client.bufferHandshake(messages);
+          this.client.bufferHandshake(messages, false, 4);
 
           flight5(this.udp, this.client, this.record)(messages);
         }

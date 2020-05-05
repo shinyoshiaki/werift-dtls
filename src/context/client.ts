@@ -3,12 +3,15 @@ import { NamedCurveKeyPair } from "../cipher/namedCurve";
 import { Handshake } from "../typings/domain";
 import { HandshakeType } from "../handshake/const";
 import { DtlsRandom } from "../handshake/random";
+import { EcdheEcdsaWithAes128GcmSha256 } from "../cipher/suite/ecdsaWithAes128GcmSha256";
 
 export class ClientContext {
   version = { major: 255 - 1, minor: 255 - 2 };
   lastFlight: Handshake[] = [];
   sequenceNumber = 0;
-  handshakeCache: Buffer[] = [];
+  epoch = 0;
+  flight = 0;
+  handshakeCache: { isLocal: boolean; data: Buffer; flight: number }[] = [];
   localRandom?: DtlsRandom;
   remoteRandom?: DtlsRandom;
   cipherSuite?: number;
@@ -16,8 +19,9 @@ export class ClientContext {
   remoteKeyPair?: Partial<NamedCurveKeyPair>;
   localKeyPair?: NamedCurveKeyPair;
   masterSecret?: Buffer;
+  cipher?: EcdheEcdsaWithAes128GcmSha256;
 
-  bufferHandshake(handshakes: Handshake[]) {
+  bufferHandshake(handshakes: Handshake[], isLocal: boolean, flight: number) {
     const buffers = handshakes
       .filter((message) => {
         switch (message.msgType) {
@@ -33,6 +37,9 @@ export class ClientContext {
         }
       })
       .map((handshake) => handshake.serialize());
-    this.handshakeCache = [...this.handshakeCache, ...buffers];
+    this.handshakeCache = [
+      ...this.handshakeCache,
+      ...buffers.map((data) => ({ isLocal, data, flight })),
+    ];
   }
 }

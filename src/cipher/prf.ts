@@ -22,7 +22,7 @@ export function prfPreMasterSecret(
   }
 }
 
-function hmac(algorithm: string, secret: Buffer, data: Buffer) {
+export function hmac(algorithm: string, secret: Buffer, data: Buffer) {
   const hash = createHmac(algorithm, secret);
   hash.update(data);
   return hash.digest();
@@ -61,13 +61,18 @@ function hash(algorithm: string, data: Buffer) {
   return createHash(algorithm).update(data).digest();
 }
 
-function prfVerifyData(
+export function prfVerifyData(
   masterSecret: Buffer,
   handshakes: Buffer,
-  label: string
+  label: string,
+  size = 12
 ) {
   const bytes = hash("sha256", handshakes);
-  return prfPHash(masterSecret, Buffer.concat([Buffer.from(label), bytes]), 12);
+  return prfPHash(
+    masterSecret,
+    Buffer.concat([Buffer.from(label), bytes]),
+    size
+  );
 }
 
 export function prfVerifyDataClient(masterSecret: Buffer, handshakes: Buffer) {

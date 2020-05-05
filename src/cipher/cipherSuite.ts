@@ -4,5 +4,5 @@ export function cipherSuiteForID(id: number) {
 }
 
 export enum CipherSuite {
-  EcdheEcdsaWithAes128GcmSha256 = 0xc02b,
+  EcdheEcdsaWithAes128GcmSha256 = 0xc02b, //49195
 }

@@ -1,5 +1,5 @@
 import { encode, types, decode } from "binary-data";
-import { DtlsPlaintextHeader } from "./header";
+import { MACHeader, DtlsPlaintextHeader } from "./header";
 
 export class DtlsPlaintext {
   static readonly spec = {
@@ -29,5 +29,15 @@ export class DtlsPlaintext {
   serialize() {
     const res = encode(this, DtlsPlaintext.spec).slice();
     return Buffer.from(res);
+  }
+
+  computeMACHeader() {
+    return new MACHeader(
+      this.recordLayerHeader.epoch,
+      this.recordLayerHeader.sequenceNumber,
+      this.recordLayerHeader.contentType,
+      this.recordLayerHeader.protocolVersion,
+      this.recordLayerHeader.contentLen
+    ).serialize();
   }
 }

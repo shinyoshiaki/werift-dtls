@@ -2,7 +2,7 @@ import { UdpContext } from "../context/udp";
 import { ClientContext } from "../context/client";
 import { ClientHello } from "../handshake/message/client/hello";
 import { ServerHelloVerifyRequest } from "../handshake/message/server/helloVerifyRequest";
-import { createFragments, createPackets } from "../record/builder";
+import { createFragments, createPlaintext } from "../record/builder";
 import { RecordContext } from "../context/record";
 
 export const flight3 = (
@@ -12,10 +12,9 @@ export const flight3 = (
 ) => async (verifyReq: ServerHelloVerifyRequest) => {
   const hello = client.lastFlight[0] as ClientHello;
   hello.cookie = verifyReq.cookie;
-
   const fragments = createFragments(client)([hello]);
-  const packets = createPackets(client, record)(fragments);
-  const buf = Buffer.concat(packets);
-  client.bufferHandshake([hello]);
+  const packets = createPlaintext(client, record)(fragments);
+  const buf = Buffer.concat(packets.map((v) => v.serialize()));
+  client.bufferHandshake([hello], true, 3);
   udp.send(buf);
 };

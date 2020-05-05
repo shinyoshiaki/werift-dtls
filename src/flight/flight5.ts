@@ -13,11 +13,12 @@ import {
 import { ClientKeyExchange } from "../handshake/message/client/keyExchange";
 import { ChangeCipherSpec } from "../handshake/message/changeCipherSpec";
 import { Finished } from "../handshake/message/finished";
-import { createFragments, createPackets } from "../record/builder";
+import { createFragments, createPlaintext } from "../record/builder";
 import { RecordContext } from "../context/record";
 import { UdpContext } from "../context/udp";
 import { DtlsRandom } from "../handshake/random";
 import { ContentType } from "../record/const";
+import { EcdheEcdsaWithAes128GcmSha256 } from "../cipher/suite/ecdsaWithAes128GcmSha256";
 
 export const flight5 = (
   udp: UdpContext,
@@ -35,34 +36,43 @@ export const flight5 = (
   );
   {
     const fragments = createFragments(client)([clientKeyExchange]);
-    const packets = createPackets(client, record)(fragments);
-    const buf = Buffer.concat(packets);
-    client.bufferHandshake([clientKeyExchange]);
+    const packets = createPlaintext(client, record)(fragments);
+    const buf = Buffer.concat(packets.map((v) => v.serialize()));
+    client.bufferHandshake([clientKeyExchange], true, 5);
     udp.send(buf);
   }
 
   const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
   {
-    const packets = createPackets(
+    const packets = createPlaintext(
       client,
       record
     )([{ type: ContentType.changeCipherSpec, fragment: changeCipherSpec }]);
-    const buf = Buffer.concat(packets);
+    const buf = Buffer.concat(packets.map((v) => v.serialize()));
     udp.send(buf);
   }
 
-  const localVerifyData = prfVerifyDataClient(
-    client.masterSecret!,
-    Buffer.concat(client.handshakeCache)
-  );
-
+  const cache = Buffer.concat(client.handshakeCache.map((v) => v.data));
+  const localVerifyData = prfVerifyDataClient(client.masterSecret!, cache);
   const finish = new Finished(localVerifyData);
   const fragments = createFragments(client)([finish]);
-  const packets = createPackets(client, record)(fragments);
-  const buf = Buffer.concat(packets);
-  // todo encrypt
-  client.bufferHandshake([clientKeyExchange]);
+  client.epoch = 1;
+  record.recordSequenceNumber = 0;
+  const packets = createPlaintext(client, record)(fragments);
+  const buf = Buffer.concat(
+    packets.map((pkt) => {
+      let raw = pkt.serialize();
+      raw = client.cipher?.cryptoGCM?.encrypt(
+        raw,
+        pkt.recordLayerHeader as any,
+        true
+      )!;
+      return raw;
+    })
+  );
   udp.send(buf);
+
+  client.flight = 5;
 };
 
 const handlers: {
@@ -100,6 +110,18 @@ handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
     client.localRandom?.serialize()!,
     client.remoteRandom?.serialize()!
   );
+
+  client.cipher = new EcdheEcdsaWithAes128GcmSha256();
+  client.cipher.init(
+    client.masterSecret,
+    client.localRandom?.serialize()!,
+    client.remoteRandom?.serialize()!,
+    true
+  );
 };
 
-handlers[HandshakeType.server_hello_done] = (client: ClientContext) => () => {};
+handlers[HandshakeType.server_hello_done] = (client: ClientContext) => (
+  message: ServerHelloDone
+) => {
+  message.messageSeq;
+};

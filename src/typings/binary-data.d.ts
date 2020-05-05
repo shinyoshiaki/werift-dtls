@@ -18,5 +18,8 @@ declare module "binary-data" {
   type Decode = <T extends any>(buf: Buffer, spec: object) => T;
   declare const decode: Decode;
 
-  export { types, encode, decode };
+  type CreateDecode = (buf: Buffer) => any;
+  declare const createDecode: CreateDecode;
+
+  export { types, encode, decode, createDecode };
 }

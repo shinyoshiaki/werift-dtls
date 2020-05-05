@@ -24,21 +24,21 @@ export const createFragments = (client: ClientContext) => (
     .flatMap((v) => v);
 };
 
-export const createPackets = (client: ClientContext, record: RecordContext) => (
-  fragments: Fragment[]
-) => {
+export const createPlaintext = (
+  client: ClientContext,
+  record: RecordContext
+) => (fragments: Fragment[]) => {
   return fragments.map((msg) => {
-    const packet = new DtlsPlaintext(
+    const plaintext = new DtlsPlaintext(
       {
         contentType: msg.type,
         protocolVersion: client.version,
-        epoch: 0,
+        epoch: client.epoch,
         sequenceNumber: record.recordSequenceNumber++,
         contentLen: msg.fragment.length,
       },
       msg.fragment
     );
-    const buf = packet.serialize();
-    return buf;
+    return plaintext;
   });
 };

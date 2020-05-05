@@ -6,20 +6,18 @@ import { DtlsRandom } from "../../random";
 
 // 7.4.1.2.  Client Hello
 
-export const clientHelloSpec = {
-  clientVersion: { major: types.uint8, minor: types.uint8 },
-  random: DtlsRandom.spec,
-  sessionId: types.buffer(types.uint8),
-  cookie: types.buffer(types.uint8),
-  cipherSuites: types.array(types.uint16be, types.uint16be, "bytes"),
-  compressionMethods: types.array(types.uint8, types.uint8, "bytes"),
-  extensions: ExtensionList,
-};
-
 export class ClientHello {
   msgType = HandshakeType.client_hello;
   messageSeq: number = 0;
-  static readonly spec = clientHelloSpec;
+  static readonly spec = {
+    clientVersion: { major: types.uint8, minor: types.uint8 },
+    random: DtlsRandom.spec,
+    sessionId: types.buffer(types.uint8),
+    cookie: types.buffer(types.uint8),
+    cipherSuites: types.array(types.uint16be, types.uint16be, "bytes"),
+    compressionMethods: types.array(types.uint8, types.uint8, "bytes"),
+    extensions: ExtensionList,
+  };
 
   constructor(
     public clientVersion: { major: number; minor: number },
