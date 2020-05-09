@@ -15,10 +15,10 @@ import { UdpContext } from "../context/udp";
 import { DtlsRandom } from "../handshake/random";
 import { ContentType } from "../record/const";
 import { createCipher } from "../cipher/cipher/create";
-import { CipherSuite } from "../cipher/cipherSuite";
 import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
 import { createHash } from "crypto";
+import { CipherSuite } from "../cipher/const";
 
 export const flight5 = (
   udp: UdpContext,

@@ -1,6 +1,6 @@
-export function cipherSuiteForID(id: number) {
-  switch (id) {
-  }
+export enum SignatureAlgorithm {
+  rsa = 1,
+  ecdsa = 3,
 }
 
 export enum CipherSuite {

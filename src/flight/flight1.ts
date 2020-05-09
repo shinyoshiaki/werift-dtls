@@ -7,9 +7,8 @@ import { EllipticCurves } from "../handshake/extensions/ellipticCurves";
 import { Signature } from "../handshake/extensions/signature";
 import { NamedCurveAlgorithm } from "../cipher/namedCurve";
 import { HashAlgorithm } from "../cipher/hash";
-import { SignatureAlgorithm } from "../cipher/signature";
-import { CipherSuite } from "../cipher/cipherSuite";
 import { RecordContext } from "../context/record";
+import { SignatureAlgorithm, CipherSuite } from "../cipher/const";
 
 export const flight1 = async (
   udp: UdpContext,
