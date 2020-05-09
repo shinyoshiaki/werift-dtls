@@ -37,7 +37,10 @@ export const flight1 = async (
   );
 
   const fragments = createFragments(client)([hello]);
-  const packets = createPlaintext(client, record)(fragments);
+  const packets = createPlaintext(client)(
+    fragments,
+    ++record.recordSequenceNumber
+  );
   const buf = Buffer.concat(packets.map((v) => v.serialize()));
 
   client.version = hello.clientVersion;

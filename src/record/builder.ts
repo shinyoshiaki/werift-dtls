@@ -24,17 +24,17 @@ export const createFragments = (client: ClientContext) => (
     .flatMap((v) => v);
 };
 
-export const createPlaintext = (
-  client: ClientContext,
-  record: RecordContext
-) => (fragments: Fragment[]) => {
+export const createPlaintext = (client: ClientContext) => (
+  fragments: Fragment[],
+  recordSequenceNumber: number
+) => {
   return fragments.map((msg) => {
     const plaintext = new DtlsPlaintext(
       {
         contentType: msg.type,
         protocolVersion: client.version,
         epoch: client.epoch,
-        sequenceNumber: record.recordSequenceNumber++,
+        sequenceNumber: recordSequenceNumber,
         contentLen: msg.fragment.length,
       },
       msg.fragment

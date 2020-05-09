@@ -1,8 +1,11 @@
 import { encode, types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
+import { Handshake } from "../../../typings/domain";
+import { FragmentedHandshake } from "../../../record/message/fragment";
 
-export class ServerKeyExchange {
+export class ServerKeyExchange implements Handshake {
   msgType = HandshakeType.server_key_exchange;
+  messageSeq?: number;
 
   static readonly spec = {
     ellipticCurveType: types.buffer(2),
@@ -50,5 +53,17 @@ export class ServerKeyExchange {
   serialize() {
     const res = encode(this, ServerKeyExchange.spec).slice();
     return Buffer.from(res);
+  }
+
+  toFragment() {
+    const body = this.serialize();
+    return new FragmentedHandshake(
+      this.msgType,
+      body.length,
+      this.messageSeq!,
+      0,
+      body.length,
+      body
+    );
   }
 }

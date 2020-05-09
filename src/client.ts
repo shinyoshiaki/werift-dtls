@@ -13,6 +13,10 @@ import { flight5 } from "./flight/flight5";
 import { FragmentedHandshake } from "./record/message/fragment";
 import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
 import { RecordContext } from "./context/record";
+import { createPlaintext } from "./record/builder";
+import { ContentType } from "./record/const";
+import { ProtocolVersion } from "./handshake/binary";
+import { encode, types, decode } from "binary-data";
 
 export type Options = RemoteInfo;
 
@@ -31,7 +35,7 @@ export class DtlsClient {
 
   private serverHelloBuffer: FragmentedHandshake[] = [];
   private udpOnMessage = (data: Buffer) => {
-    const handshakes = parsePacket(data);
+    const handshakes = parsePacket(this.client)(data);
 
     if (handshakes[0].msg_type === HandshakeType.server_hello) {
       this.serverHelloBuffer = handshakes;
@@ -51,7 +55,7 @@ export class DtlsClient {
         break;
       case HandshakeType.server_hello_done:
         {
-          const handshakes = [
+          const fragments = [
             HandshakeType.server_hello,
             HandshakeType.certificate,
             HandshakeType.server_key_exchange,
@@ -69,8 +73,13 @@ export class DtlsClient {
             })
             .filter((v) => v);
           this.serverHelloBuffer = [];
+          this.client.bufferHandshake(
+            Buffer.concat(fragments.map((v) => v.serialize())),
+            false,
+            4
+          );
 
-          const messages = handshakes.map((handshake, _) => {
+          const messages = fragments.map((handshake, _) => {
             switch (handshake.msg_type) {
               case HandshakeType.server_hello:
                 return ServerHello.deSerialize(handshake.fragment);
@@ -83,11 +92,36 @@ export class DtlsClient {
             }
           });
 
-          this.client.bufferHandshake(messages, false, 4);
-
           flight5(this.udp, this.client, this.record)(messages);
+        }
+        break;
+      case HandshakeType.finished:
+        {
+          console.log("finished");
+          this.send(Buffer.from("hello my-dtls"));
         }
         break;
     }
   };
+
+  send(buf: Buffer) {
+    const pkt = createPlaintext(this.client)(
+      [{ type: ContentType.applicationData, fragment: buf }],
+      ++this.record.recordSequenceNumber
+    )[0];
+    const header = pkt.recordLayerHeader;
+    const raw = this.client.cipher?.encrypt({ type: 1 }, pkt.fragment, {
+      type: header.contentType,
+      version: decode(
+        Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
+        { version: types.uint16be }
+      ).version,
+      epoch: header.epoch,
+      sequenceNumber: header.sequenceNumber,
+    })!;
+    pkt.fragment = raw;
+    pkt.recordLayerHeader.contentLen = raw.length;
+
+    this.udp.send(pkt.serialize());
+  }
 }

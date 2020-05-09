@@ -1,9 +1,7 @@
-import { ClientHello } from "../handshake/message/client/hello";
 import { NamedCurveKeyPair } from "../cipher/namedCurve";
 import { Handshake } from "../typings/domain";
-import { HandshakeType } from "../handshake/const";
 import { DtlsRandom } from "../handshake/random";
-import { EcdheEcdsaWithAes128GcmSha256 } from "../cipher/suite/ecdsaWithAes128GcmSha256";
+import AEADCipher from "../cipher/cipher/aead";
 
 export class ClientContext {
   version = { major: 255 - 1, minor: 255 - 2 };
@@ -19,27 +17,9 @@ export class ClientContext {
   remoteKeyPair?: Partial<NamedCurveKeyPair>;
   localKeyPair?: NamedCurveKeyPair;
   masterSecret?: Buffer;
-  cipher?: EcdheEcdsaWithAes128GcmSha256;
+  cipher?: AEADCipher;
 
-  bufferHandshake(handshakes: Handshake[], isLocal: boolean, flight: number) {
-    const buffers = handshakes
-      .filter((message) => {
-        switch (message.msgType) {
-          case HandshakeType.hello_verify_request:
-            return false;
-          case HandshakeType.hello_request:
-            return false;
-          case HandshakeType.client_hello:
-            const cookie = (message as ClientHello).cookie;
-            return cookie?.length > 0;
-          default:
-            return true;
-        }
-      })
-      .map((handshake) => handshake.serialize());
-    this.handshakeCache = [
-      ...this.handshakeCache,
-      ...buffers.map((data) => ({ isLocal, data, flight })),
-    ];
+  bufferHandshake(data: Buffer, isLocal: boolean, flight: number) {
+    this.handshakeCache = [...this.handshakeCache, { isLocal, data, flight }];
   }
 }

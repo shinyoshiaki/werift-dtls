@@ -9,7 +9,7 @@ const args = [
   "./assets/key.pem",
   "-dtls1_2",
   "-accept",
-  "127.0.0.1:4445",
+  "127.0.0.1:4444",
   "-state",
 ];
 
@@ -22,5 +22,5 @@ const args = [
 // });
 
 setTimeout(() => {
-  new DtlsClient({ address: "127.0.0.1", port: 4445 });
+  new DtlsClient({ address: "127.0.0.1", port: 4444 });
 }, 100);
