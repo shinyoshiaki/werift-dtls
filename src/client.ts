@@ -37,8 +37,24 @@ export class DtlsClient {
 
   private serverHelloBuffer: FragmentedHandshake[] = [];
   private udpOnMessage = (data: Buffer) => {
-    const handshakes = parsePacket(this.client, this.cipher)(data);
+    const messages = parsePacket(this.client, this.cipher)(data);
+    switch (messages[messages.length - 1].type) {
+      case ContentType.handshake:
+        {
+          this.handleHandshakes(
+            messages.map((v) => v.data as FragmentedHandshake).filter((v) => v)
+          );
+        }
+        break;
+      case ContentType.applicationData:
+        {
+          console.log(messages[0].data?.toString());
+        }
+        break;
+    }
+  };
 
+  handleHandshakes(handshakes: FragmentedHandshake[]) {
     if (handshakes[0].msg_type === HandshakeType.server_hello) {
       this.serverHelloBuffer = handshakes;
     }
@@ -81,7 +97,7 @@ export class DtlsClient {
             4
           );
 
-          const messages = fragments.map((handshake, _) => {
+          const messages = fragments.map((handshake) => {
             switch (handshake.msg_type) {
               case HandshakeType.server_hello:
                 return ServerHello.deSerialize(handshake.fragment);
@@ -104,7 +120,7 @@ export class DtlsClient {
         }
         break;
     }
-  };
+  }
 
   send(buf: Buffer) {
     const pkt = createPlaintext(this.client)(

@@ -20,7 +20,8 @@
     "lint": "eslint src/**/*.ts",
     "test": "jest --forceExit",
     "type": "tsc --noEmit -p .",
-    "unused": "organize-imports-cli src/**/*.ts"
+    "unused": "organize-imports-cli src/**/*.ts",
+    "start": "ts-node --files --project tsconfig.json examples/client.ts"
   },
   "jest": {
     "globals": {
