@@ -27,7 +27,7 @@
         "--runInBand",
         "--forceExit",
         "--detectOpenHandles",
-        "-t handshake_message_client_hello"
+        "-t openssl"
       ],
       "windows": {
         "program": "${workspaceRoot}/node_modules/jest/bin/jest.js"

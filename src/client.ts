@@ -21,6 +21,8 @@ import { encode, types, decode } from "binary-data";
 export type Options = RemoteInfo;
 
 export class DtlsClient {
+  onConnect?: () => void;
+
   udp = new UdpContext(createSocket("udp4"), this.options);
   client = new ClientContext();
   record = new RecordContext();
@@ -98,7 +100,7 @@ export class DtlsClient {
       case HandshakeType.finished:
         {
           console.log("finished");
-          this.send(Buffer.from("hello my-dtls"));
+          if (this.onConnect) this.onConnect();
         }
         break;
     }
@@ -123,5 +125,9 @@ export class DtlsClient {
     pkt.recordLayerHeader.contentLen = raw.length;
 
     this.udp.send(pkt.serialize());
+  }
+
+  close() {
+    this.udp.socket.close();
   }
 }
