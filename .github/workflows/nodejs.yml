@@ -16,6 +16,9 @@ jobs:
         node-version: [12.x]
 
     steps:
+      - name: openssl
+        run: |
+          openssl version
       - uses: actions/checkout@v1
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1

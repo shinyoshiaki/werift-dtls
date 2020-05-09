@@ -20,11 +20,11 @@ describe("e2e/client", () => {
     setTimeout(() => {
       const client = new DtlsClient({ address: "127.0.0.1", port: 55555 });
       client.onConnect = () => {
-        client.send(Buffer.from("### node->openssl"));
+        client.send(Buffer.from("my_dtls"));
       };
       server.stdout.on("data", (data: string) => {
-        if (data.includes("### node->openssl")) {
-          expect(data).toBe("### node->openssl");
+        if (data.includes("my_dtls")) {
+          console.log(data);
           done();
           client.close();
         }
