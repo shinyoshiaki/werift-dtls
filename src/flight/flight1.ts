@@ -9,11 +9,13 @@ import { NamedCurveAlgorithm } from "../cipher/namedCurve";
 import { HashAlgorithm } from "../cipher/hash";
 import { RecordContext } from "../context/record";
 import { SignatureAlgorithm, CipherSuite } from "../cipher/const";
+import { CipherContext } from "../context/cipher";
 
 export const flight1 = async (
   udp: UdpContext,
   client: ClientContext,
-  record: RecordContext
+  record: RecordContext,
+  cipher: CipherContext
 ) => {
   const curve = EllipticCurves.createEmpty();
   curve.data = [
@@ -43,7 +45,7 @@ export const flight1 = async (
   const buf = Buffer.concat(packets.map((v) => v.serialize()));
 
   client.version = hello.clientVersion;
-  client.localRandom = DtlsRandom.from(hello.random);
+  cipher.localRandom = DtlsRandom.from(hello.random);
 
   udp.send(buf);
 };

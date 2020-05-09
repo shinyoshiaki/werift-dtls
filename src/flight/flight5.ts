@@ -19,22 +19,24 @@ import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
 import { createHash } from "crypto";
 import { CipherSuite } from "../cipher/const";
+import { CipherContext } from "../context/cipher";
 
 export const flight5 = (
   udp: UdpContext,
   client: ClientContext,
-  record: RecordContext
+  record: RecordContext,
+  cipher: CipherContext
 ) => (
   messages: (ServerHello | Certificate | ServerKeyExchange | ServerHelloDone)[]
 ) => {
   if (client.flight === 5) return;
 
   messages.forEach((message) => {
-    handlers[message.msgType](client)(message);
+    handlers[message.msgType]({ client, cipher })(message);
   });
 
   const clientKeyExchange = new ClientKeyExchange(
-    client.localKeyPair?.publicKey!
+    cipher.localKeyPair?.publicKey!
   );
   {
     const fragments = createFragments(client)([clientKeyExchange]);
@@ -63,11 +65,11 @@ export const flight5 = (
 
   const cache = Buffer.concat(client.handshakeCache.map((v) => v.data));
 
-  const localVerifyData = client.cipher?.prf(
-    client.cipher.verifyDataLength,
-    client.masterSecret!,
+  const localVerifyData = cipher.cipher?.prf(
+    cipher.cipher.verifyDataLength,
+    cipher.masterSecret!,
     "client finished",
-    createHash(client.cipher.hash!).update(cache).digest()
+    createHash(cipher.cipher.hash!).update(cache).digest()
   )!;
   // const localVerifyData = prfVerifyDataClient(client.masterSecret!, cache);
 
@@ -82,7 +84,7 @@ export const flight5 = (
   let raw = pkt.serialize();
 
   const header = pkt.recordLayerHeader;
-  raw = client.cipher?.encrypt({ type: 1 }, pkt.fragment, {
+  raw = cipher.cipher?.encrypt({ type: 1 }, pkt.fragment, {
     type: header.contentType,
     version: decode(
       Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
@@ -100,49 +102,52 @@ export const flight5 = (
 };
 
 const handlers: {
-  [key: number]: (client: ClientContext) => (message: any) => void;
+  [key: number]: (contexts: {
+    client: ClientContext;
+    cipher: CipherContext;
+  }) => (message: any) => void;
 } = {};
 
-handlers[HandshakeType.server_hello] = (client: ClientContext) => (
+handlers[HandshakeType.server_hello] = ({ cipher }) => (
   message: ServerHello
 ) => {
-  client.remoteRandom = DtlsRandom.from(message.random);
-  client.cipherSuite = message.cipherSuite;
+  cipher.remoteRandom = DtlsRandom.from(message.random);
+  cipher.cipherSuite = message.cipherSuite;
 };
 
-handlers[HandshakeType.certificate] = (client: ClientContext) => (
+handlers[HandshakeType.certificate] = ({ cipher }) => (
   message: Certificate
 ) => {
-  client.remoteCertificate = message.certificateList[0];
+  cipher.remoteCertificate = message.certificateList[0];
 };
 
-handlers[HandshakeType.server_key_exchange] = (client: ClientContext) => (
+handlers[HandshakeType.server_key_exchange] = ({ cipher }) => (
   message: ServerKeyExchange
 ) => {
-  client.remoteKeyPair = {
+  cipher.remoteKeyPair = {
     curve: message.namedCurve,
     publicKey: message.publicKey,
   };
-  client.localKeyPair = generateKeyPair(message.namedCurve);
+  cipher.localKeyPair = generateKeyPair(message.namedCurve);
   const preMasterSecret = prfPreMasterSecret(
-    client.remoteKeyPair.publicKey!,
-    client.localKeyPair?.privateKey!,
-    client.localKeyPair?.curve!
+    cipher.remoteKeyPair.publicKey!,
+    cipher.localKeyPair?.privateKey!,
+    cipher.localKeyPair?.curve!
   )!;
-  client.masterSecret = prfMasterSecret(
+  cipher.masterSecret = prfMasterSecret(
     preMasterSecret,
-    client.localRandom?.serialize()!,
-    client.remoteRandom?.serialize()!
+    cipher.localRandom?.serialize()!,
+    cipher.remoteRandom?.serialize()!
   );
 
-  client.cipher = createCipher(CipherSuite.EcdheEcdsaWithAes128GcmSha256)!;
-  client.cipher.init({
-    masterSecret: client.masterSecret!,
-    serverRandom: client.remoteRandom!.serialize(),
-    clientRandom: client.localRandom!.serialize(),
+  cipher.cipher = createCipher(CipherSuite.EcdheEcdsaWithAes128GcmSha256)!;
+  cipher.cipher.init({
+    masterSecret: cipher.masterSecret!,
+    serverRandom: cipher.remoteRandom!.serialize(),
+    clientRandom: cipher.localRandom!.serialize(),
   });
 };
 
-handlers[HandshakeType.server_hello_done] = (client: ClientContext) => (
+handlers[HandshakeType.server_hello_done] = () => (
   message: ServerHelloDone
 ) => {};

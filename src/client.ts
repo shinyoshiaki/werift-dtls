@@ -17,6 +17,7 @@ import { createPlaintext } from "./record/builder";
 import { ContentType } from "./record/const";
 import { ProtocolVersion } from "./handshake/binary";
 import { encode, types, decode } from "binary-data";
+import { CipherContext } from "./context/cipher";
 
 export type Options = RemoteInfo;
 
@@ -26,18 +27,19 @@ export class DtlsClient {
   udp = new UdpContext(createSocket("udp4"), this.options);
   client = new ClientContext();
   record = new RecordContext();
+  cipher = new CipherContext();
   constructor(private options: Partial<Options> = {}) {
     this.udp.socket.on("message", this.udpOnMessage);
     this.udpOnListening();
   }
 
   private udpOnListening = () => {
-    flight1(this.udp, this.client, this.record);
+    flight1(this.udp, this.client, this.record, this.cipher);
   };
 
   private serverHelloBuffer: FragmentedHandshake[] = [];
   private udpOnMessage = (data: Buffer) => {
-    const handshakes = parsePacket(this.client)(data);
+    const handshakes = parsePacket(this.client, this.cipher)(data);
 
     if (handshakes[0].msg_type === HandshakeType.server_hello) {
       this.serverHelloBuffer = handshakes;
@@ -94,7 +96,7 @@ export class DtlsClient {
             }
           });
 
-          flight5(this.udp, this.client, this.record)(messages);
+          flight5(this.udp, this.client, this.record, this.cipher)(messages);
         }
         break;
       case HandshakeType.finished:
@@ -112,7 +114,7 @@ export class DtlsClient {
       ++this.record.recordSequenceNumber
     )[0];
     const header = pkt.recordLayerHeader;
-    const raw = this.client.cipher?.encrypt({ type: 1 }, pkt.fragment, {
+    const raw = this.cipher.cipher?.encrypt({ type: 1 }, pkt.fragment, {
       type: header.contentType,
       version: decode(
         Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),

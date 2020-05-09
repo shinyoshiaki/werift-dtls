@@ -19,7 +19,7 @@
     "format": "prettier --write src/**/*.ts",
     "lint": "eslint src/**/*.ts",
     "test": "jest --forceExit",
-    "type": "tsc --noEmit",
+    "type": "tsc --noEmit -p .",
     "unused": "organize-imports-cli src/**/*.ts"
   },
   "jest": {

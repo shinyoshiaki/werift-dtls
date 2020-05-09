@@ -4,8 +4,11 @@ import { ClientContext } from "../context/client";
 
 import { encode, decode, types } from "binary-data";
 import { ProtocolVersion } from "../handshake/binary";
+import { CipherContext } from "../context/cipher";
 
-export const parsePacket = (client: ClientContext) => (data: Buffer) => {
+export const parsePacket = (client: ClientContext, cipher: CipherContext) => (
+  data: Buffer
+) => {
   let start = 0;
   const packets = [];
   while (data.length > start) {
@@ -25,7 +28,7 @@ export const parsePacket = (client: ClientContext) => (data: Buffer) => {
       let raw = p.fragment;
       if (client.flight === 5) {
         const header = p.recordLayerHeader;
-        raw = client.cipher?.decrypt({ type: 1 }, p.fragment, {
+        raw = cipher.cipher?.decrypt({ type: 1 }, p.fragment, {
           type: header.contentType,
           version: decode(
             Buffer.from(
