@@ -15,8 +15,6 @@ import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
 import { RecordContext } from "./context/record";
 import { createPlaintext } from "./record/builder";
 import { ContentType } from "./record/const";
-import { ProtocolVersion } from "./handshake/binary";
-import { encode, types, decode } from "binary-data";
 import { CipherContext } from "./context/cipher";
 
 export type Options = RemoteInfo;
@@ -113,20 +111,7 @@ export class DtlsClient {
       [{ type: ContentType.applicationData, fragment: buf }],
       ++this.record.recordSequenceNumber
     )[0];
-    const header = pkt.recordLayerHeader;
-    const raw = this.cipher.cipher?.encrypt({ type: 1 }, pkt.fragment, {
-      type: header.contentType,
-      version: decode(
-        Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
-        { version: types.uint16be }
-      ).version,
-      epoch: header.epoch,
-      sequenceNumber: header.sequenceNumber,
-    })!;
-    pkt.fragment = raw;
-    pkt.recordLayerHeader.contentLen = raw.length;
-
-    this.udp.send(pkt.serialize());
+    this.udp.send(this.cipher.encryptPacket(pkt).serialize());
   }
 
   close() {

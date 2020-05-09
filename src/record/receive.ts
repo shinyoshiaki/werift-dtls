@@ -1,9 +1,6 @@
 import { DtlsPlaintext } from "./message/plaintext";
 import { FragmentedHandshake } from "./message/fragment";
 import { ClientContext } from "../context/client";
-
-import { encode, decode, types } from "binary-data";
-import { ProtocolVersion } from "../handshake/binary";
 import { CipherContext } from "../context/cipher";
 
 export const parsePacket = (client: ClientContext, cipher: CipherContext) => (
@@ -27,18 +24,7 @@ export const parsePacket = (client: ClientContext, cipher: CipherContext) => (
         return (undefined as any) as FragmentedHandshake;
       let raw = p.fragment;
       if (client.flight === 5) {
-        const header = p.recordLayerHeader;
-        raw = cipher.cipher?.decrypt({ type: 1 }, p.fragment, {
-          type: header.contentType,
-          version: decode(
-            Buffer.from(
-              encode(header.protocolVersion, ProtocolVersion).slice()
-            ),
-            { version: types.uint16be }
-          ).version,
-          epoch: header.epoch,
-          sequenceNumber: header.sequenceNumber,
-        })!;
+        raw = cipher.decryptPacket(p);
       }
       return FragmentedHandshake.deSerialize(raw);
     })

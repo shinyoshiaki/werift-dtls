@@ -15,9 +15,6 @@ import { UdpContext } from "../context/udp";
 import { DtlsRandom } from "../handshake/random";
 import { ContentType } from "../record/const";
 import { createCipher } from "../cipher/cipher/create";
-import { ProtocolVersion } from "../handshake/binary";
-import { encode, decode, types } from "binary-data";
-import { createHash } from "crypto";
 import { CipherSuite } from "../cipher/const";
 import { CipherContext } from "../context/cipher";
 
@@ -65,14 +62,7 @@ export const flight5 = (
 
   const cache = Buffer.concat(client.handshakeCache.map((v) => v.data));
 
-  const localVerifyData = cipher.cipher?.prf(
-    cipher.cipher.verifyDataLength,
-    cipher.masterSecret!,
-    "client finished",
-    createHash(cipher.cipher.hash!).update(cache).digest()
-  )!;
-  // const localVerifyData = prfVerifyDataClient(client.masterSecret!, cache);
-
+  const localVerifyData = cipher.verifyData(cache);
   const finish = new Finished(localVerifyData);
   const fragments = createFragments(client)([finish]);
   client.epoch = 1;
@@ -81,21 +71,8 @@ export const flight5 = (
     ++record.recordSequenceNumber
   )[0];
   record.recordSequenceNumber = 0;
-  let raw = pkt.serialize();
 
-  const header = pkt.recordLayerHeader;
-  raw = cipher.cipher?.encrypt({ type: 1 }, pkt.fragment, {
-    type: header.contentType,
-    version: decode(
-      Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
-      { version: types.uint16be }
-    ).version,
-    epoch: header.epoch,
-    sequenceNumber: header.sequenceNumber,
-  })!;
-  pkt.fragment = raw;
-  pkt.recordLayerHeader.contentLen = raw.length;
-  const buf = pkt.serialize();
+  const buf = cipher.encryptPacket(pkt).serialize();
   udp.send(buf);
 
   client.flight = 5;
