@@ -23,6 +23,18 @@ export class EllipticCurves {
     );
   }
 
+  static deSerialize(buf: Buffer) {
+    return new EllipticCurves(
+      //@ts-ignore
+      ...Object.values(decode(buf, EllipticCurves.spec))
+    );
+  }
+
+  serialize() {
+    const res = encode(this, EllipticCurves.spec).slice();
+    return Buffer.from(res);
+  }
+
   get extension() {
     return {
       type: this.type,
