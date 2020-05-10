@@ -11,7 +11,7 @@ import { ContentType } from "./record/const";
 import { CipherContext } from "./context/cipher";
 import { ClientHello } from "./handshake/message/client/hello";
 import { flight2 } from "./flight/server/flight2";
-import { flight4 } from "./flight/server/flight4";
+import { Flight4 } from "./flight/server/flight4";
 
 type Options = RemoteInfo;
 
@@ -64,12 +64,9 @@ export class DtlsServer {
               this.cipher
             )(clientHello);
           } else {
-            flight4(
-              this.udp,
-              this.client,
-              this.record,
-              this.cipher
-            )(clientHello);
+            new Flight4(this.udp, this.client, this.record, this.cipher).exec(
+              clientHello
+            );
           }
         }
         break;

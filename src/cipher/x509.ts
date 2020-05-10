@@ -1,4 +1,7 @@
 import * as forge from "node-forge";
+import { encode, types } from "binary-data";
+import { hash } from "./prf";
+import { privateEncrypt, constants, createSign } from "crypto";
 
 const pki = forge.pki;
 
@@ -93,4 +96,39 @@ export function createX509() {
 
   const pem = pki.certificateToPem(cert);
   return Buffer.from(pem);
+}
+
+export function generateKeySignature(
+  clientRandom: Buffer,
+  serverRandom: Buffer,
+  publicKey: Buffer,
+  namedCurve: number,
+  privateKey: string,
+  hashAlgorithm: string
+) {
+  const sig = valueKeySignature(
+    clientRandom,
+    serverRandom,
+    publicKey,
+    namedCurve
+  );
+  const signer = createSign(hashAlgorithm);
+  signer.update(sig);
+  const enc = signer.sign(privateKey);
+  return enc;
+}
+
+function valueKeySignature(
+  clientRandom: Buffer,
+  serverRandom: Buffer,
+  publicKey: Buffer,
+  namedCurve: number
+) {
+  const serverParams = Buffer.from(
+    encode(
+      { type: 3, curve: namedCurve, len: publicKey.length },
+      { type: types.uint8, curve: types.uint16be, len: types.uint8 }
+    ).slice()
+  );
+  return Buffer.concat([clientRandom, serverRandom, serverParams, publicKey]);
 }

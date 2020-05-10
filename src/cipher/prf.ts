@@ -63,7 +63,7 @@ export function prfMasterSecret(
   return prfPHash(preMasterSecret, seed, 48);
 }
 
-function hash(algorithm: string, data: Buffer) {
+export function hash(algorithm: string, data: Buffer) {
   return createHash(algorithm).update(data).digest();
 }
 
