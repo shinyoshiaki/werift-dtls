@@ -9,7 +9,7 @@ import { ServerHello } from "./handshake/message/server/hello";
 import { ServerHelloDone } from "./handshake/message/server/helloDone";
 import { HandshakeType } from "./handshake/const";
 import { Certificate } from "./handshake/message/certificate";
-import { flight5 } from "./flight/flight5";
+import { Flight5 } from "./flight/flight5";
 import { FragmentedHandshake } from "./record/message/fragment";
 import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
 import { RecordContext } from "./context/record";
@@ -110,7 +110,9 @@ export class DtlsClient {
             }
           });
 
-          flight5(this.udp, this.client, this.record, this.cipher)(messages);
+          new Flight5(this.udp, this.client, this.record, this.cipher).exec(
+            messages
+          );
         }
         break;
       case HandshakeType.finished:

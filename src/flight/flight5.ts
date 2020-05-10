@@ -18,65 +18,82 @@ import { createCipher } from "../cipher/create";
 import { CipherSuite } from "../cipher/const";
 import { CipherContext } from "../context/cipher";
 
-export const flight5 = (
-  udp: UdpContext,
-  client: ClientContext,
-  record: RecordContext,
-  cipher: CipherContext
-) => (
-  messages: (ServerHello | Certificate | ServerKeyExchange | ServerHelloDone)[]
-) => {
-  if (client.flight === 5) return;
+export class Flight5 {
+  constructor(
+    private udp: UdpContext,
+    private client: ClientContext,
+    private record: RecordContext,
+    private cipher: CipherContext
+  ) {}
 
-  messages.forEach((message) => {
-    handlers[message.msgType]({ client, cipher })(message);
-  });
+  exec(
+    messages: (
+      | ServerHello
+      | Certificate
+      | ServerKeyExchange
+      | ServerHelloDone
+    )[]
+  ) {
+    if (this.client.flight === 5) return;
 
-  const clientKeyExchange = new ClientKeyExchange(
-    cipher.localKeyPair?.publicKey!
-  );
-  {
-    const fragments = createFragments(client)([clientKeyExchange]);
-    const packets = createPlaintext(client)(
+    messages.forEach((message) => {
+      handlers[message.msgType]({ client: this.client, cipher: this.cipher })(
+        message
+      );
+    });
+
+    this.sendClientKeyExchange();
+    this.sendChangeCipherSpec();
+    this.sendFinished();
+  }
+
+  sendClientKeyExchange() {
+    const clientKeyExchange = new ClientKeyExchange(
+      this.cipher.localKeyPair?.publicKey!
+    );
+    const fragments = createFragments(this.client)([clientKeyExchange]);
+    const packets = createPlaintext(this.client)(
       fragments,
-      ++record.recordSequenceNumber
+      ++this.record.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    client.bufferHandshake(
+    this.client.bufferHandshake(
       Buffer.concat(fragments.map((v) => v.fragment)),
       true,
       5
     );
-    udp.send(buf);
+    this.udp.send(buf);
   }
 
-  const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
-  {
-    const packets = createPlaintext(client)(
+  sendChangeCipherSpec() {
+    const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
+    const packets = createPlaintext(this.client)(
       [{ type: ContentType.changeCipherSpec, fragment: changeCipherSpec }],
-      ++record.recordSequenceNumber
+      ++this.record.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    udp.send(buf);
+    this.udp.send(buf);
   }
 
-  const cache = Buffer.concat(client.handshakeCache.map((v) => v.data));
+  sendFinished() {
+    const cache = Buffer.concat(this.client.handshakeCache.map((v) => v.data));
 
-  const localVerifyData = cipher.verifyData(cache);
-  const finish = new Finished(localVerifyData);
-  const fragments = createFragments(client)([finish]);
-  client.epoch = 1;
-  const pkt = createPlaintext(client)(
-    fragments,
-    ++record.recordSequenceNumber
-  )[0];
-  record.recordSequenceNumber = 0;
+    const localVerifyData = this.cipher.verifyData(cache);
+    const finish = new Finished(localVerifyData);
+    const fragments = createFragments(this.client)([finish]);
+    this.client.epoch = 1;
+    const pkt = createPlaintext(this.client)(
+      fragments,
+      ++this.record.recordSequenceNumber
+    )[0];
+    this.record.recordSequenceNumber = 0;
 
-  const buf = cipher.encryptPacket(pkt).serialize();
-  udp.send(buf);
+    const buf = this.cipher.encryptPacket(pkt).serialize();
+    this.udp.send(buf);
 
-  client.flight = 5;
-};
+    this.client.flight = 5;
+  }
+}
 
 const handlers: {
   [key: number]: (contexts: {
@@ -125,6 +142,4 @@ handlers[HandshakeType.server_key_exchange] = ({ cipher }) => (
   );
 };
 
-handlers[HandshakeType.server_hello_done] = () => (
-  message: ServerHelloDone
-) => {};
+handlers[HandshakeType.server_hello_done] = () => () => {};
