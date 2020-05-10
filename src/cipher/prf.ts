@@ -1,7 +1,7 @@
 import { NamedCurveAlgorithm } from "./namedCurve";
 import { ec } from "elliptic";
 import * as nacl from "tweetnacl";
-import { createHmac, createHash } from "crypto";
+import { createHmac } from "crypto";
 const elliptic = new ec("secp256k1");
 
 export function prfPreMasterSecret(
@@ -55,77 +55,4 @@ export function prfMasterSecret(
     serverRandom,
   ]);
   return prfPHash(preMasterSecret, seed, 48);
-}
-
-function hash(algorithm: string, data: Buffer) {
-  return createHash(algorithm).update(data).digest();
-}
-
-export function prfVerifyData(
-  masterSecret: Buffer,
-  handshakes: Buffer,
-  label: string,
-  size = 12
-) {
-  const bytes = hash("sha256", handshakes);
-  return prfPHash(
-    masterSecret,
-    Buffer.concat([Buffer.from(label), bytes]),
-    size
-  );
-}
-
-export function prfVerifyDataClient(masterSecret: Buffer, handshakes: Buffer) {
-  return prfVerifyData(masterSecret, handshakes, "client finished");
-}
-
-export function prfVerifyDataServer(masterSecret: Buffer, handshakes: Buffer) {
-  return prfVerifyData(masterSecret, handshakes, "server finished");
-}
-
-export function prfEncryptionKeys(
-  masterSecret: Buffer,
-  clientRandom: Buffer,
-  serverRandom: Buffer,
-  prfMacLen: number,
-  prfKeyLen: number,
-  prfIvLen: number
-) {
-  const seed = Buffer.concat([
-    Buffer.from("key expansion"),
-    serverRandom,
-    clientRandom,
-  ]);
-  let keyMaterial = prfPHash(
-    masterSecret,
-    seed,
-    2 * prfMacLen + 2 * prfKeyLen + 2 * prfIvLen
-  );
-
-  const clientMACKey = keyMaterial.slice(0, prfMacLen);
-  keyMaterial = keyMaterial.slice(prfMacLen);
-
-  const serverMACKey = keyMaterial.slice(0, prfMacLen);
-  keyMaterial = keyMaterial.slice(prfMacLen);
-
-  const clientWriteKey = keyMaterial.slice(0, prfKeyLen);
-  keyMaterial = keyMaterial.slice(prfKeyLen);
-
-  const serverWriteKey = keyMaterial.slice(0, prfKeyLen);
-  keyMaterial = keyMaterial.slice(prfKeyLen);
-
-  const clientWriteIV = keyMaterial.slice(0, prfIvLen);
-  keyMaterial = keyMaterial.slice(prfIvLen);
-
-  const serverWriteIV = keyMaterial.slice(0, prfIvLen);
-
-  return {
-    masterSecret,
-    clientMACKey,
-    serverMACKey,
-    clientWriteKey,
-    serverWriteKey,
-    clientWriteIV,
-    serverWriteIV,
-  };
 }

@@ -6,9 +6,12 @@ import { ClientContext } from "../context/client";
 import { EllipticCurves } from "../handshake/extensions/ellipticCurves";
 import { Signature } from "../handshake/extensions/signature";
 import { NamedCurveAlgorithm } from "../cipher/namedCurve";
-import { HashAlgorithm } from "../cipher/hash";
 import { RecordContext } from "../context/record";
-import { SignatureAlgorithm, CipherSuite } from "../cipher/const";
+import {
+  SignatureAlgorithm,
+  CipherSuite,
+  HashAlgorithm,
+} from "../cipher/const";
 import { CipherContext } from "../context/cipher";
 
 export const flight1 = async (
