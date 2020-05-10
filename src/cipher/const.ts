@@ -6,3 +6,7 @@ export enum SignatureAlgorithm {
 export enum CipherSuite {
   EcdheEcdsaWithAes128GcmSha256 = 0xc02b, //49195
 }
+
+export enum HashAlgorithm {
+  sha256 = 4,
+}

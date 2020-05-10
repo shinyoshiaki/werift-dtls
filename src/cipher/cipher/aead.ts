@@ -1,6 +1,7 @@
 import * as crypto from "crypto";
-import { phash } from "./utils";
+import { pHash } from "./utils";
 import Cipher from "./abstract";
+import { prfPHash } from "../prf";
 const {
   createDecode,
   encode,
@@ -64,7 +65,12 @@ export default class AEADCipher extends Cipher {
     const size = this.keyLength * 2 + this.ivLength * 2;
     const secret = session.masterSecret;
     const seed = Buffer.concat([session.serverRandom, session.clientRandom]);
-    const keyBlock = this.prf(size, secret, "key expansion", seed);
+    const keyBlock = prfPHash(
+      secret,
+      Buffer.concat([Buffer.from("key expansion"), seed]),
+      size,
+      this.hash!
+    );
     const stream = createDecode(keyBlock);
 
     this.clientWriteKey = stream.readBuffer(this.keyLength);
@@ -183,25 +189,5 @@ export default class AEADCipher extends Cipher {
     return finalPart.length > 0
       ? Buffer.concat([headPart, finalPart])
       : headPart;
-  }
-
-  /**
-   * Pseudorandom Function.
-   * @param {number} size - The number of required bytes.
-   * @param {Buffer} secret - Hmac secret.
-   * @param {string} label - Identifying label.
-   * @param {Buffer} seed - Input data.
-   * @returns {Buffer}
-   */
-  prf(size: number, secret: Buffer, label: string, seed: Buffer) {
-    const isLabelString = typeof label === "string";
-    const name = isLabelString ? Buffer.from(label, "ascii") : label;
-
-    return phash(
-      size,
-      this.hash!,
-      secret,
-      Buffer.concat([Buffer.from(name), seed])
-    );
   }
 }

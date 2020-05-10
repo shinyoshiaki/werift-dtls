@@ -21,7 +21,7 @@ function hmac(algorithm: string, secret: Buffer, data: Buffer) {
  * @param {Buffer} seed - Input data.
  * @returns {Buffer}
  */
-function phash(bytes: number, algorithm: string, secret: Buffer, seed: Buffer) {
+function pHash(bytes: number, algorithm: string, secret: Buffer, seed: Buffer) {
   const totalLength = bytes;
   const bufs = [];
   let Ai = seed; // A0
@@ -37,4 +37,4 @@ function phash(bytes: number, algorithm: string, secret: Buffer, seed: Buffer) {
   return Buffer.concat(bufs, totalLength);
 }
 
-export { hmac, phash };
+export { hmac, pHash };

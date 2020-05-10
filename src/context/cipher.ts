@@ -5,6 +5,7 @@ import { DtlsPlaintext } from "../record/message/plaintext";
 import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
 import { createHash } from "crypto";
+import { prfVerifyDataClient } from "../cipher/prf";
 
 export class CipherContext {
   localRandom?: DtlsRandom;
@@ -46,11 +47,6 @@ export class CipherContext {
   }
 
   verifyData(buf: Buffer) {
-    return this.cipher?.prf(
-      this.cipher.verifyDataLength,
-      this.masterSecret!,
-      "client finished",
-      createHash(this.cipher.hash!).update(buf).digest()
-    )!;
+    return prfVerifyDataClient(this.masterSecret!, buf);
   }
 }

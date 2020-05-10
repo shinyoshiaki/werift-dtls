@@ -28,14 +28,19 @@ export function hmac(algorithm: string, secret: Buffer, data: Buffer) {
   return hash.digest();
 }
 
-function prfPHash(secret: Buffer, seed: Buffer, requestedLegth: number) {
+export function prfPHash(
+  secret: Buffer,
+  seed: Buffer,
+  requestedLegth: number,
+  algorithm = "sha256"
+) {
   const totalLength = requestedLegth;
   const bufs = [];
   let Ai = seed; // A0
 
   do {
-    Ai = hmac("sha256", secret, Ai); // A(i) = HMAC(secret, A(i-1))
-    const output = hmac("sha256", secret, Buffer.concat([Ai, seed]));
+    Ai = hmac(algorithm, secret, Ai); // A(i) = HMAC(secret, A(i-1))
+    const output = hmac(algorithm, secret, Buffer.concat([Ai, seed]));
 
     bufs.push(output);
     requestedLegth -= output.length; // eslint-disable-line no-param-reassign
@@ -63,11 +68,11 @@ function hash(algorithm: string, data: Buffer) {
 
 export function prfVerifyData(
   masterSecret: Buffer,
-  handshakes: Buffer,
+  data: Buffer,
   label: string,
   size = 12
 ) {
-  const bytes = hash("sha256", handshakes);
+  const bytes = hash("sha256", data);
   return prfPHash(
     masterSecret,
     Buffer.concat([Buffer.from(label), bytes]),
