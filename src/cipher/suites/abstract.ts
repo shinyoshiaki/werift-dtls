@@ -1,4 +1,4 @@
-import { KeyExchange } from "./key-exchange";
+import { KeyExchange } from "../key-exchange";
 
 export type CipherHeader = {
   type: number;

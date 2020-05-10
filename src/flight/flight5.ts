@@ -14,7 +14,7 @@ import { RecordContext } from "../context/record";
 import { UdpContext } from "../context/udp";
 import { DtlsRandom } from "../handshake/random";
 import { ContentType } from "../record/const";
-import { createCipher } from "../cipher/cipher/create";
+import { createCipher } from "../cipher/create";
 import { CipherSuite } from "../cipher/const";
 import { CipherContext } from "../context/cipher";
 

@@ -1,11 +1,11 @@
 import { NamedCurveKeyPair } from "../cipher/namedCurve";
 import { DtlsRandom } from "../handshake/random";
-import AEADCipher from "../cipher/cipher/aead";
+import AEADCipher from "../cipher/suites/aead";
 import { DtlsPlaintext } from "../record/message/plaintext";
 import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
 import { prfVerifyDataClient } from "../cipher/prf";
-import { sessionType } from "../cipher/cipher/abstract";
+import { sessionType } from "../cipher/suites/abstract";
 
 export class CipherContext {
   localRandom?: DtlsRandom;

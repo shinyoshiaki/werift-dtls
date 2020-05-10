@@ -1,4 +1,4 @@
-import AEADCipher from "./aead";
+import AEADCipher from "./suites/aead";
 import {
   createRSAKeyExchange,
   createECDHERSAKeyExchange,

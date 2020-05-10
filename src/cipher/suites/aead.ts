@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import { pHash } from "./utils";
+import { pHash } from "../utils";
 import Cipher, { CipherHeader, sessionType } from "./abstract";
 import { prfPHash, prfEncryptionKeys } from "../prf";
 const {
