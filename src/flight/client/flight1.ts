@@ -1,18 +1,18 @@
-import { ClientHello } from "../handshake/message/client/hello";
-import { DtlsRandom } from "../handshake/random";
-import { createFragments, createPlaintext } from "../record/builder";
-import { UdpContext } from "../context/udp";
-import { ClientContext } from "../context/client";
-import { EllipticCurves } from "../handshake/extensions/ellipticCurves";
-import { Signature } from "../handshake/extensions/signature";
-import { NamedCurveAlgorithm } from "../cipher/namedCurve";
-import { RecordContext } from "../context/record";
+import { ClientHello } from "../../handshake/message/client/hello";
+import { DtlsRandom } from "../../handshake/random";
+import { createFragments, createPlaintext } from "../../record/builder";
+import { UdpContext } from "../../context/udp";
+import { ClientContext } from "../../context/client";
+import { EllipticCurves } from "../../handshake/extensions/ellipticCurves";
+import { Signature } from "../../handshake/extensions/signature";
+import { NamedCurveAlgorithm } from "../../cipher/namedCurve";
+import { RecordContext } from "../../context/record";
 import {
   SignatureAlgorithm,
   CipherSuite,
   HashAlgorithm,
-} from "../cipher/const";
-import { CipherContext } from "../context/cipher";
+} from "../../cipher/const";
+import { CipherContext } from "../../context/cipher";
 
 export const flight1 = async (
   udp: UdpContext,

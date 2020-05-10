@@ -1,15 +1,15 @@
 import { createSocket, RemoteInfo } from "dgram";
-import { flight1 } from "./flight/flight1";
+import { flight1 } from "./flight/client/flight1";
 import { ClientContext } from "./context/client";
 import { UdpContext } from "./context/udp";
 import { parsePacket } from "./record/receive";
 import { ServerHelloVerifyRequest } from "./handshake/message/server/helloVerifyRequest";
-import { flight3 } from "./flight/flight3";
+import { flight3 } from "./flight/client/flight3";
 import { ServerHello } from "./handshake/message/server/hello";
 import { ServerHelloDone } from "./handshake/message/server/helloDone";
 import { HandshakeType } from "./handshake/const";
 import { Certificate } from "./handshake/message/certificate";
-import { Flight5 } from "./flight/flight5";
+import { Flight5 } from "./flight/client/flight5";
 import { FragmentedHandshake } from "./record/message/fragment";
 import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
 import { RecordContext } from "./context/record";
