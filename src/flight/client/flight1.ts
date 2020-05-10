@@ -2,7 +2,7 @@ import { ClientHello } from "../../handshake/message/client/hello";
 import { DtlsRandom } from "../../handshake/random";
 import { createFragments, createPlaintext } from "../../record/builder";
 import { UdpContext } from "../../context/udp";
-import { ClientContext } from "../../context/client";
+import { DtlsContext } from "../../context/client";
 import { EllipticCurves } from "../../handshake/extensions/ellipticCurves";
 import { Signature } from "../../handshake/extensions/signature";
 import { NamedCurveAlgorithm } from "../../cipher/namedCurve";
@@ -16,7 +16,7 @@ import { CipherContext } from "../../context/cipher";
 
 export const flight1 = async (
   udp: UdpContext,
-  client: ClientContext,
+  client: DtlsContext,
   record: RecordContext,
   cipher: CipherContext
 ) => {

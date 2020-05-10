@@ -8,6 +8,10 @@ export enum NamedCurveAlgorithm {
   namedCurveX25519 = 29,
 }
 
+export const supportedCurves = [NamedCurveAlgorithm.namedCurveX25519];
+export const supportedCurveFilter = (curves: number[]) =>
+  curves.filter((curve) => supportedCurves.includes(curve));
+
 export type NamedCurveKeyPair = {
   curve: number;
   publicKey: Buffer;

@@ -1,12 +1,12 @@
 import { ContentType } from "./const";
 import { DtlsPlaintext } from "./message/plaintext";
-import { ClientContext } from "../context/client";
+import { DtlsContext } from "../context/client";
 import { RecordContext } from "../context/record";
 import { Handshake } from "../typings/domain";
 
 type Fragment = { type: number; fragment: Buffer };
 
-export const createFragments = (client: ClientContext) => (
+export const createFragments = (client: DtlsContext) => (
   handshakes: Handshake[]
 ) => {
   client.lastFlight = handshakes;
@@ -24,7 +24,7 @@ export const createFragments = (client: ClientContext) => (
     .flatMap((v) => v);
 };
 
-export const createPlaintext = (client: ClientContext) => (
+export const createPlaintext = (client: DtlsContext) => (
   fragments: Fragment[],
   recordSequenceNumber: number
 ) => {

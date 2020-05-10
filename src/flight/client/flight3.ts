@@ -1,5 +1,5 @@
 import { UdpContext } from "../../context/udp";
-import { ClientContext } from "../../context/client";
+import { DtlsContext } from "../../context/client";
 import { ClientHello } from "../../handshake/message/client/hello";
 import { ServerHelloVerifyRequest } from "../../handshake/message/server/helloVerifyRequest";
 import { createFragments, createPlaintext } from "../../record/builder";
@@ -7,9 +7,9 @@ import { RecordContext } from "../../context/record";
 
 export const flight3 = (
   udp: UdpContext,
-  client: ClientContext,
+  client: DtlsContext,
   record: RecordContext
-) => async (verifyReq: ServerHelloVerifyRequest) => {
+) => (verifyReq: ServerHelloVerifyRequest) => {
   const hello = client.lastFlight[0] as ClientHello;
   hello.cookie = verifyReq.cookie;
   const fragments = createFragments(client)([hello]);

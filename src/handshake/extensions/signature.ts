@@ -1,6 +1,7 @@
 import { encode, types, decode } from "binary-data";
 
 export class Signature {
+  static type = 13;
   static readonly spec = {
     type: types.uint16be,
     data: types.array(
@@ -14,7 +15,7 @@ export class Signature {
     public type: number,
     public data: { hash: number; signature: number }[]
   ) {
-    this.type = 13;
+    this.type = Signature.type;
   }
 
   static createEmpty() {
@@ -37,7 +38,7 @@ export class Signature {
   get extension() {
     return {
       type: this.type,
-      data: encode(this.data, Signature.spec.data).slice(),
+      data: Buffer.from(encode(this.data, Signature.spec.data).slice()),
     };
   }
 }

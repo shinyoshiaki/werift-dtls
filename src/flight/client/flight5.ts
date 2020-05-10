@@ -2,7 +2,7 @@ import { ServerHello } from "../../handshake/message/server/hello";
 import { Certificate } from "../../handshake/message/certificate";
 import { ServerHelloDone } from "../../handshake/message/server/helloDone";
 import { HandshakeType } from "../../handshake/const";
-import { ClientContext } from "../../context/client";
+import { DtlsContext } from "../../context/client";
 import { ServerKeyExchange } from "../../handshake/message/server/keyExchange";
 import { generateKeyPair } from "../../cipher/namedCurve";
 import { prfPreMasterSecret, prfMasterSecret } from "../../cipher/prf";
@@ -21,7 +21,7 @@ import { CipherContext } from "../../context/cipher";
 export class Flight5 {
   constructor(
     private udp: UdpContext,
-    private client: ClientContext,
+    private client: DtlsContext,
     private record: RecordContext,
     private cipher: CipherContext
   ) {}
@@ -97,7 +97,7 @@ export class Flight5 {
 
 const handlers: {
   [key: number]: (contexts: {
-    client: ClientContext;
+    client: DtlsContext;
     cipher: CipherContext;
   }) => (message: any) => void;
 } = {};

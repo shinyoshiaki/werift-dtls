@@ -26,7 +26,7 @@ export class ClientHello {
     public cookie: Buffer,
     public cipherSuites: number[],
     public compressionMethods: number[],
-    public extensions: { type: number; data: any }[]
+    public extensions: { type: number; data: Buffer }[]
   ) {}
 
   static createEmpty() {

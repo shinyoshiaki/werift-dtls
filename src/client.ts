@@ -1,6 +1,6 @@
 import { createSocket, RemoteInfo } from "dgram";
 import { flight1 } from "./flight/client/flight1";
-import { ClientContext } from "./context/client";
+import { DtlsContext } from "./context/client";
 import { UdpContext } from "./context/udp";
 import { parsePacket } from "./record/receive";
 import { ServerHelloVerifyRequest } from "./handshake/message/server/helloVerifyRequest";
@@ -23,7 +23,7 @@ export class DtlsClient {
   onConnect?: () => void;
 
   udp = new UdpContext(createSocket("udp4"), this.options);
-  client = new ClientContext();
+  client = new DtlsContext();
   record = new RecordContext();
   cipher = new CipherContext();
   constructor(private options: Partial<Options> = {}) {
