@@ -1,5 +1,17 @@
 import { KeyExchange } from "./key-exchange";
 
+export type CipherHeader = {
+  type: number;
+  version: number;
+  epoch: number;
+  sequenceNumber: number;
+};
+
+export const sessionType = {
+  CLIENT: 1,
+  SERVER: 2,
+};
+
 export default class AbstractCipher {
   id = 0;
   name?: string;

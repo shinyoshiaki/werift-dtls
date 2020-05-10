@@ -118,11 +118,11 @@ handlers[HandshakeType.server_key_exchange] = ({ cipher }) => (
   );
 
   cipher.cipher = createCipher(CipherSuite.EcdheEcdsaWithAes128GcmSha256)!;
-  cipher.cipher.init({
-    masterSecret: cipher.masterSecret!,
-    serverRandom: cipher.remoteRandom!.serialize(),
-    clientRandom: cipher.localRandom!.serialize(),
-  });
+  cipher.cipher.init(
+    cipher.masterSecret!,
+    cipher.remoteRandom!.serialize(),
+    cipher.localRandom!.serialize()
+  );
 };
 
 handlers[HandshakeType.server_hello_done] = () => (

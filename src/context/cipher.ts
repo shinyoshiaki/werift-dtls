@@ -4,8 +4,8 @@ import AEADCipher from "../cipher/cipher/aead";
 import { DtlsPlaintext } from "../record/message/plaintext";
 import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
-import { createHash } from "crypto";
 import { prfVerifyDataClient } from "../cipher/prf";
+import { sessionType } from "../cipher/cipher/abstract";
 
 export class CipherContext {
   localRandom?: DtlsRandom;
@@ -19,7 +19,7 @@ export class CipherContext {
 
   encryptPacket(pkt: DtlsPlaintext) {
     const header = pkt.recordLayerHeader;
-    const enc = this.cipher?.encrypt({ type: 1 }, pkt.fragment, {
+    const enc = this.cipher?.encrypt(sessionType.CLIENT, pkt.fragment, {
       type: header.contentType,
       version: decode(
         Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
@@ -35,7 +35,7 @@ export class CipherContext {
 
   decryptPacket(pkt: DtlsPlaintext) {
     const header = pkt.recordLayerHeader;
-    return this.cipher?.decrypt({ type: 1 }, pkt.fragment, {
+    return this.cipher?.decrypt(sessionType.CLIENT, pkt.fragment, {
       type: header.contentType,
       version: decode(
         Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),

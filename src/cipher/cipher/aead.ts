@@ -1,7 +1,7 @@
 import * as crypto from "crypto";
 import { pHash } from "./utils";
-import Cipher from "./abstract";
-import { prfPHash } from "../prf";
+import Cipher, { CipherHeader, sessionType } from "./abstract";
+import { prfPHash, prfEncryptionKeys } from "../prf";
 const {
   createDecode,
   encode,
@@ -17,18 +17,6 @@ const AEADAdditionalData = {
   type: ContentType,
   version: ProtocolVersion,
   length: uint16be,
-};
-
-type Header = {
-  type: number;
-  version: number;
-  epoch: number;
-  sequenceNumber: number;
-};
-
-const sessionType = {
-  CLIENT: 1,
-  SERVER: 2,
 };
 
 /**
@@ -53,54 +41,28 @@ export default class AEADCipher extends Cipher {
     super();
   }
 
-  /**
-   * Initialize encryption and decryption parts.
-   * @param {Session} session
-   */
-  init(session: {
-    masterSecret: Buffer;
-    serverRandom: Buffer;
-    clientRandom: Buffer;
-  }) {
-    const size = this.keyLength * 2 + this.ivLength * 2;
-    const secret = session.masterSecret;
-    const seed = Buffer.concat([session.serverRandom, session.clientRandom]);
-    const keyBlock = prfPHash(
-      secret,
-      Buffer.concat([Buffer.from("key expansion"), seed]),
-      size,
-      this.hash!
+  init(masterSecret: Buffer, serverRandom: Buffer, clientRandom: Buffer) {
+    const keys = prfEncryptionKeys(
+      masterSecret,
+      clientRandom,
+      serverRandom,
+      this.keyLength,
+      this.ivLength,
+      this.nonceLength,
+      this.hash
     );
-    const stream = createDecode(keyBlock);
-
-    this.clientWriteKey = stream.readBuffer(this.keyLength);
-    this.serverWriteKey = stream.readBuffer(this.keyLength);
-
-    const clientNonceImplicit = stream.readBuffer(this.ivLength);
-    const serverNonceImplicit = stream.readBuffer(this.ivLength);
-
-    this.clientNonce = Buffer.alloc(this.nonceLength, 0);
-    this.serverNonce = Buffer.alloc(this.nonceLength, 0);
-
-    clientNonceImplicit.copy(this.clientNonce, 0);
-    serverNonceImplicit.copy(this.serverNonce, 0);
+    keys;
+    this.clientWriteKey = keys.clientWriteKey;
+    this.serverWriteKey = keys.serverWriteKey;
+    this.clientNonce = keys.clientNonce;
+    this.serverNonce = keys.serverNonce;
   }
 
   /**
    * Encrypt message.
-   * @param {Session} session
-   * @param {Buffer} data Message to encrypt.
-   * @param {Object} header Record layer message header.
-   * @returns {Buffer}
    */
-  encrypt(
-    session: {
-      type: number;
-    },
-    data: Buffer,
-    header: Header
-  ) {
-    const isClient = session.type === sessionType.CLIENT;
+  encrypt(type: number, data: Buffer, header: CipherHeader) {
+    const isClient = type === sessionType.CLIENT;
     const iv = isClient ? this.clientNonce! : this.serverNonce!;
 
     const writeKey = isClient ? this.clientWriteKey : this.serverWriteKey;
@@ -142,13 +104,9 @@ export default class AEADCipher extends Cipher {
 
   /**
    * Decrypt message.
-   * @param {Buffer} session
-   * @param {Buffer} data Encrypted message.
-   * @param {Object} header Record layer headers.
-   * @returns {Buffer}
    */
-  decrypt(session: { type: number }, data: Buffer, header: Header) {
-    const isClient = session.type === sessionType.CLIENT;
+  decrypt(type: number, data: Buffer, header: CipherHeader) {
+    const isClient = type === sessionType.CLIENT;
     const iv = isClient ? this.serverNonce : this.clientNonce;
     const final = createDecode(data);
 

@@ -397,9 +397,6 @@ describe("cipher/prf", () => {
     ]);
 
     const expected = {
-      masterSecret: masterSecret,
-      clientMACKey: Buffer.from([]),
-      serverMACKey: Buffer.from([]),
       clientWriteKey: Buffer.from([
         0x1b,
         0x7d,
@@ -436,16 +433,16 @@ describe("cipher/prf", () => {
         0x63,
         0x54,
       ]),
-      clientWriteIV: Buffer.from([0x0e, 0xb2, 0x09, 0x06]),
-      serverWriteIV: Buffer.from([0xf7, 0x81, 0xfa, 0xd2]),
+      clientNonce: Buffer.from([0x0e, 0xb2, 0x09, 0x06]),
+      serverNonce: Buffer.from([0xf7, 0x81, 0xfa, 0xd2]),
     };
 
     const keys = prfEncryptionKeys(
       masterSecret,
       clientRandom,
       serverRandom,
-      0,
       16,
+      4,
       4
     );
 
