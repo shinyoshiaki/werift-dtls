@@ -5,7 +5,7 @@ export class DtlsContext {
   lastFlight: Handshake[] = [];
   sequenceNumber = 0;
   epoch = 0;
-  flight = 0;
+  flight = 1;
   handshakeCache: { isLocal: boolean; data: Buffer; flight: number }[] = [];
   cookie?: Buffer;
 

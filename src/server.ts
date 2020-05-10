@@ -11,6 +11,7 @@ import { ContentType } from "./record/const";
 import { CipherContext } from "./context/cipher";
 import { ClientHello } from "./handshake/message/client/hello";
 import { flight2 } from "./flight/server/flight2";
+import { flight4 } from "./flight/server/flight4";
 
 type Options = RemoteInfo;
 
@@ -55,7 +56,21 @@ export class DtlsServer {
       case HandshakeType.client_hello:
         {
           const clientHello = ClientHello.deSerialize(handshakes[0].fragment);
-          flight2(this.udp, this.client, this.record, this.cipher)(clientHello);
+          if (this.client.flight === 1) {
+            flight2(
+              this.udp,
+              this.client,
+              this.record,
+              this.cipher
+            )(clientHello);
+          } else {
+            flight4(
+              this.udp,
+              this.client,
+              this.record,
+              this.cipher
+            )(clientHello);
+          }
         }
         break;
     }
