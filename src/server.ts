@@ -1,5 +1,4 @@
 import { createSocket, RemoteInfo } from "dgram";
-import { flight1 } from "./flight/client/flight1";
 import { DtlsContext } from "./context/client";
 import { UdpContext } from "./context/udp";
 import { parsePacket } from "./record/receive";
@@ -25,16 +24,13 @@ export class DtlsServer {
   constructor(private options: Partial<Options> = {}) {
     this.udp.socket.bind(options.port);
     this.udp.socket.on("message", this.udpOnMessage);
-    this.udpOnListening();
   }
 
-  private udpOnListening = () => {
-    flight1(this.udp, this.client, this.record, this.cipher);
-  };
-
-  private serverHelloBuffer: FragmentedHandshake[] = [];
-  private udpOnMessage = (data: Buffer) => {
+  private flight5Buffer: FragmentedHandshake[] = [];
+  private udpOnMessage = (data: Buffer, rInfo: RemoteInfo) => {
+    this.udp.rinfo = rInfo;
     const messages = parsePacket(this.client, this.cipher)(data);
+    if (messages.length === 0) return;
     switch (messages[messages.length - 1].type) {
       case ContentType.handshake:
         {
@@ -64,10 +60,13 @@ export class DtlsServer {
               this.cipher
             )(clientHello);
           } else {
-            new Flight4(this.udp, this.client, this.record, this.cipher).exec(
-              clientHello
-            );
+            new Flight4(this.udp, this.client, this.record, this.cipher).exec();
           }
+        }
+        break;
+      case HandshakeType.client_key_exchange:
+        {
+          handshakes;
         }
         break;
     }

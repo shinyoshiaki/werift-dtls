@@ -35,7 +35,7 @@ export class DtlsClient {
     flight1(this.udp, this.client, this.record, this.cipher);
   };
 
-  private serverHelloBuffer: FragmentedHandshake[] = [];
+  private flight4Buffer: FragmentedHandshake[] = [];
   private udpOnMessage = (data: Buffer) => {
     const messages = parsePacket(this.client, this.cipher)(data);
     switch (messages[messages.length - 1].type) {
@@ -56,10 +56,10 @@ export class DtlsClient {
 
   handleHandshakes(handshakes: FragmentedHandshake[]) {
     if (handshakes[0].msg_type === HandshakeType.server_hello) {
-      this.serverHelloBuffer = handshakes;
+      this.flight4Buffer = handshakes;
     }
-    if (this.serverHelloBuffer.length > 0) {
-      this.serverHelloBuffer = [...this.serverHelloBuffer, ...handshakes];
+    if (this.flight4Buffer.length > 0) {
+      this.flight4Buffer = [...this.flight4Buffer, ...handshakes];
     }
 
     switch (handshakes[handshakes.length - 1].msg_type) {
@@ -82,7 +82,7 @@ export class DtlsClient {
           ]
             .map((type) => {
               const fragments = FragmentedHandshake.findAllFragments(
-                this.serverHelloBuffer,
+                this.flight4Buffer,
                 type
               );
               if (fragments.length === 0)
@@ -90,7 +90,7 @@ export class DtlsClient {
               return FragmentedHandshake.assemble(fragments);
             })
             .filter((v) => v);
-          this.serverHelloBuffer = [];
+          this.flight4Buffer = [];
           this.client.bufferHandshake(
             Buffer.concat(fragments.map((v) => v.serialize())),
             false,

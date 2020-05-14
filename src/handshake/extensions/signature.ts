@@ -35,6 +35,10 @@ export class Signature {
     return Buffer.from(res);
   }
 
+  static fromData(buf: Buffer) {
+    return new Signature(Signature.type, decode(buf, Signature.spec.data));
+  }
+
   get extension() {
     return {
       type: this.type,

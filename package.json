@@ -41,13 +41,16 @@
   },
   "dependencies": {
     "binary-data": "^0.6.0",
+    "date-fns": "^2.13.0",
     "elliptic": "^6.5.2",
+    "jsrsasign": "^8.0.15",
     "node-forge": "^0.9.1",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@types/elliptic": "^6.4.12",
     "@types/jest": "^25.2.1",
+    "@types/jsrsasign": "^8.0.2",
     "@types/node": "^13.13.4",
     "@types/node-forge": "^0.9.3",
     "@typescript-eslint/eslint-plugin": "^2.30.0",

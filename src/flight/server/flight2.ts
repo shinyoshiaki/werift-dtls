@@ -17,6 +17,7 @@ export const flight2 = (
   record: RecordContext,
   cipher: CipherContext
 ) => (clientHello: ClientHello) => {
+  cipher.localRandom = new DtlsRandom();
   cipher.remoteRandom = DtlsRandom.from(clientHello.random);
   cipher.cipherSuite = clientHello.cipherSuites[0];
   clientHello.extensions.forEach((extension) => {
@@ -25,10 +26,13 @@ export const flight2 = (
         {
           const curves = EllipticCurves.fromData(extension.data).data;
           cipher.namedCurve = supportedCurveFilter(curves)[0];
+          cipher.namedCurve;
         }
         break;
       case Signature.type:
         {
+          const signature = Signature.fromData(extension.data).data;
+          console.log();
         }
         break;
     }

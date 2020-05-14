@@ -17,6 +17,7 @@ export class CipherContext {
   masterSecret?: Buffer;
   cipher?: AEADCipher;
   namedCurve?: number;
+  localPrivateKey?: string;
 
   encryptPacket(pkt: DtlsPlaintext) {
     const header = pkt.recordLayerHeader;
