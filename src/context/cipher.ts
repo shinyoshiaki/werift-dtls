@@ -4,7 +4,7 @@ import AEADCipher from "../cipher/suites/aead";
 import { DtlsPlaintext } from "../record/message/plaintext";
 import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
-import { prfVerifyDataClient } from "../cipher/prf";
+import { prfVerifyDataClient, prfVerifyDataServer } from "../cipher/prf";
 import { SessionType } from "../cipher/suites/abstract";
 import { PrivateKey } from "@fidm/x509";
 
@@ -53,7 +53,8 @@ export class CipherContext {
     return dec;
   }
 
-  verifyData(buf: Buffer) {
-    return prfVerifyDataClient(this.masterSecret!, buf);
+  verifyData(buf: Buffer, isClient = true) {
+    if (isClient) return prfVerifyDataClient(this.masterSecret!, buf);
+    else return prfVerifyDataServer(this.masterSecret!, buf);
   }
 }

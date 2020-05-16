@@ -21,7 +21,8 @@
     "test": "jest --forceExit",
     "type": "tsc --noEmit -p .",
     "unused": "organize-imports-cli src/**/*.ts",
-    "start": "ts-node --files --project tsconfig.json examples/client.ts"
+    "client": "ts-node --files --project tsconfig.json examples/client.ts",
+    "server": "ts-node --files --project tsconfig.json examples/server.ts"
   },
   "jest": {
     "globals": {

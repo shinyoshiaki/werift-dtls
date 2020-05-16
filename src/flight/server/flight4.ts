@@ -19,6 +19,7 @@ export class Flight4 {
   ) {}
 
   exec() {
+    if (this.dtls.flight === 4) return;
     this.dtls.flight = 4;
     this.dtls.sequenceNumber = 1;
 

@@ -23,10 +23,12 @@ export class Flight6 {
   ) {}
 
   exec(handshakes: (FragmentedHandshake | DtlsPlaintext)[]) {
-    handshakes.map((handshake) => {
+    if (this.dtls.flight === 6) return;
+    this.dtls.flight = 6;
+
+    const fragments = handshakes.map((handshake) => {
       let fragment: FragmentedHandshake = handshake as FragmentedHandshake;
       if ((handshake as FragmentedHandshake).msg_type) {
-        this.dtls.bufferHandshake(fragment.serialize(), false, 5);
       } else {
         const raw = this.cipher.decryptPacket(handshake as DtlsPlaintext);
         fragment = FragmentedHandshake.deSerialize(raw);
@@ -46,6 +48,11 @@ export class Flight6 {
       );
       return fragment;
     });
+    this.dtls.bufferHandshake(
+      Buffer.concat(fragments.map((h) => h.serialize())),
+      false,
+      5
+    );
 
     this.sendChangeCipherSpec();
     this.sendFinished();
@@ -64,7 +71,7 @@ export class Flight6 {
   sendFinished() {
     const cache = Buffer.concat(this.dtls.handshakeCache.map((v) => v.data));
 
-    const localVerifyData = this.cipher.verifyData(cache);
+    const localVerifyData = this.cipher.verifyData(cache, false);
     const finish = new Finished(localVerifyData);
     const fragments = createFragments(this.dtls)([finish]);
     this.dtls.epoch = 1;
@@ -76,8 +83,6 @@ export class Flight6 {
 
     const buf = this.cipher.encryptPacket(pkt).serialize();
     this.udp.send(buf);
-
-    this.dtls.flight = 6;
   }
 }
 
