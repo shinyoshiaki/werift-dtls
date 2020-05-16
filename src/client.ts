@@ -1,6 +1,6 @@
 import { createSocket, RemoteInfo } from "dgram";
 import { flight1 } from "./flight/client/flight1";
-import { DtlsContext } from "./context/client";
+import { DtlsContext } from "./context/dtls";
 import { UdpContext } from "./context/udp";
 import { parsePacket } from "./record/receive";
 import { ServerHelloVerifyRequest } from "./handshake/message/server/helloVerifyRequest";
@@ -16,6 +16,7 @@ import { RecordContext } from "./context/record";
 import { createPlaintext } from "./record/builder";
 import { ContentType } from "./record/const";
 import { CipherContext } from "./context/cipher";
+import { SessionType } from "./cipher/suites/abstract";
 
 export type Options = RemoteInfo;
 
@@ -23,21 +24,22 @@ export class DtlsClient {
   onConnect?: () => void;
 
   udp = new UdpContext(createSocket("udp4"), this.options);
-  client = new DtlsContext();
+  dtls = new DtlsContext();
   record = new RecordContext();
   cipher = new CipherContext();
   constructor(private options: Partial<Options> = {}) {
     this.udp.socket.on("message", this.udpOnMessage);
     this.udpOnListening();
+    this.cipher.sessionType = SessionType.CLIENT;
   }
 
   private udpOnListening = () => {
-    flight1(this.udp, this.client, this.record, this.cipher);
+    flight1(this.udp, this.dtls, this.record, this.cipher);
   };
 
   private flight4Buffer: FragmentedHandshake[] = [];
   private udpOnMessage = (data: Buffer) => {
-    const messages = parsePacket(this.client, this.cipher)(data);
+    const messages = parsePacket(this.dtls, this.cipher)(data);
     switch (messages[messages.length - 1].type) {
       case ContentType.handshake:
         {
@@ -68,7 +70,7 @@ export class DtlsClient {
           const verifyReq = ServerHelloVerifyRequest.deSerialize(
             handshakes[0].fragment
           );
-          flight3(this.udp, this.client, this.record)(verifyReq);
+          flight3(this.udp, this.dtls, this.record)(verifyReq);
         }
         break;
       case HandshakeType.server_hello_done:
@@ -91,7 +93,7 @@ export class DtlsClient {
             })
             .filter((v) => v);
           this.flight4Buffer = [];
-          this.client.bufferHandshake(
+          this.dtls.bufferHandshake(
             Buffer.concat(fragments.map((v) => v.serialize())),
             false,
             4
@@ -110,7 +112,7 @@ export class DtlsClient {
             }
           });
 
-          new Flight5(this.udp, this.client, this.record, this.cipher).exec(
+          new Flight5(this.udp, this.dtls, this.record, this.cipher).exec(
             messages
           );
         }
@@ -125,7 +127,7 @@ export class DtlsClient {
   }
 
   send(buf: Buffer) {
-    const pkt = createPlaintext(this.client)(
+    const pkt = createPlaintext(this.dtls)(
       [{ type: ContentType.applicationData, fragment: buf }],
       ++this.record.recordSequenceNumber
     )[0];
