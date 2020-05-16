@@ -2,7 +2,7 @@ import { ClientHello } from "../../handshake/message/client/hello";
 import { DtlsRandom } from "../../handshake/random";
 import { createFragments, createPlaintext } from "../../record/builder";
 import { UdpContext } from "../../context/udp";
-import { DtlsContext } from "../../context/client";
+import { DtlsContext } from "../../context/dtls";
 import { EllipticCurves } from "../../handshake/extensions/ellipticCurves";
 import { Signature } from "../../handshake/extensions/signature";
 import { RecordContext } from "../../context/record";

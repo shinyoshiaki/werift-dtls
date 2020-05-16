@@ -2,7 +2,7 @@ import { ServerHello } from "../../handshake/message/server/hello";
 import { Certificate } from "../../handshake/message/certificate";
 import { ServerHelloDone } from "../../handshake/message/server/helloDone";
 import { HandshakeType } from "../../handshake/const";
-import { DtlsContext } from "../../context/client";
+import { DtlsContext } from "../../context/dtls";
 import { ServerKeyExchange } from "../../handshake/message/server/keyExchange";
 import { generateKeyPair } from "../../cipher/namedCurve";
 import { prfPreMasterSecret, prfMasterSecret } from "../../cipher/prf";
@@ -21,7 +21,7 @@ import { CipherContext } from "../../context/cipher";
 export class Flight5 {
   constructor(
     private udp: UdpContext,
-    private client: DtlsContext,
+    private dtls: DtlsContext,
     private record: RecordContext,
     private cipher: CipherContext
   ) {}
@@ -34,10 +34,10 @@ export class Flight5 {
       | ServerHelloDone
     )[]
   ) {
-    if (this.client.flight === 5) return;
+    if (this.dtls.flight === 5) return;
 
     messages.forEach((message) => {
-      handlers[message.msgType]({ client: this.client, cipher: this.cipher })(
+      handlers[message.msgType]({ client: this.dtls, cipher: this.cipher })(
         message
       );
     });
@@ -51,23 +51,23 @@ export class Flight5 {
     const clientKeyExchange = new ClientKeyExchange(
       this.cipher.localKeyPair?.publicKey!
     );
-    const fragments = createFragments(this.client)([clientKeyExchange]);
-    const packets = createPlaintext(this.client)(
-      fragments,
-      ++this.record.recordSequenceNumber
-    );
-    const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.client.bufferHandshake(
+    const fragments = createFragments(this.dtls)([clientKeyExchange]);
+    this.dtls.bufferHandshake(
       Buffer.concat(fragments.map((v) => v.fragment)),
       true,
       5
     );
+    const packets = createPlaintext(this.dtls)(
+      fragments,
+      ++this.record.recordSequenceNumber
+    );
+    const buf = Buffer.concat(packets.map((v) => v.serialize()));
     this.udp.send(buf);
   }
 
   sendChangeCipherSpec() {
     const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
-    const packets = createPlaintext(this.client)(
+    const packets = createPlaintext(this.dtls)(
       [{ type: ContentType.changeCipherSpec, fragment: changeCipherSpec }],
       ++this.record.recordSequenceNumber
     );
@@ -76,13 +76,13 @@ export class Flight5 {
   }
 
   sendFinished() {
-    const cache = Buffer.concat(this.client.handshakeCache.map((v) => v.data));
+    const cache = Buffer.concat(this.dtls.handshakeCache.map((v) => v.data));
 
     const localVerifyData = this.cipher.verifyData(cache);
     const finish = new Finished(localVerifyData);
-    const fragments = createFragments(this.client)([finish]);
-    this.client.epoch = 1;
-    const pkt = createPlaintext(this.client)(
+    const fragments = createFragments(this.dtls)([finish]);
+    this.dtls.epoch = 1;
+    const pkt = createPlaintext(this.dtls)(
       fragments,
       ++this.record.recordSequenceNumber
     )[0];
@@ -91,7 +91,7 @@ export class Flight5 {
     const buf = this.cipher.encryptPacket(pkt).serialize();
     this.udp.send(buf);
 
-    this.client.flight = 5;
+    this.dtls.flight = 5;
   }
 }
 

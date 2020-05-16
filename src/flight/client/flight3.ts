@@ -1,5 +1,5 @@
 import { UdpContext } from "../../context/udp";
-import { DtlsContext } from "../../context/client";
+import { DtlsContext } from "../../context/dtls";
 import { ClientHello } from "../../handshake/message/client/hello";
 import { ServerHelloVerifyRequest } from "../../handshake/message/server/helloVerifyRequest";
 import { createFragments, createPlaintext } from "../../record/builder";
