@@ -35,7 +35,10 @@ export const flight1 = async (
     new DtlsRandom(),
     Buffer.from([]),
     Buffer.from([]),
-    [CipherSuite.EcdheEcdsaWithAes128GcmSha256],
+    [
+      CipherSuite.EcdheEcdsaWithAes128GcmSha256,
+      CipherSuite.EcdheRsaWithAes128GcmSha256,
+    ],
     [0],
     [curve.extension, signature.extension]
   );

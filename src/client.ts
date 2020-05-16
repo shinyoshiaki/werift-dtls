@@ -22,6 +22,7 @@ export type Options = RemoteInfo;
 
 export class DtlsClient {
   onConnect?: () => void;
+  onData: (buf: Buffer) => void = () => {};
 
   udp = new UdpContext(createSocket("udp4"), this.options);
   dtls = new DtlsContext();
@@ -51,6 +52,7 @@ export class DtlsClient {
       case ContentType.applicationData:
         {
           console.log(messages[0].data?.toString());
+          this.onData(messages[0].data);
         }
         break;
     }
