@@ -99,4 +99,5 @@ describe("e2e/client", () => {
 - pion/dtls https://github.com/pion/dtls
 - nodertc/dtls https://github.com/nodertc/dtls
 - node-dtls https://github.com/Rantanen/node-dtls
+- node-dtls-client https://github.com/AlCalzone/node-dtls-client
 - OpenSSL
