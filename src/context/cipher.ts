@@ -6,6 +6,7 @@ import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
 import { prfVerifyDataClient } from "../cipher/prf";
 import { sessionType } from "../cipher/suites/abstract";
+import { PrivateKey } from "@fidm/x509";
 
 export class CipherContext {
   localRandom?: DtlsRandom;
@@ -17,7 +18,7 @@ export class CipherContext {
   masterSecret?: Buffer;
   cipher?: AEADCipher;
   namedCurve?: number;
-  localPrivateKey?: string;
+  localPrivateKey?: PrivateKey;
 
   encryptPacket(pkt: DtlsPlaintext) {
     const header = pkt.recordLayerHeader;

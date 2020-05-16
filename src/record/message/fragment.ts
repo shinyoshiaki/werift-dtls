@@ -47,6 +47,18 @@ export class FragmentedHandshake {
     let start = 0;
     const totalLength = this.fragment.length;
 
+    if (totalLength === 0)
+      return [
+        new FragmentedHandshake(
+          this.msg_type,
+          totalLength,
+          this.message_seq,
+          start,
+          0,
+          this.fragment
+        ),
+      ];
+
     const fragments: FragmentedHandshake[] = [];
     if (!maxFragmentLength) {
       maxFragmentLength = 1280 - (20 + 8) - (1 + 3 + 2 + 3 + 3);

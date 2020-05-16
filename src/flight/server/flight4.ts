@@ -5,7 +5,7 @@ import { RecordContext } from "../../context/record";
 import { CipherContext } from "../../context/cipher";
 import { ServerHello } from "../../handshake/message/server/hello";
 import { Certificate } from "../../handshake/message/certificate";
-import { generateKeySignature } from "../../cipher/x509";
+import { generateKeySignature, parseX509 } from "../../cipher/x509";
 import { ServerKeyExchange } from "../../handshake/message/server/keyExchange";
 import { ServerHelloDone } from "../../handshake/message/server/helloDone";
 
@@ -21,20 +21,26 @@ export class Flight4 {
     this.dtls.flight = 4;
     this.dtls.sequenceNumber = 1;
 
-    this.sendServerHello();
-    this.sendCertificate();
-    this.sendKeyExchange();
-    this.sendServerHelloDone();
+    const messages = [
+      this.sendServerHello(),
+      this.sendCertificate(),
+      this.sendServerKeyExchange(),
+      this.sendServerHelloDone(),
+    ];
+    messages.forEach((buf) => this.udp.send(buf));
   }
 
   sendServerHello() {
+    if (!this.cipher.localRandom || !this.cipher.cipherSuite)
+      throw new Error("");
+
     const serverHello = new ServerHello(
       this.dtls.version,
-      this.cipher.localRandom!,
+      this.cipher.localRandom,
       Buffer.from([0x00]),
-      this.cipher.cipherSuite!,
-      0,
-      []
+      this.cipher.cipherSuite,
+      0, // compression
+      [] // extensions
     );
     const fragments = createFragments(this.dtls)([serverHello]);
     const packets = createPlaintext(this.dtls)(
@@ -42,41 +48,51 @@ export class Flight4 {
       ++this.record.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendCertificate() {
-    // this.cipher.localPrivateKey = sign.key;
-    // const certificate = new Certificate([Buffer.from(sign.pem)]);
-    // const fragments = createFragments(this.dtls)([certificate]);
-    // const packets = createPlaintext(this.dtls)(
-    //   fragments,
-    //   ++this.record.recordSequenceNumber
-    // );
-    // const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    // this.udp.send(buf);
+    const sign = parseX509();
+    this.cipher.localPrivateKey = sign.key;
+    const certificate = new Certificate([Buffer.from(sign.cert)]);
+    const fragments = createFragments(this.dtls)([certificate]);
+    const packets = createPlaintext(this.dtls)(
+      fragments,
+      ++this.record.recordSequenceNumber
+    );
+    const buf = Buffer.concat(packets.map((v) => v.serialize()));
+    return buf;
   }
 
-  sendKeyExchange() {
-    const serverRandom = this.cipher.localRandom?.serialize()!;
-    const clientRandom = this.cipher.remoteRandom?.serialize()!;
+  sendServerKeyExchange() {
+    if (
+      !this.cipher.localRandom ||
+      !this.cipher.remoteRandom ||
+      !this.cipher.localKeyPair ||
+      !this.cipher.namedCurve ||
+      !this.cipher.localPrivateKey
+    )
+      throw new Error("");
+
+    const serverRandom = this.cipher.localRandom.serialize();
+    const clientRandom = this.cipher.remoteRandom.serialize();
     const signature = generateKeySignature(
       clientRandom,
       serverRandom,
-      this.cipher.localKeyPair?.publicKey!,
-      this.cipher.namedCurve!,
-      this.cipher.localPrivateKey!,
+      this.cipher.localKeyPair.publicKey,
+      this.cipher.namedCurve,
+      this.cipher.localPrivateKey,
       "sha256"
     );
     const keyExchange = new ServerKeyExchange(
-      Buffer.from([0, 3]),
-      this.cipher.namedCurve!,
-      this.cipher.localKeyPair?.privateKey.length!,
-      this.cipher.localKeyPair?.privateKey!,
+      Buffer.from([3, 0]),
+      this.cipher.namedCurve,
+      this.cipher.localKeyPair.publicKey.length,
+      this.cipher.localKeyPair.publicKey,
       4,
-      Buffer.from([0, 1]),
+      Buffer.from([3, 0]),
       signature.length,
-      Buffer.from(signature)
+      signature
     );
     const fragments = createFragments(this.dtls)([keyExchange]);
     const packets = createPlaintext(this.dtls)(
@@ -84,7 +100,7 @@ export class Flight4 {
       ++this.record.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendServerHelloDone() {
@@ -95,6 +111,6 @@ export class Flight4 {
       ++this.record.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 }

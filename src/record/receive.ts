@@ -42,7 +42,7 @@ export const parsePacket = (client: DtlsContext, cipher: CipherContext) => (
       }
       case ContentType.alert: {
         console.log("ContentType.alert", p);
-        return { type: ContentType.alert, data: undefined };
+        throw new Error("alert");
       }
       default: {
         console.log("default", p);

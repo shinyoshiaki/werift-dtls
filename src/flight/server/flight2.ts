@@ -10,6 +10,7 @@ import { RecordContext } from "../../context/record";
 import { CipherContext } from "../../context/cipher";
 import { ServerHelloVerifyRequest } from "../../handshake/message/server/helloVerifyRequest";
 import { randomBytes } from "crypto";
+import { CipherSuite } from "../../cipher/const";
 
 export const flight2 = (
   udp: UdpContext,
@@ -19,14 +20,14 @@ export const flight2 = (
 ) => (clientHello: ClientHello) => {
   cipher.localRandom = new DtlsRandom();
   cipher.remoteRandom = DtlsRandom.from(clientHello.random);
-  cipher.cipherSuite = clientHello.cipherSuites[0];
+  cipher.cipherSuite = CipherSuite.EcdheRsaWithAes128GcmSha256;
   clientHello.extensions.forEach((extension) => {
     switch (extension.type) {
       case EllipticCurves.type:
         {
           const curves = EllipticCurves.fromData(extension.data).data;
           cipher.namedCurve = supportedCurveFilter(curves)[0];
-          cipher.namedCurve;
+          console.log();
         }
         break;
       case Signature.type:
@@ -38,7 +39,9 @@ export const flight2 = (
     }
   });
 
-  cipher.localKeyPair = generateKeyPair(cipher.namedCurve!);
+  if (!cipher.namedCurve) return;
+
+  cipher.localKeyPair = generateKeyPair(cipher.namedCurve);
   dtls.cookie = randomBytes(20);
   const helloVerifyReq = new ServerHelloVerifyRequest(
     {

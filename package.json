@@ -40,6 +40,7 @@
     ]
   },
   "dependencies": {
+    "@fidm/x509": "^1.2.1",
     "binary-data": "^0.6.0",
     "date-fns": "^2.13.0",
     "elliptic": "^6.5.2",
