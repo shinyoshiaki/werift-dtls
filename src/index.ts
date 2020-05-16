@@ -1,3 +1,7 @@
+export { DtlsServer } from "./server";
+
+export { DtlsClient } from "./client";
+
 /* Client                                          Server
    ------                                          ------
 

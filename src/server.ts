@@ -68,6 +68,9 @@ export class DtlsServer {
           new Flight6(this.udp, this.dtls, this.record, this.cipher).exec(
             handshakes
           );
+          setTimeout(() => {
+            if (this.onConnect) this.onConnect();
+          }, 100);
         }
         break;
     }
