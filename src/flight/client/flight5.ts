@@ -53,7 +53,7 @@ export class Flight5 {
     );
     const fragments = createFragments(this.dtls)([clientKeyExchange]);
     this.dtls.bufferHandshake(
-      Buffer.concat(fragments.map((v) => v.fragment)),
+      fragments.map((v) => v.fragment),
       true,
       5
     );

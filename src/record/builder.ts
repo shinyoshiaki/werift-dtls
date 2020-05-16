@@ -3,7 +3,7 @@ import { DtlsPlaintext } from "./message/plaintext";
 import { DtlsContext } from "../context/dtls";
 import { Handshake } from "../typings/domain";
 
-type Fragment = { type: number; fragment: Buffer };
+export type Fragment = { type: number; fragment: Buffer };
 
 export const createFragments = (client: DtlsContext) => (
   handshakes: Handshake[]

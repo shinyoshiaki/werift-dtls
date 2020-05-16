@@ -13,15 +13,15 @@ export const flight3 = (
   const hello = client.lastFlight[0] as ClientHello;
   hello.cookie = verifyReq.cookie;
   const fragments = createFragments(client)([hello]);
+  client.bufferHandshake(
+    fragments.map((v) => v.fragment),
+    true,
+    3
+  );
   const packets = createPlaintext(client)(
     fragments,
     ++record.recordSequenceNumber
   );
   const buf = Buffer.concat(packets.map((v) => v.serialize()));
-  client.bufferHandshake(
-    Buffer.concat(fragments.map((v) => v.fragment)),
-    true,
-    3
-  );
   udp.send(buf);
 };

@@ -59,7 +59,7 @@ export class DtlsServer {
           if (this.dtls.flight === 1) {
             flight2(this.udp, this.dtls, this.record, this.cipher)(clientHello);
           } else {
-            this.dtls.bufferHandshake(handshakes[0].serialize(), false, 4);
+            this.dtls.bufferHandshake([handshakes[0].serialize()], false, 4);
             new Flight4(this.udp, this.dtls, this.record, this.cipher).exec();
           }
         }

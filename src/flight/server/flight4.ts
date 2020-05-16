@@ -46,7 +46,7 @@ export class Flight4 {
     );
     const fragments = createFragments(this.dtls)([serverHello]);
     this.dtls.bufferHandshake(
-      Buffer.concat(fragments.map((v) => v.fragment)),
+      fragments.map((v) => v.fragment),
       true,
       4
     );
@@ -64,7 +64,7 @@ export class Flight4 {
     const certificate = new Certificate([Buffer.from(sign.cert)]);
     const fragments = createFragments(this.dtls)([certificate]);
     this.dtls.bufferHandshake(
-      Buffer.concat(fragments.map((v) => v.fragment)),
+      fragments.map((v) => v.fragment),
       true,
       4
     );
@@ -108,7 +108,7 @@ export class Flight4 {
     );
     const fragments = createFragments(this.dtls)([keyExchange]);
     this.dtls.bufferHandshake(
-      Buffer.concat(fragments.map((v) => v.fragment)),
+      fragments.map((v) => v.fragment),
       true,
       4
     );
@@ -124,7 +124,7 @@ export class Flight4 {
     const handshake = new ServerHelloDone();
     const fragments = createFragments(this.dtls)([handshake]);
     this.dtls.bufferHandshake(
-      Buffer.concat(fragments.map((v) => v.fragment)),
+      fragments.map((v) => v.fragment),
       true,
       4
     );

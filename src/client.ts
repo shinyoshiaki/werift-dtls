@@ -96,7 +96,7 @@ export class DtlsClient {
             .filter((v) => v);
           this.flight4Buffer = [];
           this.dtls.bufferHandshake(
-            Buffer.concat(fragments.map((v) => v.serialize())),
+            fragments.map((v) => v.serialize()),
             false,
             4
           );

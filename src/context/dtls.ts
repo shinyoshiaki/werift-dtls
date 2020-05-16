@@ -1,4 +1,5 @@
 import { Handshake } from "../typings/domain";
+import { FragmentedHandshake } from "../record/message/fragment";
 
 export class DtlsContext {
   version = { major: 255 - 1, minor: 255 - 2 };
@@ -9,7 +10,14 @@ export class DtlsContext {
   handshakeCache: { isLocal: boolean; data: Buffer; flight: number }[] = [];
   cookie?: Buffer;
 
-  bufferHandshake(data: Buffer, isLocal: boolean, flight: number) {
-    this.handshakeCache = [...this.handshakeCache, { isLocal, data, flight }];
+  bufferHandshake(handshakes: Buffer[], isLocal: boolean, flight: number) {
+    this.handshakeCache = [
+      ...this.handshakeCache,
+      ...handshakes.map((data) => ({
+        isLocal,
+        data,
+        flight,
+      })),
+    ];
   }
 }

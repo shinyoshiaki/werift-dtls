@@ -49,7 +49,7 @@ export class Flight6 {
       return fragment;
     });
     this.dtls.bufferHandshake(
-      Buffer.concat(fragments.map((h) => h.serialize())),
+      fragments.map((h) => h.serialize()),
       false,
       5
     );
