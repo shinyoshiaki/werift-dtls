@@ -4,7 +4,8 @@ import {
   prfVerifyDataClient,
   prfEncryptionKeys,
 } from "../../src/cipher/prf";
-import { NamedCurveAlgorithm } from "../../src/cipher/namedCurve";
+import { NamedCurveAlgorithm } from "../../src/cipher/const";
+
 describe("cipher/prf", () => {
   test("prfPreMasterSecret", () => {
     const priv = Buffer.from([
