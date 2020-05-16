@@ -44,7 +44,6 @@ export class DtlsServer {
       case ContentType.applicationData:
         {
           console.log(messages[0].data?.toString());
-          this.send(Buffer.from("hi"));
         }
         break;
     }
