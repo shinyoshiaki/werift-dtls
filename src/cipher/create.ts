@@ -57,7 +57,6 @@ const ECDHE_PSK_KEY_EXCHANGE = createECDHEPSKKeyExchange();
 /**
  * Convert cipher value to cipher instance.
  * @param {number} cipher
- * @returns {AEADCipher}
  */
 export function createCipher(cipher: number) {
   switch (cipher) {
@@ -152,7 +151,7 @@ export function createCipher(cipher: number) {
       break;
   }
 
-  return null;
+  return (null as any) as AEADCipher;
 }
 
 /**

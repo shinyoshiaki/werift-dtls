@@ -26,12 +26,11 @@ export class DtlsServer {
     this.udp.socket.on("message", this.udpOnMessage);
   }
 
-  private flight5Buffer: FragmentedHandshake[] = [];
   private udpOnMessage = (data: Buffer, rInfo: RemoteInfo) => {
     this.udp.rinfo = rInfo;
     const messages = parsePacket(this.client, this.cipher)(data);
     if (messages.length === 0) return;
-    switch (messages[messages.length - 1].type) {
+    switch (messages[0].type) {
       case ContentType.handshake:
         {
           this.handleHandshakes(
@@ -48,7 +47,7 @@ export class DtlsServer {
   };
 
   handleHandshakes(handshakes: FragmentedHandshake[]) {
-    switch (handshakes[handshakes.length - 1].msg_type) {
+    switch (handshakes[0].msg_type) {
       case HandshakeType.client_hello:
         {
           const clientHello = ClientHello.deSerialize(handshakes[0].fragment);

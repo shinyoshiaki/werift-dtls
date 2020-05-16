@@ -4,7 +4,7 @@ import { DtlsContext } from "../context/client";
 import { CipherContext } from "../context/cipher";
 import { ContentType } from "./const";
 
-export const parsePacket = (client: DtlsContext, cipher: CipherContext) => (
+export const parsePacket = (dtls: DtlsContext, cipher: CipherContext) => (
   data: Buffer
 ) => {
   let start = 0;
@@ -19,14 +19,20 @@ export const parsePacket = (client: DtlsContext, cipher: CipherContext) => (
     start += 13 + fragmentLength;
   }
 
+  let changeCipherSpec = false;
+
   const results = packets.map((p) => {
     switch (p.recordLayerHeader.contentType) {
       case ContentType.changeCipherSpec: {
+        changeCipherSpec = true;
         return { type: ContentType.changeCipherSpec, data: undefined };
       }
       case ContentType.handshake: {
         let raw = p.fragment;
-        if (client.flight === 5) {
+        if (p.recordLayerHeader.epoch != 0) {
+          if (changeCipherSpec) {
+            return { type: -1, data: raw }; // expect client finished
+          }
           raw = cipher.decryptPacket(p);
         }
         return {

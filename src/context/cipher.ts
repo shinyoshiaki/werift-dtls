@@ -37,8 +37,9 @@ export class CipherContext {
   }
 
   decryptPacket(pkt: DtlsPlaintext) {
+    if (!this.cipher) throw new Error("");
     const header = pkt.recordLayerHeader;
-    return this.cipher?.decrypt(sessionType.CLIENT, pkt.fragment, {
+    return this.cipher.decrypt(sessionType.CLIENT, pkt.fragment, {
       type: header.contentType,
       version: decode(
         Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
@@ -46,7 +47,7 @@ export class CipherContext {
       ).version,
       epoch: header.epoch,
       sequenceNumber: header.sequenceNumber,
-    })!;
+    });
   }
 
   verifyData(buf: Buffer) {

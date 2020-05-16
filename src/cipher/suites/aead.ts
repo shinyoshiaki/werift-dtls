@@ -108,6 +108,7 @@ export default class AEADCipher extends Cipher {
   decrypt(type: number, data: Buffer, header: CipherHeader) {
     const isClient = type === sessionType.CLIENT;
     const iv = isClient ? this.serverNonce : this.clientNonce;
+    if (!iv) throw new Error();
     const final = createDecode(data);
 
     const explicitNonce = final.readBuffer(this.nonceExplicitLength);

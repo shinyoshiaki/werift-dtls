@@ -1,7 +1,6 @@
 import { ContentType } from "./const";
 import { DtlsPlaintext } from "./message/plaintext";
 import { DtlsContext } from "../context/client";
-import { RecordContext } from "../context/record";
 import { Handshake } from "../typings/domain";
 
 type Fragment = { type: number; fragment: Buffer };
