@@ -1,12 +1,8 @@
 import { generateKeyPairSync } from "crypto";
 import { ec } from "elliptic";
 import * as nacl from "tweetnacl";
+import { NamedCurveAlgorithm } from "./const";
 const elliptic = new ec("secp256k1");
-
-export enum NamedCurveAlgorithm {
-  namedCurveP256 = 23,
-  namedCurveX25519 = 29,
-}
 
 export const supportedCurves = [NamedCurveAlgorithm.namedCurveX25519];
 export const supportedCurveFilter = (curves: number[]) =>

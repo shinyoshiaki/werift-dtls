@@ -11,3 +11,8 @@ export enum CipherSuite {
 export enum HashAlgorithm {
   sha256 = 4,
 }
+
+export enum NamedCurveAlgorithm {
+  namedCurveP256 = 23,
+  namedCurveX25519 = 29,
+}

@@ -5,12 +5,12 @@ import { UdpContext } from "../../context/udp";
 import { DtlsContext } from "../../context/client";
 import { EllipticCurves } from "../../handshake/extensions/ellipticCurves";
 import { Signature } from "../../handshake/extensions/signature";
-import { NamedCurveAlgorithm } from "../../cipher/namedCurve";
 import { RecordContext } from "../../context/record";
 import {
   SignatureAlgorithm,
   CipherSuite,
   HashAlgorithm,
+  NamedCurveAlgorithm,
 } from "../../cipher/const";
 import { CipherContext } from "../../context/cipher";
 

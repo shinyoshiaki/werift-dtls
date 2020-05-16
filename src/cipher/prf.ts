@@ -1,8 +1,8 @@
-import { NamedCurveAlgorithm } from "./namedCurve";
 import { ec } from "elliptic";
 import * as nacl from "tweetnacl";
 import { createHmac, createHash } from "crypto";
 import { createDecode } from "binary-data";
+import { NamedCurveAlgorithm } from "./const";
 const elliptic = new ec("secp256k1");
 
 export function prfPreMasterSecret(

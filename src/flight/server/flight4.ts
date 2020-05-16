@@ -8,6 +8,7 @@ import { Certificate } from "../../handshake/message/certificate";
 import { generateKeySignature, parseX509 } from "../../cipher/x509";
 import { ServerKeyExchange } from "../../handshake/message/server/keyExchange";
 import { ServerHelloDone } from "../../handshake/message/server/helloDone";
+import { SignatureAlgorithm, HashAlgorithm } from "../../cipher/const";
 
 export class Flight4 {
   constructor(
@@ -85,12 +86,12 @@ export class Flight4 {
       "sha256"
     );
     const keyExchange = new ServerKeyExchange(
-      Buffer.from([3, 0]),
+      Buffer.from([3, 0]), // ec curve type
       this.cipher.namedCurve,
       this.cipher.localKeyPair.publicKey.length,
       this.cipher.localKeyPair.publicKey,
-      4,
-      Buffer.from([3, 0]),
+      HashAlgorithm.sha256, // hash algorithm
+      Buffer.from([SignatureAlgorithm.rsa, 0]), // signature algorithm
       signature.length,
       signature
     );
