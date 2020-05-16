@@ -1,6 +1,6 @@
 import { createFragments, createPlaintext } from "../../record/builder";
 import { UdpContext } from "../../context/udp";
-import { DtlsContext } from "../../context/client";
+import { DtlsContext } from "../../context/dtls";
 import { RecordContext } from "../../context/record";
 import { CipherContext } from "../../context/cipher";
 import { ServerHello } from "../../handshake/message/server/hello";
@@ -44,6 +44,11 @@ export class Flight4 {
       [] // extensions
     );
     const fragments = createFragments(this.dtls)([serverHello]);
+    this.dtls.bufferHandshake(
+      Buffer.concat(fragments.map((v) => v.fragment)),
+      true,
+      4
+    );
     const packets = createPlaintext(this.dtls)(
       fragments,
       ++this.record.recordSequenceNumber
@@ -57,6 +62,11 @@ export class Flight4 {
     this.cipher.localPrivateKey = sign.key;
     const certificate = new Certificate([Buffer.from(sign.cert)]);
     const fragments = createFragments(this.dtls)([certificate]);
+    this.dtls.bufferHandshake(
+      Buffer.concat(fragments.map((v) => v.fragment)),
+      true,
+      4
+    );
     const packets = createPlaintext(this.dtls)(
       fragments,
       ++this.record.recordSequenceNumber
@@ -96,6 +106,11 @@ export class Flight4 {
       signature
     );
     const fragments = createFragments(this.dtls)([keyExchange]);
+    this.dtls.bufferHandshake(
+      Buffer.concat(fragments.map((v) => v.fragment)),
+      true,
+      4
+    );
     const packets = createPlaintext(this.dtls)(
       fragments,
       ++this.record.recordSequenceNumber
@@ -107,6 +122,11 @@ export class Flight4 {
   sendServerHelloDone() {
     const handshake = new ServerHelloDone();
     const fragments = createFragments(this.dtls)([handshake]);
+    this.dtls.bufferHandshake(
+      Buffer.concat(fragments.map((v) => v.fragment)),
+      true,
+      4
+    );
     const packets = createPlaintext(this.dtls)(
       fragments,
       ++this.record.recordSequenceNumber

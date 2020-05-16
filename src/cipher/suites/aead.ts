@@ -1,7 +1,6 @@
 import * as crypto from "crypto";
-import { pHash } from "../utils";
-import Cipher, { CipherHeader, sessionType } from "./abstract";
-import { prfPHash, prfEncryptionKeys } from "../prf";
+import Cipher, { CipherHeader, SessionType } from "./abstract";
+import { prfEncryptionKeys } from "../prf";
 const {
   createDecode,
   encode,
@@ -62,7 +61,7 @@ export default class AEADCipher extends Cipher {
    * Encrypt message.
    */
   encrypt(type: number, data: Buffer, header: CipherHeader) {
-    const isClient = type === sessionType.CLIENT;
+    const isClient = type === SessionType.CLIENT;
     const iv = isClient ? this.clientNonce! : this.serverNonce!;
 
     const writeKey = isClient ? this.clientWriteKey : this.serverWriteKey;
@@ -106,7 +105,7 @@ export default class AEADCipher extends Cipher {
    * Decrypt message.
    */
   decrypt(type: number, data: Buffer, header: CipherHeader) {
-    const isClient = type === sessionType.CLIENT;
+    const isClient = type === SessionType.CLIENT;
     const iv = isClient ? this.serverNonce : this.clientNonce;
     if (!iv) throw new Error();
     const final = createDecode(data);

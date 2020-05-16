@@ -5,10 +5,11 @@ import { DtlsPlaintext } from "../record/message/plaintext";
 import { ProtocolVersion } from "../handshake/binary";
 import { encode, decode, types } from "binary-data";
 import { prfVerifyDataClient } from "../cipher/prf";
-import { sessionType } from "../cipher/suites/abstract";
+import { SessionType } from "../cipher/suites/abstract";
 import { PrivateKey } from "@fidm/x509";
 
 export class CipherContext {
+  sessionType?: SessionType;
   localRandom?: DtlsRandom;
   remoteRandom?: DtlsRandom;
   cipherSuite?: number;
@@ -22,7 +23,7 @@ export class CipherContext {
 
   encryptPacket(pkt: DtlsPlaintext) {
     const header = pkt.recordLayerHeader;
-    const enc = this.cipher?.encrypt(sessionType.CLIENT, pkt.fragment, {
+    const enc = this.cipher?.encrypt(this.sessionType!, pkt.fragment, {
       type: header.contentType,
       version: decode(
         Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
@@ -37,9 +38,10 @@ export class CipherContext {
   }
 
   decryptPacket(pkt: DtlsPlaintext) {
-    if (!this.cipher) throw new Error("");
+    if (!this.cipher || !this.sessionType) throw new Error("");
+
     const header = pkt.recordLayerHeader;
-    return this.cipher.decrypt(sessionType.CLIENT, pkt.fragment, {
+    const dec = this.cipher.decrypt(this.sessionType, pkt.fragment, {
       type: header.contentType,
       version: decode(
         Buffer.from(encode(header.protocolVersion, ProtocolVersion).slice()),
@@ -48,6 +50,7 @@ export class CipherContext {
       epoch: header.epoch,
       sequenceNumber: header.sequenceNumber,
     });
+    return dec;
   }
 
   verifyData(buf: Buffer) {

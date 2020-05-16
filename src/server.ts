@@ -1,5 +1,5 @@
 import { createSocket, RemoteInfo } from "dgram";
-import { DtlsContext } from "./context/client";
+import { DtlsContext } from "./context/dtls";
 import { UdpContext } from "./context/udp";
 import { parsePacket } from "./record/receive";
 import { HandshakeType } from "./handshake/const";
@@ -11,6 +11,8 @@ import { CipherContext } from "./context/cipher";
 import { ClientHello } from "./handshake/message/client/hello";
 import { flight2 } from "./flight/server/flight2";
 import { Flight4 } from "./flight/server/flight4";
+import { Flight6 } from "./flight/server/flight6";
+import { SessionType } from "./cipher/suites/abstract";
 
 type Options = RemoteInfo;
 
@@ -18,17 +20,18 @@ export class DtlsServer {
   onConnect?: () => void;
 
   udp = new UdpContext(createSocket("udp4"), this.options);
-  client = new DtlsContext();
+  dtls = new DtlsContext();
   record = new RecordContext();
   cipher = new CipherContext();
   constructor(private options: Partial<Options> = {}) {
     this.udp.socket.bind(options.port);
     this.udp.socket.on("message", this.udpOnMessage);
+    this.cipher.sessionType = SessionType.SERVER;
   }
 
   private udpOnMessage = (data: Buffer, rInfo: RemoteInfo) => {
     this.udp.rinfo = rInfo;
-    const messages = parsePacket(this.client, this.cipher)(data);
+    const messages = parsePacket(this.dtls, this.cipher)(data);
     if (messages.length === 0) return;
     switch (messages[0].type) {
       case ContentType.handshake:
@@ -51,28 +54,26 @@ export class DtlsServer {
       case HandshakeType.client_hello:
         {
           const clientHello = ClientHello.deSerialize(handshakes[0].fragment);
-          if (this.client.flight === 1) {
-            flight2(
-              this.udp,
-              this.client,
-              this.record,
-              this.cipher
-            )(clientHello);
+          if (this.dtls.flight === 1) {
+            flight2(this.udp, this.dtls, this.record, this.cipher)(clientHello);
           } else {
-            new Flight4(this.udp, this.client, this.record, this.cipher).exec();
+            this.dtls.bufferHandshake(handshakes[0].serialize(), false, 4);
+            new Flight4(this.udp, this.dtls, this.record, this.cipher).exec();
           }
         }
         break;
       case HandshakeType.client_key_exchange:
         {
-          handshakes;
+          new Flight6(this.udp, this.dtls, this.record, this.cipher).exec(
+            handshakes
+          );
         }
         break;
     }
   }
 
   send(buf: Buffer) {
-    const pkt = createPlaintext(this.client)(
+    const pkt = createPlaintext(this.dtls)(
       [{ type: ContentType.applicationData, fragment: buf }],
       ++this.record.recordSequenceNumber
     )[0];

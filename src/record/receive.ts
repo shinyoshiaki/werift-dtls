@@ -1,6 +1,6 @@
 import { DtlsPlaintext } from "./message/plaintext";
 import { FragmentedHandshake } from "./message/fragment";
-import { DtlsContext } from "../context/client";
+import { DtlsContext } from "../context/dtls";
 import { CipherContext } from "../context/cipher";
 import { ContentType } from "./const";
 
@@ -31,7 +31,7 @@ export const parsePacket = (dtls: DtlsContext, cipher: CipherContext) => (
         let raw = p.fragment;
         if (p.recordLayerHeader.epoch != 0) {
           if (changeCipherSpec && dtls.flight < 5) {
-            return { type: -1, data: raw }; // expect client finished
+            return { type: -1, data: p }; // expect client finished
           }
           raw = cipher.decryptPacket(p);
         }
