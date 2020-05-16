@@ -92,3 +92,11 @@ describe("e2e/client", () => {
   });
 });
 ```
+
+# reference
+- RFC5246
+- RFC6347
+- pion/dtls https://github.com/pion/dtls
+- nodertc/dtls https://github.com/nodertc/dtls
+- node-dtls https://github.com/Rantanen/node-dtls
+- OpenSSL
