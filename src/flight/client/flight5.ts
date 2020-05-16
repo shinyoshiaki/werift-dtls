@@ -35,6 +35,7 @@ export class Flight5 {
     )[]
   ) {
     if (this.dtls.flight === 5) return;
+    this.dtls.flight = 5;
 
     messages.forEach((message) => {
       handlers[message.msgType]({ client: this.dtls, cipher: this.cipher })(
@@ -48,8 +49,10 @@ export class Flight5 {
   }
 
   sendClientKeyExchange() {
+    if (!this.cipher.localKeyPair) throw new Error();
+
     const clientKeyExchange = new ClientKeyExchange(
-      this.cipher.localKeyPair?.publicKey!
+      this.cipher.localKeyPair.publicKey
     );
     const fragments = createFragments(this.dtls)([clientKeyExchange]);
     this.dtls.bufferHandshake(
@@ -90,8 +93,6 @@ export class Flight5 {
 
     const buf = this.cipher.encryptPacket(pkt).serialize();
     this.udp.send(buf);
-
-    this.dtls.flight = 5;
   }
 }
 

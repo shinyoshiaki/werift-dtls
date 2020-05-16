@@ -94,6 +94,7 @@ describe("e2e/client", () => {
 ```
 
 # reference
+
 - RFC5246
 - RFC6347
 - pion/dtls https://github.com/pion/dtls
@@ -101,3 +102,11 @@ describe("e2e/client", () => {
 - node-dtls https://github.com/Rantanen/node-dtls
 - node-dtls-client https://github.com/AlCalzone/node-dtls-client
 - OpenSSL
+
+# cert
+
+```sh
+openssl genrsa 2048 > key.pem
+openssl req -new -key key.pem > cert.csr
+openssl x509 -req -days 3650 -signkey key.pem -in cert.csr -out  cert.pem
+```

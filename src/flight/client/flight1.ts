@@ -16,7 +16,7 @@ import { CipherContext } from "../../context/cipher";
 
 export const flight1 = async (
   udp: UdpContext,
-  client: DtlsContext,
+  dtls: DtlsContext,
   record: RecordContext,
   cipher: CipherContext
 ) => {
@@ -28,6 +28,7 @@ export const flight1 = async (
   const signature = Signature.createEmpty();
   signature.data = [
     { hash: HashAlgorithm.sha256, signature: SignatureAlgorithm.ecdsa },
+    { hash: HashAlgorithm.sha256, signature: SignatureAlgorithm.rsa },
   ];
 
   const hello = new ClientHello(
@@ -36,22 +37,21 @@ export const flight1 = async (
     Buffer.from([]),
     Buffer.from([]),
     [
-      CipherSuite.EcdheEcdsaWithAes128GcmSha256,
       CipherSuite.EcdheRsaWithAes128GcmSha256,
+      CipherSuite.EcdheEcdsaWithAes128GcmSha256,
     ],
-    [0],
+    [0], // don't compress
     [curve.extension, signature.extension]
   );
 
-  const fragments = createFragments(client)([hello]);
-  const packets = createPlaintext(client)(
+  const fragments = createFragments(dtls)([hello]);
+  const packets = createPlaintext(dtls)(
     fragments,
     ++record.recordSequenceNumber
   );
   const buf = Buffer.concat(packets.map((v) => v.serialize()));
-
-  client.version = hello.clientVersion;
-  cipher.localRandom = DtlsRandom.from(hello.random);
-
   udp.send(buf);
+
+  dtls.version = hello.clientVersion;
+  cipher.localRandom = DtlsRandom.from(hello.random);
 };
