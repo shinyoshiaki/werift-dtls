@@ -20,6 +20,8 @@ export class CipherContext {
   cipher?: AEADCipher;
   namedCurve?: number;
   localPrivateKey?: PrivateKey;
+  certPem?: string;
+  keyPem?: string;
 
   encryptPacket(pkt: DtlsPlaintext) {
     const header = pkt.recordLayerHeader;

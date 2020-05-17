@@ -14,7 +14,7 @@ import { Flight4 } from "./flight/server/flight4";
 import { Flight6 } from "./flight/server/flight6";
 import { SessionType } from "./cipher/suites/abstract";
 
-type Options = RemoteInfo;
+type Options = { port: number; cert: string; key: string };
 
 export class DtlsServer {
   onConnect?: () => void;
@@ -25,6 +25,8 @@ export class DtlsServer {
   record = new RecordContext();
   cipher = new CipherContext();
   constructor(private options: Partial<Options> = {}) {
+    this.cipher.certPem = options.cert;
+    this.cipher.keyPem = options.key;
     this.udp.socket.bind(options.port);
     this.udp.socket.on("message", this.udpOnMessage);
     this.cipher.sessionType = SessionType.SERVER;

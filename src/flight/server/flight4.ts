@@ -59,7 +59,9 @@ export class Flight4 {
   }
 
   sendCertificate() {
-    const sign = parseX509();
+    if (!this.cipher.certPem || !this.cipher.keyPem) throw new Error();
+
+    const sign = parseX509(this.cipher.certPem, this.cipher.keyPem);
     this.cipher.localPrivateKey = sign.key;
     const certificate = new Certificate([Buffer.from(sign.cert)]);
     const fragments = createFragments(this.dtls)([certificate]);
