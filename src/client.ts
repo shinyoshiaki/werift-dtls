@@ -51,7 +51,7 @@ export class DtlsClient {
         break;
       case ContentType.applicationData:
         {
-          this.onData(messages[0].data);
+          this.onData(messages[0].data as Buffer);
         }
         break;
     }
@@ -110,6 +110,8 @@ export class DtlsClient {
                 return ServerKeyExchange.deSerialize(handshake.fragment);
               case HandshakeType.server_hello_done:
                 return ServerHelloDone.deSerialize(handshake.fragment);
+              default:
+                return (undefined as any) as ServerHello;
             }
           });
 

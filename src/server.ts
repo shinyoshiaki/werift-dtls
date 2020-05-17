@@ -46,7 +46,7 @@ export class DtlsServer {
         break;
       case ContentType.applicationData:
         {
-          this.onData(messages[0].data);
+          this.onData(messages[0].data as Buffer);
         }
         break;
     }

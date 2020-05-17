@@ -15,7 +15,7 @@ declare module "binary-data" {
   type Encode = (o: object, spec: object) => { slice: () => number[] };
   declare const encode: Encode;
 
-  type Decode = <T extends any>(buf: Buffer, spec: object) => T;
+  type Decode = (buf: Buffer, spec: object) => any;
   declare const decode: Decode;
 
   type CreateDecode = (buf: Buffer) => any;

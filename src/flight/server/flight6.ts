@@ -43,7 +43,7 @@ export class Flight6 {
         }
       })();
 
-      handlers[message.msgType]({ dtls: this.dtls, cipher: this.cipher })(
+      handlers[message!.msgType]({ dtls: this.dtls, cipher: this.cipher })(
         message
       );
       return fragment;
