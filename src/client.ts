@@ -41,6 +41,10 @@ export class DtlsClient {
   private flight4Buffer: FragmentedHandshake[] = [];
   private udpOnMessage = (data: Buffer) => {
     const messages = parsePacket(this.dtls, this.cipher)(data);
+    if (messages.length === 0) {
+      // this is not dtls message
+      return;
+    }
     switch (messages[messages.length - 1].type) {
       case ContentType.handshake:
         {

@@ -4,11 +4,14 @@ import { createSocket } from "dgram";
 
 test("e2e/self", (done) => {
   const word = "self";
+  const port = 55557;
+  const socket = createSocket("udp4");
+  socket.bind(port);
   const server = new DtlsServer({
-    port: 55557,
+    port,
     cert: readFileSync("assets/cert.pem").toString(),
     key: readFileSync("assets/key.pem").toString(),
-    socket: createSocket("udp4"),
+    socket,
   });
   server.onData = (data) => {
     expect(data.toString()).toBe(word);

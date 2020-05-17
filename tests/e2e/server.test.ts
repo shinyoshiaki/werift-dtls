@@ -5,11 +5,14 @@ import { createSocket } from "dgram";
 
 describe("e2e/server", () => {
   test("openssl", (done) => {
+    const port = 55556;
+    const socket = createSocket("udp4");
+    socket.bind(port);
     const server = new DtlsServer({
-      port: 55556,
+      port,
       cert: readFileSync("assets/cert.pem").toString(),
       key: readFileSync("assets/key.pem").toString(),
-      socket: createSocket("udp4"),
+      socket,
     });
     server.onConnect = () => {
       server.send(Buffer.from("my_dtls_server"));

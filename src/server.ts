@@ -27,7 +27,6 @@ export class DtlsServer {
   constructor(private options: Options) {
     this.cipher.certPem = options.cert;
     this.cipher.keyPem = options.key;
-    this.udp.socket.bind(options.port);
     this.udp.socket.on("message", this.udpOnMessage);
     this.cipher.sessionType = SessionType.SERVER;
   }
