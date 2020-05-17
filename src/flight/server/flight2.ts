@@ -24,13 +24,11 @@ export const flight2 = (
         {
           const curves = EllipticCurves.fromData(extension.data).data;
           cipher.namedCurve = NamedCurveAlgorithm.namedCurveX25519;
-          console.log();
         }
         break;
       case Signature.type:
         {
           const signature = Signature.fromData(extension.data).data;
-          console.log();
         }
         break;
     }

@@ -106,7 +106,8 @@ describe("e2e/client", () => {
 # cert
 
 ```sh
-openssl genrsa 2048 > key.pem
+openssl genrsa 2048 > rsa.key
+openssl pkcs8 -in rsa.key -topk8 -out key.pem -nocrypt
 openssl req -new -key key.pem > cert.csr
 openssl x509 -req -days 3650 -signkey key.pem -in cert.csr -out  cert.pem
 ```

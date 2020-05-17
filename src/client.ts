@@ -51,7 +51,6 @@ export class DtlsClient {
         break;
       case ContentType.applicationData:
         {
-          console.log(messages[0].data?.toString());
           this.onData(messages[0].data);
         }
         break;
@@ -121,7 +120,6 @@ export class DtlsClient {
         break;
       case HandshakeType.finished:
         {
-          console.log("finished");
           if (this.onConnect) this.onConnect();
         }
         break;

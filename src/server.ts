@@ -46,7 +46,6 @@ export class DtlsServer {
         break;
       case ContentType.applicationData:
         {
-          console.log(messages[0].data?.toString());
           this.onData(messages[0].data);
         }
         break;

@@ -99,12 +99,12 @@ export class Flight4 {
       "sha256"
     );
     const keyExchange = new ServerKeyExchange(
-      Buffer.from([3, 0]), // ec curve type
+      3, // ec curve type
       this.cipher.namedCurve,
       this.cipher.localKeyPair.publicKey.length,
       this.cipher.localKeyPair.publicKey,
       HashAlgorithm.sha256, // hash algorithm
-      Buffer.from([SignatureAlgorithm.rsa, 0]), // signature algorithm
+      SignatureAlgorithm.rsa, // signature algorithm
       signature.length,
       signature
     );

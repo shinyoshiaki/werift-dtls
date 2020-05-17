@@ -1,30 +1,31 @@
-import { encode, types, decode } from "binary-data";
+import { types, decode } from "binary-data";
 import { HandshakeType } from "../../const";
 import { Handshake } from "../../../typings/domain";
 import { FragmentedHandshake } from "../../../record/message/fragment";
+import { encodeBuffer } from "../../../util/binary";
 
 export class ServerKeyExchange implements Handshake {
   msgType = HandshakeType.server_key_exchange;
   messageSeq?: number;
 
   static readonly spec = {
-    ellipticCurveType: types.buffer(2),
-    namedCurve: types.uint8,
+    ellipticCurveType: types.uint8,
+    namedCurve: types.uint16be,
     publicKeyLength: types.uint8,
     publicKey: types.buffer((ctx: any) => ctx.current.publicKeyLength),
     hashAlgorithm: types.uint8,
-    signatureAlgorithm: types.buffer(2),
-    signatureLength: types.uint8,
+    signatureAlgorithm: types.uint8,
+    signatureLength: types.uint16be,
     signature: types.buffer((ctx: any) => ctx.current.signatureLength),
   };
 
   constructor(
-    public ellipticCurveType: Buffer,
+    public ellipticCurveType: number,
     public namedCurve: number,
     public publicKeyLength: number,
     public publicKey: Buffer,
     public hashAlgorithm: number,
-    public signatureAlgorithm: Buffer,
+    public signatureAlgorithm: number,
     public signatureLength: number,
     public signature: Buffer
   ) {}
@@ -51,8 +52,8 @@ export class ServerKeyExchange implements Handshake {
   }
 
   serialize() {
-    const res = encode(this, ServerKeyExchange.spec).slice();
-    return Buffer.from(res);
+    const res = encodeBuffer(this, ServerKeyExchange.spec);
+    return res;
   }
 
   toFragment() {

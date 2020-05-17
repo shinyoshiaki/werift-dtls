@@ -24,7 +24,6 @@ describe("e2e/client", () => {
       };
       server.stdout.on("data", (data: string) => {
         if (data.includes("my_dtls")) {
-          console.log(data);
           done();
           client.close();
         }
