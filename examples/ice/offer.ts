@@ -44,8 +44,6 @@ const reader = readline.createInterface({
     reader.on("line", listen);
   });
 
-  let dtls: DtlsServer;
-  // connect
   await new Promise((r) => {
     const listen = async () => {
       console.log("start connect");
@@ -53,9 +51,12 @@ const reader = readline.createInterface({
       reader.removeListener("line", listen);
 
       await connection.connect();
+      await connection.send(Buffer.from("ice offer"));
+      console.log((await connection.recv()).toString());
+
       console.log("server start");
 
-      dtls = new DtlsServer({
+      const dtls = new DtlsServer({
         ...connection.connectedSocket,
         cert: readFileSync("assets/cert.pem").toString(),
         key: readFileSync("assets/key.pem").toString(),

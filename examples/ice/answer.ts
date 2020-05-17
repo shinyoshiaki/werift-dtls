@@ -42,7 +42,6 @@ const reader = readline.createInterface({
     reader.on("line", listen);
   });
 
-  let dtls: DtlsClient;
   // connect
   await new Promise((r) => {
     const listen = async () => {
@@ -51,10 +50,13 @@ const reader = readline.createInterface({
       reader.removeListener("line", listen);
 
       await connection.connect();
+      await connection.send(Buffer.from("ice answer"));
+      console.log((await connection.recv()).toString());
+
       await new Promise((r) => setTimeout(r, 1000));
       console.log("client start");
 
-      dtls = new DtlsClient(connection.connectedSocket);
+      const dtls = new DtlsClient(connection.connectedSocket);
       dtls.onConnect = async () => {
         console.log("dtls connected");
         await new Promise((r) => setTimeout(r, 1000));
