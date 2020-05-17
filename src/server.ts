@@ -1,4 +1,4 @@
-import { createSocket, RemoteInfo } from "dgram";
+import { createSocket, RemoteInfo, Socket } from "dgram";
 import { DtlsContext } from "./context/dtls";
 import { UdpContext } from "./context/udp";
 import { parsePacket } from "./record/receive";
@@ -14,17 +14,17 @@ import { Flight4 } from "./flight/server/flight4";
 import { Flight6 } from "./flight/server/flight6";
 import { SessionType } from "./cipher/suites/abstract";
 
-type Options = { port: number; cert: string; key: string };
+type Options = { port: number; cert: string; key: string; socket: Socket };
 
 export class DtlsServer {
   onConnect?: () => void;
   onData: (buf: Buffer) => void = () => {};
 
-  udp = new UdpContext(createSocket("udp4"), this.options);
+  udp = new UdpContext(this.options.socket, this.options);
   dtls = new DtlsContext();
   record = new RecordContext();
   cipher = new CipherContext();
-  constructor(private options: Partial<Options> = {}) {
+  constructor(private options: Options) {
     this.cipher.certPem = options.cert;
     this.cipher.keyPem = options.key;
     this.udp.socket.bind(options.port);

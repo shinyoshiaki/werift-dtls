@@ -1,4 +1,4 @@
-import { createSocket, RemoteInfo } from "dgram";
+import { Socket } from "dgram";
 import { flight1 } from "./flight/client/flight1";
 import { DtlsContext } from "./context/dtls";
 import { UdpContext } from "./context/udp";
@@ -18,17 +18,17 @@ import { ContentType } from "./record/const";
 import { CipherContext } from "./context/cipher";
 import { SessionType } from "./cipher/suites/abstract";
 
-export type Options = RemoteInfo;
+export type Options = { address: string; port: number; socket: Socket };
 
 export class DtlsClient {
   onConnect?: () => void;
   onData: (buf: Buffer) => void = () => {};
 
-  udp = new UdpContext(createSocket("udp4"), this.options);
+  udp = new UdpContext(this.options.socket, this.options);
   dtls = new DtlsContext();
   record = new RecordContext();
   cipher = new CipherContext();
-  constructor(private options: Partial<Options> = {}) {
+  constructor(private options: Options) {
     this.udp.socket.on("message", this.udpOnMessage);
     this.udpOnListening();
     this.cipher.sessionType = SessionType.CLIENT;

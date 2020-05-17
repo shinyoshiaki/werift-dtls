@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import { DtlsServer } from "../../src/server";
 import { readFileSync } from "fs";
+import { createSocket } from "dgram";
 
 describe("e2e/server", () => {
   test("openssl", (done) => {
@@ -8,6 +9,7 @@ describe("e2e/server", () => {
       port: 55556,
       cert: readFileSync("assets/cert.pem").toString(),
       key: readFileSync("assets/key.pem").toString(),
+      socket: createSocket("udp4"),
     });
     server.onConnect = () => {
       server.send(Buffer.from("my_dtls_server"));

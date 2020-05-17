@@ -1,5 +1,6 @@
 import { DtlsServer, DtlsClient } from "../../src";
 import { readFileSync } from "fs";
+import { createSocket } from "dgram";
 
 test("e2e/self", (done) => {
   const word = "self";
@@ -7,12 +8,17 @@ test("e2e/self", (done) => {
     port: 55557,
     cert: readFileSync("assets/cert.pem").toString(),
     key: readFileSync("assets/key.pem").toString(),
+    socket: createSocket("udp4"),
   });
   server.onData = (data) => {
     expect(data.toString()).toBe(word);
     server.send(Buffer.from(word + "_server"));
   };
-  const client = new DtlsClient({ address: "127.0.0.1", port: 55557 });
+  const client = new DtlsClient({
+    address: "127.0.0.1",
+    port: 55557,
+    socket: createSocket("udp4"),
+  });
   client.onConnect = () => {
     client.send(Buffer.from(word));
   };
