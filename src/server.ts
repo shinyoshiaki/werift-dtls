@@ -14,7 +14,13 @@ import { Flight4 } from "./flight/server/flight4";
 import { Flight6 } from "./flight/server/flight6";
 import { SessionType } from "./cipher/suites/abstract";
 
-type Options = { port: number; cert: string; key: string; socket: Socket };
+type Options = {
+  port?: number;
+  address?: string;
+  cert: string;
+  key: string;
+  socket: Socket;
+};
 
 export class DtlsServer {
   onConnect?: () => void;

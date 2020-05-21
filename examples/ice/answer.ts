@@ -37,6 +37,7 @@ const reader = readline.createInterface({
       reader.prompt();
       reader.removeListener("line", listen);
       r();
+      console.log("answer start connect first after offer set answer");
     };
 
     reader.on("line", listen);

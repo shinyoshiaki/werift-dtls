@@ -8,7 +8,6 @@ test("e2e/self", (done) => {
   const socket = createSocket("udp4");
   socket.bind(port);
   const server = new DtlsServer({
-    port,
     cert: readFileSync("assets/cert.pem").toString(),
     key: readFileSync("assets/key.pem").toString(),
     socket,

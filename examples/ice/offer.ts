@@ -39,7 +39,6 @@ const reader = readline.createInterface({
       reader.prompt();
       reader.removeListener("line", listen);
       r();
-      console.log("offer start connect first");
     };
     reader.on("line", listen);
   });
