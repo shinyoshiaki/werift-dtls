@@ -39,4 +39,5 @@ test("e2e/ice", async (done) => {
     expect(buf.toString()).toBe("dtls_over_ice");
     done();
   };
+  dtlsClient.connect();
 });

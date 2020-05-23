@@ -1,5 +1,5 @@
 {
-  "name": "my-dtls",
+  "name": "rainy-dtls",
   "version": "0.0.1",
   "description": "DTLS protocol implementation for Node.js written in TypeScript.",
   "homepage": "https://github.com/shinyoshiaki/my-dtls",

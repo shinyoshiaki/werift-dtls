@@ -8,4 +8,5 @@ setTimeout(() => {
     socket: createSocket("udp4"),
   });
   client.onConnect = () => client.send(Buffer.from("hello"));
+  client.connect();
 }, 100);

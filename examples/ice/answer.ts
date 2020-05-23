@@ -72,6 +72,7 @@ const reader = readline.createInterface({
       dtls.onData = (v) => {
         console.log(v.toString());
       };
+      dtls.connect();
     };
     reader.on("line", listen);
   });

@@ -18,7 +18,7 @@ test("e2e/self", (done) => {
   };
   const client = new DtlsClient({
     address: "127.0.0.1",
-    port: 55557,
+    port,
     socket: createSocket("udp4"),
   });
   client.onConnect = () => {
@@ -28,4 +28,5 @@ test("e2e/self", (done) => {
     expect(data.toString()).toBe(word + "_server");
     done();
   };
+  client.connect();
 });
