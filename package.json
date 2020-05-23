@@ -1,11 +1,11 @@
 {
   "name": "rainy-dtls",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "DTLS protocol implementation for Node.js written in TypeScript.",
-  "homepage": "https://github.com/shinyoshiaki/my-dtls",
+  "homepage": "https://github.com/shinyoshiaki/rainy-dtls",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shinyoshiaki/my-dtls.git"
+    "url": "git+https://github.com/shinyoshiaki/rainy-dtls.git"
   },
   "license": "MIT",
   "author": {
@@ -19,6 +19,7 @@
     "fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
     "lint": "eslint src/**/*.ts",
+    "publish": "npm publish --access=public",
     "server": "ts-node --files --project tsconfig.json examples/server.ts",
     "test": "jest --forceExit",
     "type": "tsc --noEmit -p .",
