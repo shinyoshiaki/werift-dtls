@@ -1,15 +1,13 @@
 import { UdpContext } from "./context/udp";
-import { Socket } from "dgram";
 import { DtlsContext } from "./context/dtls";
 import { RecordContext } from "./context/record";
 import { CipherContext } from "./context/cipher";
 import { createPlaintext } from "./record/builder";
 import { ContentType } from "./record/const";
+import { Transport } from "./transport";
 
 type Options = {
-  port?: number;
-  address?: string;
-  socket: Socket;
+  socket: Transport;
 };
 
 export abstract class DtlsSocket {
@@ -21,7 +19,7 @@ export abstract class DtlsSocket {
   cipher = new CipherContext();
 
   constructor(options: Options) {
-    this.udp = new UdpContext(options.socket, options);
+    this.udp = new UdpContext(options.socket);
   }
 
   send(buf: Buffer) {

@@ -1,9 +1,9 @@
-import { Socket, RemoteInfo } from "dgram";
+import { Transport } from "../transport";
 
 export class UdpContext {
-  constructor(public socket: Socket, public rinfo: Partial<RemoteInfo>) {}
+  constructor(public socket: Transport) {}
 
   send(buf: Buffer) {
-    this.socket.send(buf, this.rinfo.port, this.rinfo.address);
+    this.socket.send(buf);
   }
 }

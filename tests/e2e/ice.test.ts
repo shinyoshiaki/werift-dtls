@@ -1,5 +1,5 @@
 import { Connection, Candidate } from "icet";
-import { DtlsServer, DtlsClient } from "../../src";
+import { DtlsServer, DtlsClient, createIceTransport } from "../../src";
 import { readFileSync } from "fs";
 
 test("e2e/ice", async (done) => {
@@ -27,14 +27,14 @@ test("e2e/ice", async (done) => {
   await Promise.all([offer.connect(), answer.connect()]);
 
   const dtlsServer = new DtlsServer({
-    ...offer.connectedSocket,
+    socket: createIceTransport(offer),
     cert: readFileSync("assets/cert.pem").toString(),
     key: readFileSync("assets/key.pem").toString(),
   });
   dtlsServer.onConnect = () => {
     dtlsServer.send(Buffer.from("dtls_over_ice"));
   };
-  const dtlsClient = new DtlsClient({ ...answer.connectedSocket });
+  const dtlsClient = new DtlsClient({ socket: createIceTransport(answer) });
   dtlsClient.onData = (buf) => {
     expect(buf.toString()).toBe("dtls_over_ice");
     done();
