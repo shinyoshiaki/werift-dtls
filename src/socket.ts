@@ -1,4 +1,4 @@
-import { UdpContext } from "./context/udp";
+import { TransportContext } from "./context/transport";
 import { DtlsContext } from "./context/dtls";
 import { RecordContext } from "./context/record";
 import { CipherContext } from "./context/cipher";
@@ -13,13 +13,13 @@ type Options = {
 export abstract class DtlsSocket {
   onConnect: () => void = () => {};
   onData: (buf: Buffer) => void = () => {};
-  udp: UdpContext;
+  udp: TransportContext;
   dtls = new DtlsContext();
   record = new RecordContext();
   cipher = new CipherContext();
 
   constructor(options: Options) {
-    this.udp = new UdpContext(options.socket);
+    this.udp = new TransportContext(options.socket);
   }
 
   send(buf: Buffer) {

@@ -1,6 +1,6 @@
 import { Transport } from "../transport";
 
-export class UdpContext {
+export class TransportContext {
   constructor(public socket: Transport) {}
 
   send(buf: Buffer) {
