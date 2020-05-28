@@ -48,7 +48,8 @@ export class DtlsServer extends DtlsSocket {
     switch (handshakes[0].msg_type) {
       case HandshakeType.client_hello:
         {
-          const clientHello = ClientHello.deSerialize(handshakes[0].fragment);
+          const assemble = FragmentedHandshake.assemble(handshakes);
+          const clientHello = ClientHello.deSerialize(assemble.fragment);
           if (this.dtls.flight === 1) {
             flight2(this.udp, this.dtls, this.record, this.cipher)(clientHello);
           } else {
