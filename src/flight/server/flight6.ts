@@ -48,7 +48,7 @@ export class Flight6 {
       );
       return fragment;
     });
-    this.dtls.bufferHandshake(
+    this.dtls.bufferHandshakeCache(
       fragments.map((h) => h.serialize()),
       false,
       5
@@ -119,4 +119,4 @@ handlers[HandshakeType.client_key_exchange] = ({ cipher }) => (
   );
 };
 
-handlers[HandshakeType.finished] = () => () => {};
+handlers[HandshakeType.finished] = () => (message: Finished) => {};
