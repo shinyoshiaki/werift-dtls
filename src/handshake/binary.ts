@@ -1,5 +1,5 @@
 import { types } from "binary-data";
-const { uint16be, uint24be, buffer, array, uint32be, uint8, string } = types;
+const { uint16be, uint24be, buffer, array, uint8, string } = types;
 
 // export const Random = {
 //   gmt_unix_time: uint32be,
@@ -18,6 +18,6 @@ export const ASN11Cert = buffer(uint24be);
 export const ClientCertificateType = uint8;
 export const DistinguishedName = string(uint16be);
 
-export const SignatureAlgorithm = uint16be;
+export const SignatureAlgorithm = { hash: uint8, signature: uint8 };
 
 export const ProtocolVersion = { major: uint8, minor: uint8 };

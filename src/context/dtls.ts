@@ -14,7 +14,7 @@ export class DtlsContext {
   }[] = [];
   cookie?: Buffer;
   requestedCertificateTypes: number[] = [];
-  requestedSignatureAlgorithms: number[] = [];
+  requestedSignatureAlgorithms: { hash: number; signature: number }[] = [];
 
   bufferHandshakeCache(
     handshakes: FragmentedHandshake[],
