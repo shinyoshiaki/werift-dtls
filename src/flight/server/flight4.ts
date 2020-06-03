@@ -116,8 +116,14 @@ export class Flight4 {
 
   sendCertificateRequest() {
     const handshake = new ServerCertificateRequest(
-      [1], // clientCertificateTypeRSASign
-      [{ hash: HashAlgorithm.sha256, signature: SignatureAlgorithm.rsa }],
+      [
+        1, // clientCertificateTypeRSASign
+        64, // clientCertificateTypeECDSASign
+      ],
+      [
+        { hash: HashAlgorithm.sha256, signature: SignatureAlgorithm.rsa },
+        { hash: HashAlgorithm.sha256, signature: SignatureAlgorithm.ecdsa },
+      ],
       []
     );
     const buf = this.createPacket([handshake]);
