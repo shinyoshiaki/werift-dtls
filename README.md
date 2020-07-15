@@ -1,96 +1,40 @@
-server/client
+# Example
 
 ```typescript
-import { DtlsServer, DtlsClient } from "../../src";
+  import { DtlsServer, DtlsClient, createUdpTransport } from "../../src";
+  import { readFileSync } from "fs";
+  import { createSocket } from "dgram";
 
-test("e2e/self", (done) => {
-  const word = "self";
-  const server = new DtlsServer({ port: 55557 });
+  const port = 55557;
+
+  const socket = createSocket("udp4");
+  socket.bind(port);
+
+  const server = new DtlsServer({
+    cert: readFileSync("assets/cert.pem").toString(),
+    key: readFileSync("assets/key.pem").toString(),
+    transport: createUdpTransport(socket),
+  });
+
+  const client = new DtlsClient({
+    transport: createUdpTransport(createSocket("udp4"), {
+      address: "127.0.0.1",
+      port,
+    }),
+  });
+  
   server.onData = (data) => {
-    expect(data.toString()).toBe(word);
-    server.send(Buffer.from(word + "_server"));
+    console.log(data.toString())
   };
-  const client = new DtlsClient({ address: "127.0.0.1", port: 55557 });
+
   client.onConnect = () => {
-    client.send(Buffer.from(word));
+    client.send(Buffer.from("ping"));
   };
   client.onData = (data) => {
-    expect(data.toString()).toBe(word + "_server");
-    done();
+    console.log(data.toString())
   };
-});
-```
 
-server/client(OpenSSL)
-
-```typescript
-import { spawn } from "child_process";
-import { DtlsServer } from "../../src/server";
-
-describe("e2e/server", () => {
-  test("openssl", (done) => {
-    const server = new DtlsServer({ port: 55556 });
-    server.onConnect = () => {
-      server.send(Buffer.from("my_dtls_server"));
-    };
-
-    setTimeout(() => {
-      const client = spawn("openssl", [
-        "s_client",
-        "-dtls1_2",
-        "-connect",
-        "127.0.0.1:55556",
-      ]);
-      client.stdout.setEncoding("ascii");
-      client.stdout.on("data", (data: string) => {
-        if (data.includes("my_dtls_server")) {
-          console.log(data);
-          done();
-          server.close();
-        }
-      });
-    }, 100);
-  });
-});
-```
-
-client/server(OpenSSL)
-
-```typescript
-import { spawn } from "child_process";
-import { DtlsClient } from "../../src/client";
-
-describe("e2e/client", () => {
-  test("openssl", (done) => {
-    const args = [
-      "s_server",
-      "-cert",
-      "./assets/cert.pem",
-      "-key",
-      "./assets/key.pem",
-      "-dtls1_2",
-      "-accept",
-      "127.0.0.1:55555",
-    ];
-
-    const server = spawn("openssl", args);
-    server.stdout.setEncoding("ascii");
-
-    setTimeout(() => {
-      const client = new DtlsClient({ address: "127.0.0.1", port: 55555 });
-      client.onConnect = () => {
-        client.send(Buffer.from("my_dtls"));
-      };
-      server.stdout.on("data", (data: string) => {
-        if (data.includes("my_dtls")) {
-          console.log(data);
-          done();
-          client.close();
-        }
-      });
-    }, 100);
-  });
-});
+  client.connect();
 ```
 
 # reference
@@ -103,7 +47,7 @@ describe("e2e/client", () => {
 - node-dtls-client https://github.com/AlCalzone/node-dtls-client
 - OpenSSL
 
-# cert
+# create key & cert
 
 ```sh
 openssl genrsa 2048 > rsa.key
