@@ -3,7 +3,7 @@ DTLS v1.2 server/client Implementation for TypeScript
 # Example
 
 ```typescript
-  import { DtlsServer, DtlsClient, createUdpTransport } from "../../src";
+  import { DtlsServer, DtlsClient, createUdpTransport } from "rainy-dtls";
   import { readFileSync } from "fs";
   import { createSocket } from "dgram";
 
