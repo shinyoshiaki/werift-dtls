@@ -2,6 +2,7 @@ import readline from "readline";
 import { Connection, Candidate } from "icet";
 import { DtlsServer } from "../../src";
 import { readFileSync } from "fs";
+import { createIceTransport } from "../transport/ice";
 
 const reader = readline.createInterface({
   input: process.stdin,
@@ -56,7 +57,7 @@ const reader = readline.createInterface({
       console.log("server start");
 
       const dtls = new DtlsServer({
-        ...connection.connectedSocket,
+        transport: createIceTransport(connection),
         cert: readFileSync("assets/cert.pem").toString(),
         key: readFileSync("assets/key.pem").toString(),
       });

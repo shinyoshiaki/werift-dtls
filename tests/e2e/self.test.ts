@@ -10,14 +10,14 @@ test("e2e/self", (done) => {
   const server = new DtlsServer({
     cert: readFileSync("assets/cert.pem").toString(),
     key: readFileSync("assets/key.pem").toString(),
-    socket: createUdpTransport(socket),
+    transport: createUdpTransport(socket),
   });
   server.onData = (data) => {
     expect(data.toString()).toBe(word);
     server.send(Buffer.from(word + "_server"));
   };
   const client = new DtlsClient({
-    socket: createUdpTransport(createSocket("udp4"), {
+    transport: createUdpTransport(createSocket("udp4"), {
       address: "127.0.0.1",
       port,
     }),

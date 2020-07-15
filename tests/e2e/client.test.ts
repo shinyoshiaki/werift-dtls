@@ -21,7 +21,7 @@ describe("e2e/client", () => {
 
     setTimeout(() => {
       const client = new DtlsClient({
-        socket: createUdpTransport(createSocket("udp4"), {
+        transport: createUdpTransport(createSocket("udp4"), {
           address: "127.0.0.1",
           port: 55555,
         }),

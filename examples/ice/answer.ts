@@ -1,6 +1,7 @@
 import { Connection, Candidate } from "icet";
 import readline from "readline";
 import { DtlsClient } from "../../src";
+import { createIceTransport } from "../transport/ice";
 
 const reader = readline.createInterface({
   input: process.stdin,
@@ -57,7 +58,9 @@ const reader = readline.createInterface({
       await new Promise((r) => setTimeout(r, 1000));
       console.log("client start");
 
-      const dtls = new DtlsClient(connection.connectedSocket);
+      const dtls = new DtlsClient({
+        transport: createIceTransport(connection),
+      });
       dtls.onConnect = async () => {
         console.log("dtls connected");
         await new Promise((r) => setTimeout(r, 1000));

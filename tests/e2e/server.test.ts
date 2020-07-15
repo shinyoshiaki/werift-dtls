@@ -12,7 +12,7 @@ describe("e2e/server", () => {
     const server = new DtlsServer({
       cert: readFileSync("assets/cert.pem").toString(),
       key: readFileSync("assets/key.pem").toString(),
-      socket: createUdpTransport(socket),
+      transport: createUdpTransport(socket),
     });
     server.onConnect = () => {
       server.send(Buffer.from("my_dtls_server"));

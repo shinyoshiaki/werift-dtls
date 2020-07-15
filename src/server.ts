@@ -13,7 +13,7 @@ import { Transport } from "./transport";
 type Options = {
   cert: string;
   key: string;
-  socket: Transport;
+  transport: Transport;
   certificateRequest?: boolean;
 };
 
