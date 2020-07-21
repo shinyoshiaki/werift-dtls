@@ -1,6 +1,6 @@
 import { UseSRTP } from "../../../src/handshake/extensions/useSrtp";
 
-test("handshake_extensions_useSrtp", () => {
+describe("handshake_extensions_useSrtp", () => {
   const raw = Buffer.from([
     0x00,
     0x0e,
@@ -12,8 +12,15 @@ test("handshake_extensions_useSrtp", () => {
     0x01,
     0x00,
   ]);
-  const c = UseSRTP.deSerialize(raw);
-  expect(c.type).toBe(14);
-  // expect(c.data).toEqual([0x0001]);
-  expect(raw).toEqual(c.serialize());
+  test("raw", () => {
+    const c = UseSRTP.deSerialize(raw);
+    expect(c.type).toBe(14);
+    // expect(c.data).toEqual([0x0001]);
+    expect(raw).toEqual(c.serialize());
+  });
+
+  test("create", () => {
+    const c = UseSRTP.create([1], Buffer.from([0x00]));
+    expect(c.serialize()).toEqual(raw);
+  });
 });

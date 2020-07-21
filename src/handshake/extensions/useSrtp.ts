@@ -10,10 +10,9 @@ export class UseSRTP {
       types.uint16be,
       (ctx: any) => ctx.current.profileLength / 2
     ),
-    mki: types.buffer((ctx: any) => {
-      const v = ctx.current.mkiLength - ctx.current.profileLength - 2;
-      return v;
-    }),
+    mki: types.buffer(
+      (ctx: any) => ctx.current.mkiLength - ctx.current.profileLength - 2
+    ),
   };
   type: number = UseSRTP.type;
   mkiLength: number = 0;
@@ -25,8 +24,14 @@ export class UseSRTP {
     Object.assign(this, props);
   }
 
-  static createEmpty() {
-    const v = new UseSRTP();
+  static create(profiles: number[], mki: Buffer) {
+    const profileLength = profiles.length * 2;
+    const v = new UseSRTP({
+      profiles,
+      profileLength,
+      mki,
+      mkiLength: mki.length + profileLength + 2,
+    });
     return v;
   }
 
