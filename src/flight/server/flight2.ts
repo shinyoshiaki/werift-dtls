@@ -6,7 +6,6 @@ import { DtlsContext } from "../../context/dtls";
 import { EllipticCurves } from "../../handshake/extensions/ellipticCurves";
 import { Signature } from "../../handshake/extensions/signature";
 import { generateKeyPair } from "../../cipher/namedCurve";
-import { RecordContext } from "../../context/record";
 import { CipherContext } from "../../context/cipher";
 import { ServerHelloVerifyRequest } from "../../handshake/message/server/helloVerifyRequest";
 import { randomBytes } from "crypto";
@@ -16,7 +15,6 @@ import { ContentType } from "../../record/const";
 export const flight2 = (
   udp: TransportContext,
   dtls: DtlsContext,
-  record: RecordContext,
   cipher: CipherContext
 ) => (clientHello: ClientHello) => {
   clientHello.extensions.forEach((extension) => {
@@ -53,7 +51,7 @@ export const flight2 = (
       type: ContentType.handshake,
       fragment: fragment.serialize(),
     })),
-    ++record.recordSequenceNumber
+    ++dtls.recordSequenceNumber
   );
   const buf = Buffer.concat(packets.map((v) => v.serialize()));
   dtls.flight = 2;

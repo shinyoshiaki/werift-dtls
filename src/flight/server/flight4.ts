@@ -1,7 +1,6 @@
 import { createFragments, createPlaintext } from "../../record/builder";
 import { TransportContext } from "../../context/transport";
 import { DtlsContext } from "../../context/dtls";
-import { RecordContext } from "../../context/record";
 import { CipherContext } from "../../context/cipher";
 import { ServerHello } from "../../handshake/message/server/hello";
 import { Certificate } from "../../handshake/message/certificate";
@@ -17,7 +16,6 @@ export class Flight4 {
   constructor(
     private udp: TransportContext,
     private dtls: DtlsContext,
-    private record: RecordContext,
     private cipher: CipherContext
   ) {}
 
@@ -46,7 +44,7 @@ export class Flight4 {
         type: ContentType.handshake,
         fragment: fragment.serialize(),
       })),
-      ++this.record.recordSequenceNumber
+      ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
     return buf;

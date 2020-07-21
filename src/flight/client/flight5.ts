@@ -10,7 +10,6 @@ import { ClientKeyExchange } from "../../handshake/message/client/keyExchange";
 import { ChangeCipherSpec } from "../../handshake/message/changeCipherSpec";
 import { Finished } from "../../handshake/message/finished";
 import { createFragments, createPlaintext } from "../../record/builder";
-import { RecordContext } from "../../context/record";
 import { TransportContext } from "../../context/transport";
 import { DtlsRandom } from "../../handshake/random";
 import { ContentType } from "../../record/const";
@@ -25,7 +24,6 @@ export class Flight5 {
   constructor(
     private udp: TransportContext,
     private dtls: DtlsContext,
-    private record: RecordContext,
     private cipher: CipherContext
   ) {}
 
@@ -68,7 +66,7 @@ export class Flight5 {
         type: ContentType.handshake,
         fragment: fragment.serialize(),
       })),
-      ++this.record.recordSequenceNumber
+      ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
     this.udp.send(buf);
@@ -87,7 +85,7 @@ export class Flight5 {
         type: ContentType.handshake,
         fragment: fragment.serialize(),
       })),
-      ++this.record.recordSequenceNumber
+      ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
     this.udp.send(buf);
@@ -105,7 +103,7 @@ export class Flight5 {
         type: ContentType.handshake,
         fragment: fragment.serialize(),
       })),
-      ++this.record.recordSequenceNumber
+      ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
     this.udp.send(buf);
@@ -115,7 +113,7 @@ export class Flight5 {
     const changeCipherSpec = ChangeCipherSpec.createEmpty().serialize();
     const packets = createPlaintext(this.dtls)(
       [{ type: ContentType.changeCipherSpec, fragment: changeCipherSpec }],
-      ++this.record.recordSequenceNumber
+      ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
     this.udp.send(buf);
@@ -135,9 +133,9 @@ export class Flight5 {
         type: ContentType.handshake,
         fragment: fragment.serialize(),
       })),
-      ++this.record.recordSequenceNumber
+      ++this.dtls.recordSequenceNumber
     )[0];
-    this.record.recordSequenceNumber = 0;
+    this.dtls.recordSequenceNumber = 0;
 
     const buf = this.cipher.encryptPacket(pkt).serialize();
     this.udp.send(buf);

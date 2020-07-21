@@ -47,10 +47,10 @@ export class DtlsServer extends DtlsSocket {
           const assemble = FragmentedHandshake.assemble(handshakes);
           const clientHello = ClientHello.deSerialize(assemble.fragment);
           if (this.dtls.flight === 1) {
-            flight2(this.udp, this.dtls, this.record, this.cipher)(clientHello);
+            flight2(this.udp, this.dtls, this.cipher)(clientHello);
           } else {
             this.dtls.bufferHandshakeCache([assemble], false, 4);
-            new Flight4(this.udp, this.dtls, this.record, this.cipher).exec(
+            new Flight4(this.udp, this.dtls, this.cipher).exec(
               this.options.certificateRequest
             );
           }
@@ -58,9 +58,7 @@ export class DtlsServer extends DtlsSocket {
         break;
       case HandshakeType.client_key_exchange:
         {
-          new Flight6(this.udp, this.dtls, this.record, this.cipher).exec(
-            handshakes
-          );
+          new Flight6(this.udp, this.dtls, this.cipher).exec(handshakes);
           if (this.onConnect) this.onConnect();
         }
         break;

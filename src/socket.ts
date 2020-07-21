@@ -1,6 +1,5 @@
 import { TransportContext } from "./context/transport";
 import { DtlsContext } from "./context/dtls";
-import { RecordContext } from "./context/record";
 import { CipherContext } from "./context/cipher";
 import { createPlaintext } from "./record/builder";
 import { ContentType } from "./record/const";
@@ -29,7 +28,6 @@ export abstract class DtlsSocket {
   onClose: () => void = () => {};
   udp: TransportContext;
   dtls = new DtlsContext();
-  record = new RecordContext();
   cipher = new CipherContext();
 
   extensions: Extension[] = [];
@@ -64,7 +62,7 @@ export abstract class DtlsSocket {
   send(buf: Buffer) {
     const pkt = createPlaintext(this.dtls)(
       [{ type: ContentType.applicationData, fragment: buf }],
-      ++this.record.recordSequenceNumber
+      ++this.dtls.recordSequenceNumber
     )[0];
     this.udp.send(this.cipher.encryptPacket(pkt).serialize());
   }

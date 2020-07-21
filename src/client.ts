@@ -25,7 +25,7 @@ export class DtlsClient extends DtlsSocket {
   }
 
   connect() {
-    flight1(this.udp, this.dtls, this.record, this.cipher, this.extensions);
+    flight1(this.udp, this.dtls, this.cipher, this.extensions);
   }
 
   private udpOnMessage = (data: Buffer) => {
@@ -67,7 +67,7 @@ export class DtlsClient extends DtlsSocket {
           const verifyReq = ServerHelloVerifyRequest.deSerialize(
             handshakes[0].fragment
           );
-          flight3(this.udp, this.dtls, this.record)(verifyReq);
+          flight3(this.udp, this.dtls)(verifyReq);
         }
         break;
       case HandshakeType.server_hello_done:
@@ -109,9 +109,7 @@ export class DtlsClient extends DtlsSocket {
             }
           });
 
-          new Flight5(this.udp, this.dtls, this.record, this.cipher).exec(
-            messages
-          );
+          new Flight5(this.udp, this.dtls, this.cipher).exec(messages);
         }
         break;
       case HandshakeType.finished:

@@ -3,7 +3,6 @@ import { DtlsRandom } from "../../handshake/random";
 import { createFragments, createPlaintext } from "../../record/builder";
 import { TransportContext } from "../../context/transport";
 import { DtlsContext } from "../../context/dtls";
-import { RecordContext } from "../../context/record";
 import { CipherSuite } from "../../cipher/const";
 import { CipherContext } from "../../context/cipher";
 import { ContentType } from "../../record/const";
@@ -12,7 +11,6 @@ import { Extension } from "../../typings/domain";
 export const flight1 = async (
   udp: TransportContext,
   dtls: DtlsContext,
-  record: RecordContext,
   cipher: CipherContext,
   extensions: Extension[]
 ) => {
@@ -36,7 +34,7 @@ export const flight1 = async (
       type: ContentType.handshake,
       fragment: fragment.serialize(),
     })),
-    ++record.recordSequenceNumber
+    ++dtls.recordSequenceNumber
   );
   const buf = Buffer.concat(packets.map((v) => v.serialize()));
   udp.send(buf);
