@@ -11,15 +11,8 @@ import { FragmentedHandshake } from "./record/message/fragment";
 import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
 import { ContentType } from "./record/const";
 import { SessionType } from "./cipher/suites/abstract";
-import { DtlsSocket } from "./socket";
-import { Transport } from "./transport";
+import { DtlsSocket, Options } from "./socket";
 import { ServerCertificateRequest } from "./handshake/message/server/certificateRequest";
-
-type Options = {
-  transport: Transport;
-  cert?: string; // when Server CertificateRequest
-  key?: string; // when Server CertificateRequest
-};
 
 export class DtlsClient extends DtlsSocket {
   private flight4Buffer: FragmentedHandshake[] = [];
@@ -32,7 +25,7 @@ export class DtlsClient extends DtlsSocket {
   }
 
   connect() {
-    flight1(this.udp, this.dtls, this.record, this.cipher);
+    flight1(this.udp, this.dtls, this.record, this.cipher, this.extensions);
   }
 
   private udpOnMessage = (data: Buffer) => {

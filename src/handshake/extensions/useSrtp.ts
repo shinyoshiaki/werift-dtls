@@ -1,4 +1,5 @@
 import { encode, types, decode } from "binary-data";
+import { Extension } from "../../typings/domain";
 
 export class UseSRTP {
   static type = 14; // 9.  IANA Considerations
@@ -42,5 +43,12 @@ export class UseSRTP {
   serialize() {
     const res = encode(this, UseSRTP.spec).slice();
     return Buffer.from(res);
+  }
+
+  get extension(): Extension {
+    return {
+      type: this.type,
+      data: this.serialize().slice(2),
+    };
   }
 }
