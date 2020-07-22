@@ -23,4 +23,10 @@ describe("handshake_extensions_useSrtp", () => {
     const c = UseSRTP.create([1], Buffer.from([0x00]));
     expect(c.serialize()).toEqual(raw);
   });
+
+  test("fromData", () => {
+    const c = UseSRTP.deSerialize(raw);
+    const ext = c.extension;
+    expect(UseSRTP.fromData(ext.data).serialize()).toEqual(raw);
+  });
 });

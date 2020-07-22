@@ -13,6 +13,7 @@ import {
 } from "./cipher/const";
 import { Signature } from "./handshake/extensions/signature";
 import { Extension } from "./typings/domain";
+import { SrtpContext } from "./context/srtp";
 
 export type Options = {
   transport: Transport;
@@ -27,14 +28,16 @@ export abstract class DtlsSocket {
   onData: (buf: Buffer) => void = () => {};
   onClose: () => void = () => {};
   udp: TransportContext;
-  dtls = new DtlsContext();
+  dtls = new DtlsContext(this.options);
   cipher = new CipherContext();
-
+  srtp = new SrtpContext();
   extensions: Extension[] = [];
 
   constructor(public options: Options) {
     this.udp = new TransportContext(options.transport);
     this.setupExtensions();
+
+    this.dtls.options = options;
   }
 
   private setupExtensions() {

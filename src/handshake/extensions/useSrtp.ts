@@ -45,6 +45,12 @@ export class UseSRTP {
     return Buffer.from(res);
   }
 
+  static fromData(buf: Buffer) {
+    const type = Buffer.alloc(2);
+    type.writeUInt16BE(UseSRTP.type);
+    return UseSRTP.deSerialize(Buffer.concat([type, buf]));
+  }
+
   get extension(): Extension {
     return {
       type: this.type,

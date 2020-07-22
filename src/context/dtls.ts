@@ -1,5 +1,6 @@
 import { FragmentedHandshake } from "../record/message/fragment";
 import { Handshake } from "../typings/domain";
+import { Options } from "../socket";
 
 export class DtlsContext {
   version = { major: 255 - 1, minor: 255 - 2 };
@@ -16,6 +17,8 @@ export class DtlsContext {
   cookie?: Buffer;
   requestedCertificateTypes: number[] = [];
   requestedSignatureAlgorithms: { hash: number; signature: number }[] = [];
+
+  constructor(public options: Options) {}
 
   bufferHandshakeCache(
     handshakes: FragmentedHandshake[],

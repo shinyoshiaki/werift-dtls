@@ -33,10 +33,9 @@ export class Signature {
   }
 
   static fromData(buf: Buffer) {
-    return new Signature({
-      type: Signature.type,
-      data: decode(buf, Signature.spec.data),
-    });
+    const type = Buffer.alloc(2);
+    type.writeUInt16BE(Signature.type);
+    return Signature.deSerialize(Buffer.concat([type, buf]));
   }
 
   get extension() {
