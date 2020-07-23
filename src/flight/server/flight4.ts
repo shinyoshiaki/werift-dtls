@@ -11,12 +11,15 @@ import { SignatureAlgorithm, HashAlgorithm } from "../../cipher/const";
 import { ContentType } from "../../record/const";
 import { Handshake } from "../../typings/domain";
 import { ServerCertificateRequest } from "../../handshake/message/server/certificateRequest";
+import { SrtpContext } from "../../context/srtp";
+import { UseSRTP } from "../../handshake/extensions/useSrtp";
 
 export class Flight4 {
   constructor(
     private udp: TransportContext,
     private dtls: DtlsContext,
-    private cipher: CipherContext
+    private cipher: CipherContext,
+    private srtp: SrtpContext
   ) {}
 
   exec(certificateRequest: boolean = false) {
@@ -54,13 +57,20 @@ export class Flight4 {
     if (!this.cipher.localRandom || !this.cipher.cipherSuite)
       throw new Error("");
 
+    const extensions = [];
+    if (this.srtp.srtpProfile) {
+      extensions.push(
+        UseSRTP.create([this.srtp.srtpProfile], Buffer.from([])).extension
+      );
+    }
+
     const serverHello = new ServerHello(
       this.dtls.version,
       this.cipher.localRandom,
       Buffer.from([0x00]),
       this.cipher.cipherSuite,
-      0, // compression
-      [] // extensions
+      0, // do not compression
+      extensions
     );
     const buf = this.createPacket([serverHello]);
     return buf;

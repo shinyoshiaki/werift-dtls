@@ -154,6 +154,8 @@ handlers[HandshakeType.server_hello] = ({ cipher }) => (
 ) => {
   cipher.remoteRandom = DtlsRandom.from(message.random);
   cipher.cipherSuite = message.cipherSuite;
+
+  message.extensions;
 };
 
 handlers[HandshakeType.certificate] = ({ cipher }) => (
