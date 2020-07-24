@@ -14,7 +14,8 @@ import {
 import { Signature } from "./handshake/extensions/signature";
 import { Extension } from "./typings/domain";
 import { SrtpContext } from "./context/srtp";
-import { prfMasterSecret, exportKeyingMaterial } from "./cipher/prf";
+import { exportKeyingMaterial } from "./cipher/prf";
+import { decode, types } from "binary-data";
 
 export type Options = {
   transport: Transport;
@@ -78,6 +79,37 @@ export class DtlsSocket {
   extractSessionKeys() {
     const keyLen = 16;
     const saltLen = 14;
+
+    const keyingMaterial = this.exportKeyingMaterial(
+      "EXTRACTOR-dtls_srtp",
+      keyLen * 2 + saltLen * 2
+    );
+
+    const { clientKey, serverKey, clientSalt, serverSalt } = decode(
+      keyingMaterial,
+      {
+        clientKey: types.buffer(keyLen),
+        serverKey: types.buffer(keyLen),
+        clientSalt: types.buffer(saltLen),
+        serverSalt: types.buffer(saltLen),
+      }
+    );
+
+    if (this.isClient) {
+      return {
+        localKey: clientKey,
+        localSalt: clientSalt,
+        remoteKey: serverKey,
+        remoteSalt: serverSalt,
+      };
+    } else {
+      return {
+        localKey: serverKey,
+        localSalt: serverSalt,
+        remoteKey: clientKey,
+        remoteSalt: clientSalt,
+      };
+    }
   }
 
   exportKeyingMaterial(label: string, length: number) {
