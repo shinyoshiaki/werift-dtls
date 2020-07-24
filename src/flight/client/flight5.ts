@@ -160,20 +160,21 @@ handlers[HandshakeType.server_hello] = ({ cipher, srtp, dtls }) => (
 ) => {
   cipher.remoteRandom = DtlsRandom.from(message.random);
   cipher.cipherSuite = message.cipherSuite;
-
-  message.extensions.forEach((extension) => {
-    switch (extension.type) {
-      case UseSRTP.type:
-        const useSrtp = UseSRTP.fromData(extension.data);
-        const profile = SrtpContext.findMatchingSRTPProfile(
-          useSrtp.profiles,
-          dtls.options.srtpProfiles!
-        );
-        if (profile === undefined) return;
-        srtp.srtpProfile = profile;
-        break;
-    }
-  });
+  if (message.extensions) {
+    message.extensions.forEach((extension) => {
+      switch (extension.type) {
+        case UseSRTP.type:
+          const useSrtp = UseSRTP.fromData(extension.data);
+          const profile = SrtpContext.findMatchingSRTPProfile(
+            useSrtp.profiles,
+            dtls.options.srtpProfiles!
+          );
+          if (profile === undefined) return;
+          srtp.srtpProfile = profile;
+          break;
+      }
+    });
+  }
 };
 
 handlers[HandshakeType.certificate] = ({ cipher }) => (
