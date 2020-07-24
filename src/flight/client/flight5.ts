@@ -19,12 +19,15 @@ import { CipherContext } from "../../context/cipher";
 import { ServerCertificateRequest } from "../../handshake/message/server/certificateRequest";
 import { parseX509 } from "../../cipher/x509";
 import { CertificateVerify } from "../../handshake/message/client/certificateVerify";
+import { UseSRTP } from "../../handshake/extensions/useSrtp";
+import { SrtpContext } from "../../context/srtp";
 
 export class Flight5 {
   constructor(
     private udp: TransportContext,
     private dtls: DtlsContext,
-    private cipher: CipherContext
+    private cipher: CipherContext,
+    private srtp: SrtpContext
   ) {}
 
   exec(
@@ -40,9 +43,11 @@ export class Flight5 {
     this.dtls.flight = 5;
 
     messages.forEach((message) => {
-      handlers[message.msgType]({ dtls: this.dtls, cipher: this.cipher })(
-        message
-      );
+      handlers[message.msgType]({
+        dtls: this.dtls,
+        cipher: this.cipher,
+        srtp: this.srtp,
+      })(message);
     });
 
     if (this.dtls.requestedCertificateTypes.length > 0) this.sendCertificate();
@@ -146,16 +151,29 @@ const handlers: {
   [key: number]: (contexts: {
     dtls: DtlsContext;
     cipher: CipherContext;
+    srtp: SrtpContext;
   }) => (message: any) => void;
 } = {};
 
-handlers[HandshakeType.server_hello] = ({ cipher }) => (
+handlers[HandshakeType.server_hello] = ({ cipher, srtp, dtls }) => (
   message: ServerHello
 ) => {
   cipher.remoteRandom = DtlsRandom.from(message.random);
   cipher.cipherSuite = message.cipherSuite;
 
-  message.extensions;
+  message.extensions.forEach((extension) => {
+    switch (extension.type) {
+      case UseSRTP.type:
+        const useSrtp = UseSRTP.fromData(extension.data);
+        const profile = SrtpContext.findMatchingSRTPProfile(
+          useSrtp.profiles,
+          dtls.options.srtpProfiles!
+        );
+        if (profile === undefined) return;
+        srtp.srtpProfile = profile;
+        break;
+    }
+  });
 };
 
 handlers[HandshakeType.certificate] = ({ cipher }) => (

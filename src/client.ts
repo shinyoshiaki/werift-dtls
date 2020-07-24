@@ -17,7 +17,7 @@ import { ServerCertificateRequest } from "./handshake/message/server/certificate
 export class DtlsClient extends DtlsSocket {
   private flight4Buffer: FragmentedHandshake[] = [];
   constructor(options: Options) {
-    super(options);
+    super(options, true);
     this.cipher.certPem = options.cert;
     this.cipher.keyPem = options.key;
     this.cipher.sessionType = SessionType.CLIENT;
@@ -109,7 +109,9 @@ export class DtlsClient extends DtlsSocket {
             }
           });
 
-          new Flight5(this.udp, this.dtls, this.cipher).exec(messages);
+          new Flight5(this.udp, this.dtls, this.cipher, this.srtp).exec(
+            messages
+          );
         }
         break;
       case HandshakeType.finished:

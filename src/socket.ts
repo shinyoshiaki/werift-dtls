@@ -14,6 +14,7 @@ import {
 import { Signature } from "./handshake/extensions/signature";
 import { Extension } from "./typings/domain";
 import { SrtpContext } from "./context/srtp";
+import { prfMasterSecret, exportKeyingMaterial } from "./cipher/prf";
 
 export type Options = {
   transport: Transport;
@@ -23,7 +24,7 @@ export type Options = {
   certificateRequest?: boolean;
 };
 
-export abstract class DtlsSocket {
+export class DtlsSocket {
   onConnect: () => void = () => {};
   onData: (buf: Buffer) => void = () => {};
   onClose: () => void = () => {};
@@ -33,7 +34,7 @@ export abstract class DtlsSocket {
   srtp = new SrtpContext();
   extensions: Extension[] = [];
 
-  constructor(public options: Options) {
+  constructor(public options: Options, public isClient: boolean) {
     this.udp = new TransportContext(options.transport);
     this.setupExtensions();
 
@@ -72,5 +73,21 @@ export abstract class DtlsSocket {
 
   close() {
     this.udp.socket.close();
+  }
+
+  extractSessionKeys() {
+    const keyLen = 16;
+    const saltLen = 14;
+  }
+
+  exportKeyingMaterial(label: string, length: number) {
+    return exportKeyingMaterial(
+      label,
+      length,
+      this.cipher.masterSecret!,
+      this.cipher.localRandom!.serialize(),
+      this.cipher.remoteRandom!.serialize(),
+      this.isClient
+    );
   }
 }

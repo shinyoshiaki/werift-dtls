@@ -11,7 +11,7 @@ import { DtlsSocket, Options } from "./socket";
 
 export class DtlsServer extends DtlsSocket {
   constructor(options: Options) {
-    super(options);
+    super(options, false);
     this.cipher.certPem = options.cert;
     this.cipher.keyPem = options.key;
     this.cipher.sessionType = SessionType.SERVER;
