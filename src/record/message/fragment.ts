@@ -20,6 +20,17 @@ export class FragmentedHandshake {
     public fragment: Buffer
   ) {}
 
+  static createEmpty() {
+    return new FragmentedHandshake(
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      undefined as any
+    );
+  }
+
   static deSerialize(buf: Buffer) {
     return new FragmentedHandshake(
       //@ts-ignore
