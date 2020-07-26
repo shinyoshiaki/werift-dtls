@@ -15,7 +15,6 @@ describe("handshake_extensions_useSrtp", () => {
   test("raw", () => {
     const c = UseSRTP.deSerialize(raw);
     expect(c.type).toBe(14);
-    // expect(c.data).toEqual([0x0001]);
     expect(raw).toEqual(c.serialize());
   });
 
