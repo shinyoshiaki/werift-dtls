@@ -32,7 +32,7 @@
     "elliptic": "^6.5.2",
     "jsrsasign": "^8.0.15",
     "lodash": "^4.17.19",
-    "node-forge": "^0.9.1",
+    "node-forge": "^0.10.0",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
