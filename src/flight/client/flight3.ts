@@ -8,6 +8,9 @@ import { ContentType } from "../../record/const";
 export const flight3 = (udp: TransportContext, dtls: DtlsContext) => (
   verifyReq: ServerHelloVerifyRequest
 ) => {
+  if (dtls.flight === 3) return;
+  dtls.flight = 3;
+
   const hello = dtls.lastFlight[0] as ClientHello;
   hello.cookie = verifyReq.cookie;
   const fragments = createFragments(dtls)([hello]);

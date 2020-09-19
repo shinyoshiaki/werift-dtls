@@ -99,22 +99,30 @@ handlers[HandshakeType.client_key_exchange] = ({ cipher }) => (
     curve: cipher.namedCurve,
     publicKey: message.publicKey,
   };
+  if (
+    !cipher.remoteKeyPair.publicKey ||
+    !cipher.localKeyPair ||
+    !cipher.remoteRandom ||
+    !cipher.localRandom
+  )
+    throw new Error();
+
   const preMasterSecret = prfPreMasterSecret(
-    cipher.remoteKeyPair.publicKey!,
-    cipher.localKeyPair?.privateKey!,
-    cipher.localKeyPair?.curve!
-  )!;
+    cipher.remoteKeyPair.publicKey,
+    cipher.localKeyPair.privateKey,
+    cipher.localKeyPair.curve
+  );
   cipher.masterSecret = prfMasterSecret(
     preMasterSecret,
-    cipher.remoteRandom?.serialize()!,
-    cipher.localRandom?.serialize()!
+    cipher.remoteRandom.serialize(),
+    cipher.localRandom.serialize()
   );
 
-  cipher.cipher = createCipher(CipherSuite.EcdheRsaWithAes128GcmSha256)!;
+  cipher.cipher = createCipher(CipherSuite.EcdheRsaWithAes128GcmSha256);
   cipher.cipher.init(
-    cipher.masterSecret!,
-    cipher.localRandom!.serialize(),
-    cipher.remoteRandom!.serialize()
+    cipher.masterSecret,
+    cipher.localRandom.serialize(),
+    cipher.remoteRandom.serialize()
   );
 };
 
