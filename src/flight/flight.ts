@@ -23,7 +23,7 @@ export abstract class Flight {
 
   private async retransmit() {
     this.buffer.forEach((v) => this.udp.send(v));
-    await sleep(1000);
+    await sleep(3000);
     if (this.dtls.flight !== this.flight) {
       await this.retransmit();
     }
