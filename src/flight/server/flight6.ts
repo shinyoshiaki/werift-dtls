@@ -20,7 +20,7 @@ export class Flight6 extends Flight {
     dtls: DtlsContext,
     private cipher: CipherContext
   ) {
-    super(udp, dtls, 8);
+    super(udp, dtls);
   }
 
   exec(handshakes: (FragmentedHandshake | DtlsPlaintext)[]) {

@@ -13,8 +13,12 @@ export abstract class Flight {
   constructor(
     private udp: TransportContext,
     public dtls: DtlsContext,
-    private flight: number
+    private nextFlight?: number
   ) {}
+
+  private setState(state: FlightType) {
+    this.state = state;
+  }
 
   transmit(buf: Buffer[]) {
     this.buffer = buf;
@@ -22,10 +26,21 @@ export abstract class Flight {
   }
 
   private async retransmit() {
+    this.setState("SENDING");
     this.buffer.forEach((v) => this.udp.send(v));
-    await sleep(3000);
-    if (this.dtls.flight !== this.flight) {
-      await this.retransmit();
+    this.setState("WAITING");
+
+    if (this.nextFlight === undefined) {
+      this.setState("FINISHED");
+      return;
+    }
+
+    await sleep(1000);
+    if (this.dtls.flight === this.nextFlight) {
+      this.setState("FINISHED");
+      return;
+    } else {
+      this.retransmit();
     }
   }
 }
