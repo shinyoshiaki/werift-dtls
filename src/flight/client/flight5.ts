@@ -21,14 +21,17 @@ import { parseX509 } from "../../cipher/x509";
 import { CertificateVerify } from "../../handshake/message/client/certificateVerify";
 import { UseSRTP } from "../../handshake/extensions/useSrtp";
 import { SrtpContext } from "../../context/srtp";
+import { Flight } from "../flight";
 
-export class Flight5 {
+export class Flight5 extends Flight {
   constructor(
-    private udp: TransportContext,
-    private dtls: DtlsContext,
+    udp: TransportContext,
+    dtls: DtlsContext,
     private cipher: CipherContext,
     private srtp: SrtpContext
-  ) {}
+  ) {
+    super(udp, dtls, 7);
+  }
 
   exec(
     messages: (
@@ -50,12 +53,16 @@ export class Flight5 {
       })(message);
     });
 
-    if (this.dtls.requestedCertificateTypes.length > 0) this.sendCertificate();
-    this.sendClientKeyExchange();
-    if (this.dtls.requestedCertificateTypes.length > 0)
-      this.sendCertificateVerify();
-    this.sendChangeCipherSpec();
-    this.sendFinished();
+    const packets = [
+      this.dtls.requestedCertificateTypes.length > 0 && this.sendCertificate(),
+      this.sendClientKeyExchange(),
+      this.dtls.requestedCertificateTypes.length > 0 &&
+        this.sendCertificateVerify(),
+      this.sendChangeCipherSpec(),
+      this.sendFinished(),
+    ].filter((v) => v) as Buffer[];
+
+    this.transmit(packets);
   }
 
   sendCertificate() {
@@ -74,7 +81,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendClientKeyExchange() {
@@ -93,7 +100,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendCertificateVerify() {
@@ -111,7 +118,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendChangeCipherSpec() {
@@ -121,7 +128,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendFinished() {
@@ -143,7 +150,7 @@ export class Flight5 {
     this.dtls.recordSequenceNumber = 0;
 
     const buf = this.cipher.encryptPacket(pkt).serialize();
-    this.udp.send(buf);
+    return buf;
   }
 }
 
