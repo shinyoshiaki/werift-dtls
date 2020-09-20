@@ -36,7 +36,7 @@ export abstract class Flight {
     }
 
     await sleep(1000);
-    if (this.dtls.flight === this.nextFlight) {
+    if (this.dtls.flight >= this.nextFlight) {
       this.setState("FINISHED");
       return;
     } else {
