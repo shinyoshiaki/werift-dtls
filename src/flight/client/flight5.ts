@@ -186,27 +186,32 @@ handlers[HandshakeType.certificate] = ({ cipher }) => (
 handlers[HandshakeType.server_key_exchange] = ({ cipher }) => (
   message: ServerKeyExchange
 ) => {
-  cipher.remoteKeyPair = {
+  if (!cipher.localRandom || !cipher.remoteRandom) throw new Error();
+
+  const remoteKeyPair = (cipher.remoteKeyPair = {
     curve: message.namedCurve,
     publicKey: message.publicKey,
-  };
-  cipher.localKeyPair = generateKeyPair(message.namedCurve);
+  });
+  const localKeyPair = (cipher.localKeyPair = generateKeyPair(
+    message.namedCurve
+  ));
+
   const preMasterSecret = prfPreMasterSecret(
-    cipher.remoteKeyPair.publicKey!,
-    cipher.localKeyPair?.privateKey!,
-    cipher.localKeyPair?.curve!
-  )!;
+    remoteKeyPair.publicKey,
+    localKeyPair.privateKey,
+    localKeyPair.curve
+  );
   cipher.masterSecret = prfMasterSecret(
     preMasterSecret,
-    cipher.localRandom?.serialize()!,
-    cipher.remoteRandom?.serialize()!
+    cipher.localRandom.serialize(),
+    cipher.remoteRandom.serialize()
   );
 
-  cipher.cipher = createCipher(CipherSuite.EcdheEcdsaWithAes128GcmSha256)!;
+  cipher.cipher = createCipher(CipherSuite.EcdheEcdsaWithAes128GcmSha256);
   cipher.cipher.init(
-    cipher.masterSecret!,
-    cipher.remoteRandom!.serialize(),
-    cipher.localRandom!.serialize()
+    cipher.masterSecret,
+    cipher.remoteRandom.serialize(),
+    cipher.localRandom.serialize()
   );
 };
 
