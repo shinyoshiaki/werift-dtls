@@ -12,13 +12,16 @@ import { CipherSuite } from "../../cipher/const";
 import { CipherContext } from "../../context/cipher";
 import { FragmentedHandshake } from "../../record/message/fragment";
 import { DtlsPlaintext } from "../../record/message/plaintext";
+import { Flight } from "../flight";
 
-export class Flight6 {
+export class Flight6 extends Flight {
   constructor(
-    private udp: TransportContext,
-    private dtls: DtlsContext,
+    udp: TransportContext,
+    dtls: DtlsContext,
     private cipher: CipherContext
-  ) {}
+  ) {
+    super(udp, dtls, 8);
+  }
 
   exec(handshakes: (FragmentedHandshake | DtlsPlaintext)[]) {
     if (this.dtls.flight === 6) return;
@@ -38,18 +41,20 @@ export class Flight6 {
             return ClientKeyExchange.deSerialize(fragment.fragment);
           case HandshakeType.finished:
             return Finished.deSerialize(fragment.fragment);
+          default:
+            throw new Error();
         }
       })();
 
-      handlers[message!.msgType]({ dtls: this.dtls, cipher: this.cipher })(
+      handlers[message.msgType]({ dtls: this.dtls, cipher: this.cipher })(
         message
       );
       return fragment;
     });
     this.dtls.bufferHandshakeCache(fragments, false, 5);
 
-    this.sendChangeCipherSpec();
-    this.sendFinished();
+    const messages = [this.sendChangeCipherSpec(), this.sendFinished()];
+    this.transmit(messages);
   }
 
   sendChangeCipherSpec() {
@@ -59,7 +64,7 @@ export class Flight6 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendFinished() {
@@ -81,7 +86,7 @@ export class Flight6 {
     this.dtls.recordSequenceNumber = 0;
 
     const buf = this.cipher.encryptPacket(pkt).serialize();
-    this.udp.send(buf);
+    return buf;
   }
 }
 
