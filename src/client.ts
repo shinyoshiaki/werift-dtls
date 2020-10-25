@@ -91,27 +91,9 @@ export class DtlsClient extends DtlsSocket {
             })
             .filter((v) => v);
           this.flight4Buffer = [];
-          this.dtls.bufferHandshakeCache(fragments, false, 4);
-
-          const messages = fragments.map((handshake) => {
-            switch (handshake.msg_type) {
-              case HandshakeType.server_hello:
-                return ServerHello.deSerialize(handshake.fragment);
-              case HandshakeType.certificate:
-                return Certificate.deSerialize(handshake.fragment);
-              case HandshakeType.server_key_exchange:
-                return ServerKeyExchange.deSerialize(handshake.fragment);
-              case HandshakeType.certificate_request:
-                return ServerCertificateRequest.deSerialize(handshake.fragment);
-              case HandshakeType.server_hello_done:
-                return ServerHelloDone.deSerialize(handshake.fragment);
-              default:
-                return (undefined as any) as ServerHello;
-            }
-          });
 
           new Flight5(this.udp, this.dtls, this.cipher, this.srtp).exec(
-            messages
+            fragments
           );
         }
         break;

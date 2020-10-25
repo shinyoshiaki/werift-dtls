@@ -28,10 +28,9 @@ export class Flight4 extends Flight {
 
   exec(assemble: FragmentedHandshake, certificateRequest: boolean = false) {
     if (this.dtls.flight === 4) return;
-    this.dtls.bufferHandshakeCache([assemble], false, 4);
-
     this.dtls.flight = 4;
     this.dtls.sequenceNumber = 1;
+    this.dtls.bufferHandshakeCache([assemble], false, 4);
 
     const messages = [
       this.sendServerHello(),
