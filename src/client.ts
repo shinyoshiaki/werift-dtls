@@ -56,11 +56,10 @@ export class DtlsClient extends DtlsSocket {
   };
 
   private handleHandshakes(handshakes: FragmentedHandshake[]) {
-    if (handshakes[0].msg_type === HandshakeType.server_hello) {
-      this.flight4Buffer = handshakes;
-    }
     if (this.flight4Buffer.length > 0) {
       this.flight4Buffer = [...this.flight4Buffer, ...handshakes];
+    } else if (handshakes[0].msg_type === HandshakeType.server_hello) {
+      this.flight4Buffer = handshakes;
     }
 
     switch (handshakes.slice(-1)[0].msg_type) {

@@ -40,6 +40,7 @@ export abstract class Flight {
       this.setState("FINISHED");
       return;
     } else {
+      console.log("retransmit");
       this.retransmit();
     }
   }

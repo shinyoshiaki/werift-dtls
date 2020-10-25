@@ -14,6 +14,7 @@ import { ServerCertificateRequest } from "../../handshake/message/server/certifi
 import { SrtpContext } from "../../context/srtp";
 import { UseSRTP } from "../../handshake/extensions/useSrtp";
 import { Flight } from "../flight";
+import { FragmentedHandshake } from "../../record/message/fragment";
 
 export class Flight4 extends Flight {
   constructor(
@@ -25,8 +26,10 @@ export class Flight4 extends Flight {
     super(udp, dtls, 6);
   }
 
-  exec(certificateRequest: boolean = false) {
+  exec(assemble: FragmentedHandshake, certificateRequest: boolean = false) {
     if (this.dtls.flight === 4) return;
+    this.dtls.bufferHandshakeCache([assemble], false, 4);
+
     this.dtls.flight = 4;
     this.dtls.sequenceNumber = 1;
 
@@ -41,7 +44,7 @@ export class Flight4 extends Flight {
     this.transmit(messages);
   }
 
-  createPacket(handshakes: Handshake[]) {
+  private createPacket(handshakes: Handshake[]) {
     const fragments = createFragments(this.dtls)(handshakes);
     this.dtls.bufferHandshakeCache(fragments, true, 4);
     const packets = createPlaintext(this.dtls)(
@@ -55,7 +58,7 @@ export class Flight4 extends Flight {
     return buf;
   }
 
-  sendServerHello() {
+  private sendServerHello() {
     if (!this.cipher.localRandom || !this.cipher.cipherSuite)
       throw new Error("");
 
@@ -78,7 +81,7 @@ export class Flight4 extends Flight {
     return buf;
   }
 
-  sendCertificate() {
+  private sendCertificate() {
     if (!this.cipher.certPem || !this.cipher.keyPem) throw new Error();
 
     const sign = parseX509(this.cipher.certPem, this.cipher.keyPem);
@@ -89,7 +92,7 @@ export class Flight4 extends Flight {
     return buf;
   }
 
-  sendServerKeyExchange() {
+  private sendServerKeyExchange() {
     if (
       !this.cipher.localRandom ||
       !this.cipher.remoteRandom ||
@@ -124,7 +127,7 @@ export class Flight4 extends Flight {
     return buf;
   }
 
-  sendCertificateRequest() {
+  private sendCertificateRequest() {
     const handshake = new ServerCertificateRequest(
       [
         1, // clientCertificateTypeRSASign
@@ -140,7 +143,7 @@ export class Flight4 extends Flight {
     return buf;
   }
 
-  sendServerHelloDone() {
+  private sendServerHelloDone() {
     const handshake = new ServerHelloDone();
 
     const buf = this.createPacket([handshake]);

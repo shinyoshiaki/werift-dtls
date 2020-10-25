@@ -48,9 +48,8 @@ export class DtlsServer extends DtlsSocket {
           const clientHello = ClientHello.deSerialize(assemble.fragment);
 
           if (this.dtls.cookie && this.dtls.cookie.equals(clientHello.cookie)) {
-            this.dtls.bufferHandshakeCache([assemble], false, 4);
-
             new Flight4(this.udp, this.dtls, this.cipher, this.srtp).exec(
+              assemble,
               this.options.certificateRequest
             );
           } else {
@@ -60,7 +59,6 @@ export class DtlsServer extends DtlsSocket {
         break;
       case HandshakeType.client_key_exchange:
         {
-          this.dtls.flight = 8;
           new Flight6(this.udp, this.dtls, this.cipher).exec(handshakes);
           if (this.onConnect) this.onConnect();
         }
