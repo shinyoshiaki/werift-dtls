@@ -21,26 +21,44 @@ import { parseX509 } from "../../cipher/x509";
 import { CertificateVerify } from "../../handshake/message/client/certificateVerify";
 import { UseSRTP } from "../../handshake/extensions/useSrtp";
 import { SrtpContext } from "../../context/srtp";
+import { Flight } from "../flight";
+import { FragmentedHandshake } from "../../record/message/fragment";
 
-export class Flight5 {
+export class Flight5 extends Flight {
   constructor(
-    private udp: TransportContext,
-    private dtls: DtlsContext,
+    udp: TransportContext,
+    dtls: DtlsContext,
     private cipher: CipherContext,
     private srtp: SrtpContext
-  ) {}
-
-  exec(
-    messages: (
-      | ServerHello
-      | Certificate
-      | ServerKeyExchange
-      | ServerHelloDone
-      | ServerCertificateRequest
-    )[]
   ) {
-    if (this.dtls.flight === 5) return;
+    super(udp, dtls, 7);
+  }
+
+  exec(fragments: FragmentedHandshake[]) {
+    if (this.dtls.flight === 5) {
+      console.log("flight5 twice");
+      this.send(this.dtls.lastMessage);
+      return;
+    }
     this.dtls.flight = 5;
+    this.dtls.bufferHandshakeCache(fragments, false, 4);
+
+    const messages = fragments.map((handshake) => {
+      switch (handshake.msg_type) {
+        case HandshakeType.server_hello:
+          return ServerHello.deSerialize(handshake.fragment);
+        case HandshakeType.certificate:
+          return Certificate.deSerialize(handshake.fragment);
+        case HandshakeType.server_key_exchange:
+          return ServerKeyExchange.deSerialize(handshake.fragment);
+        case HandshakeType.certificate_request:
+          return ServerCertificateRequest.deSerialize(handshake.fragment);
+        case HandshakeType.server_hello_done:
+          return ServerHelloDone.deSerialize(handshake.fragment);
+        default:
+          return (undefined as any) as ServerHello;
+      }
+    });
 
     messages.forEach((message) => {
       handlers[message.msgType]({
@@ -50,12 +68,17 @@ export class Flight5 {
       })(message);
     });
 
-    if (this.dtls.requestedCertificateTypes.length > 0) this.sendCertificate();
-    this.sendClientKeyExchange();
-    if (this.dtls.requestedCertificateTypes.length > 0)
-      this.sendCertificateVerify();
-    this.sendChangeCipherSpec();
-    this.sendFinished();
+    const packets = [
+      this.dtls.requestedCertificateTypes.length > 0 && this.sendCertificate(),
+      this.sendClientKeyExchange(),
+      this.dtls.requestedCertificateTypes.length > 0 &&
+        this.sendCertificateVerify(),
+      this.sendChangeCipherSpec(),
+      this.sendFinished(),
+    ].filter((v) => v) as Buffer[];
+
+    this.dtls.lastMessage = packets;
+    this.transmit(packets);
   }
 
   sendCertificate() {
@@ -74,7 +97,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendClientKeyExchange() {
@@ -93,7 +116,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendCertificateVerify() {
@@ -111,7 +134,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendChangeCipherSpec() {
@@ -121,7 +144,7 @@ export class Flight5 {
       ++this.dtls.recordSequenceNumber
     );
     const buf = Buffer.concat(packets.map((v) => v.serialize()));
-    this.udp.send(buf);
+    return buf;
   }
 
   sendFinished() {
@@ -143,7 +166,7 @@ export class Flight5 {
     this.dtls.recordSequenceNumber = 0;
 
     const buf = this.cipher.encryptPacket(pkt).serialize();
-    this.udp.send(buf);
+    return buf;
   }
 }
 

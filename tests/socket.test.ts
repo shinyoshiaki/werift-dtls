@@ -37,7 +37,6 @@ describe("socket", () => {
     socket.cipher.remoteRandom = new DtlsRandom(1000, rand);
     socket.cipher.masterSecret = Buffer.from([]);
     socket.cipher.cipherSuite = 0xc02b;
-    socket.dtls.sequenceNumber = 0;
 
     expect(socket.exportKeyingMaterial(exportLabel, 10)).toEqual(
       expectedServerKey

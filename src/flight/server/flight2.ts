@@ -14,13 +14,14 @@ import { ContentType } from "../../record/const";
 import { UseSRTP } from "../../handshake/extensions/useSrtp";
 import { SrtpContext } from "../../context/srtp";
 
+// HelloVerifyRequest do not retransmit
+
 export const flight2 = (
   udp: TransportContext,
   dtls: DtlsContext,
   cipher: CipherContext,
   srtp: SrtpContext
 ) => (clientHello: ClientHello) => {
-  if (dtls.flight === 2) return;
   dtls.flight = 2;
 
   clientHello.extensions.forEach((extension) => {
@@ -28,6 +29,8 @@ export const flight2 = (
       case EllipticCurves.type:
         {
           const curves = EllipticCurves.fromData(extension.data).data;
+          if (!curves.includes(NamedCurveAlgorithm.namedCurveX25519))
+            throw new Error();
           cipher.namedCurve = NamedCurveAlgorithm.namedCurveX25519;
         }
         break;
@@ -76,6 +79,5 @@ export const flight2 = (
     ++dtls.recordSequenceNumber
   );
   const buf = Buffer.concat(packets.map((v) => v.serialize()));
-  dtls.flight = 2;
   udp.send(buf);
 };
