@@ -34,6 +34,7 @@ export class DtlsClient extends DtlsSocket {
       // this is not dtls message
       return;
     }
+
     switch (messages[messages.length - 1].type) {
       case ContentType.handshake:
         {
@@ -48,6 +49,7 @@ export class DtlsClient extends DtlsSocket {
         }
         break;
       case ContentType.alert:
+        console.log("on alert", messages[messages.length - 1].data);
         this.onClose();
         break;
     }
@@ -61,7 +63,7 @@ export class DtlsClient extends DtlsSocket {
       this.flight4Buffer = [...this.flight4Buffer, ...handshakes];
     }
 
-    switch (handshakes[handshakes.length - 1].msg_type) {
+    switch (handshakes.slice(-1)[0].msg_type) {
       case HandshakeType.hello_verify_request:
         {
           const verifyReq = ServerHelloVerifyRequest.deSerialize(
