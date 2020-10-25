@@ -27,7 +27,11 @@ export class Flight4 extends Flight {
   }
 
   exec(assemble: FragmentedHandshake, certificateRequest: boolean = false) {
-    if (this.dtls.flight === 4) return;
+    if (this.dtls.flight === 4) {
+      console.log("flight4 twice");
+      this.send(this.dtls.lastMessage);
+      return;
+    }
     this.dtls.flight = 4;
     this.dtls.sequenceNumber = 1;
     this.dtls.bufferHandshakeCache([assemble], false, 4);
@@ -40,6 +44,7 @@ export class Flight4 extends Flight {
       this.sendServerHelloDone(),
     ].filter((v) => v) as Buffer[];
 
+    this.dtls.lastMessage = messages;
     this.transmit(messages);
   }
 

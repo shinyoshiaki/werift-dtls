@@ -2,17 +2,13 @@ import { Flight1 } from "./flight/client/flight1";
 import { parsePacket } from "./record/receive";
 import { ServerHelloVerifyRequest } from "./handshake/message/server/helloVerifyRequest";
 import { Flight3 } from "./flight/client/flight3";
-import { ServerHello } from "./handshake/message/server/hello";
-import { ServerHelloDone } from "./handshake/message/server/helloDone";
 import { HandshakeType } from "./handshake/const";
-import { Certificate } from "./handshake/message/certificate";
 import { Flight5 } from "./flight/client/flight5";
 import { FragmentedHandshake } from "./record/message/fragment";
-import { ServerKeyExchange } from "./handshake/message/server/keyExchange";
 import { ContentType } from "./record/const";
 import { SessionType } from "./cipher/suites/abstract";
 import { DtlsSocket, Options } from "./socket";
-import { ServerCertificateRequest } from "./handshake/message/server/certificateRequest";
+import { DtlsContext } from "./context/dtls";
 
 export class DtlsClient extends DtlsSocket {
   private flight4Buffer: FragmentedHandshake[] = [];
@@ -25,6 +21,7 @@ export class DtlsClient extends DtlsSocket {
   }
 
   connect() {
+    this.dtls = new DtlsContext(this.options);
     new Flight1(this.udp, this.dtls, this.cipher).exec(this.extensions);
   }
 
